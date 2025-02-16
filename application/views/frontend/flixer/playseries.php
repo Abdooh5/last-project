@@ -60,6 +60,41 @@
         font-weight: bold;
         border-radius: 5px;
     }
+	#more .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* لجعل الصور بحجم ثابت */
+    gap: 15px; /* زيادة المسافة بين الصور */
+    margin-top: 20px;
+}
+
+#more .episode-card {
+    text-align: center;
+    background-color: #1e1e1e;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+}
+
+#more .episode-card:hover {
+    transform: scale(1.05);
+}
+
+#more .episode-card img {
+    width: 100%;
+    height: 320px; /* تعيين ارتفاع ثابت للصور */
+    object-fit: cover; /* للحفاظ على أبعاد الصورة دون تشوه */
+    border-radius: 8px;
+}
+
+#more .episode-card h5 {
+    color: #fff;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
 </style>
 <?php
 	$series_details	=	$this->db->get_where('series' , array('series_id' => $series_id))->result_array();
@@ -361,25 +396,31 @@
 							</div>
 						</p>
 					</div>
-					<!-- TAB FOR SAME CATEGORY MOVIES -->
-					<div class="tab-pane  " id="more">
-						<p>
-						<div class="content">
-							<div class="grid">
-								<?php
-									$series = $this->crud_model->get_series($row['genre_id'] , 10, 0);
-									foreach ($series as $row)
-									{
-										$title	=	$row['title'];
-										$link	=	base_url().'index.php?browse/playseries/'.$row['series_id'];
-										$thumb	=	$this->crud_model->get_thumb_url('series' , $row['series_id']);
-										include 'thumb.php';
-									}
-									?>
-							</div>
-						</div>
-						</p>
-					</div>
+					
+<!-- TAB FOR SAME CATEGORY SERIES -->
+<div class="tab-pane" id="more">
+    <p>
+        <div class="content">
+            <div class="grid">
+                <?php
+                $series = $this->crud_model->get_series($row['genre_id'], 10, 0);
+                foreach ($series as $row):
+                    $title = $row['title'];
+                    $link = base_url().'index.php?browse/playseries/'.$row['series_id'];
+                    $thumb = $this->crud_model->get_thumb_url('series', $row['series_id']);
+                ?>
+                    <div class="episode-card">
+                        <a href="<?php echo $link; ?>">
+                            <img src="<?php echo $thumb; ?>" alt="<?php echo $title; ?>">
+                        </a>
+                        <h5><?php echo $title; ?></h5>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </p>
+</div>
+
 				</div>
 			</div>
 		</div>
