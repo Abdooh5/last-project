@@ -42,18 +42,40 @@ class Browse extends CI_Controller {
 
 
 	function search($search_key = '')
-	{
-		if (isset($_POST) && !empty($_POST))
-		{
-			$search_key = $this->input->post('search_key');
-			redirect(base_url().'index.php?browse/search/'.$search_key , 'refresh');
-		}
-		$page_data['page_name']		=	'search';
-		$page_data['search_key']	=	$search_key;
-		$page_data['page_title']	=	'Search result';
-		$this->load->view('frontend/index', $page_data);
+{
+    if ($this->input->post('search_key'))
+    {
+        $search_key = $this->input->post('search_key', TRUE); // فلترة تلقائية من CodeIgniter
 
-	}
+        // إزالة الرموز غير المرغوب فيها مع السماح ببعض الرموز المفيدة للبحث
+        $search_key = preg_replace('/[^اأإءئبتثجحخدذرزسشصضطظعغفقكلمنهويةa-zA-Z0-9\s.,?!-]/u', '', $search_key);
+
+        // منع إدخال روابط خارجية
+        if (preg_match('/https?:\/\//', $search_key)) {
+            show_error('Invalid search query');
+        }
+
+        // تحويل الأحرف الخاصة إلى كود HTML عند العرض فقط، وليس أثناء البحث
+        $safe_search_key = htmlspecialchars($search_key, ENT_QUOTES, 'UTF-8');
+
+        redirect(base_url().'index.php?browse/search/'.urlencode($safe_search_key), 'refresh');
+    }
+
+    // فك ترميز النص (لضمان أنه يظهر بشكل صحيح)
+    $search_key = urldecode($search_key);
+
+    // تحويل الأحرف الخاصة عند العرض فقط
+    $page_data['search_key'] = htmlspecialchars($search_key, ENT_QUOTES, 'UTF-8');
+
+    $page_data['page_name'] = 'search';
+    $page_data['page_title'] = 'Search result';
+
+    $this->load->view('frontend/index', $page_data);
+}
+
+
+
+
 
 	function process_list($type = '', $task = '', $id = '')
 	{
