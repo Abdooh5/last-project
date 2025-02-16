@@ -195,17 +195,26 @@ class Browse extends CI_Controller {
 		$page_data['page_title']	=	'My List';
 		$this->load->view('frontend/index', $page_data);
 	}
-
-	function series($genre_id = '', $offset = '')
+	public function latest_series()
+	{
+		$this->db->order_by('series_id', 'DESC'); // ترتيب تنازلي لجلب الأحدث
+		$this->db->limit(20); // عدد النتائج الظاهرة (يمكنك تغييره)
+		$page_data['series'] = $this->db->get('series')->result_array();
+		
+		$page_data['page_name']  = 'latest_series';
+		$page_data['page_title'] = "أحدث السلاسل المضافة";
+		$this->load->view('frontend/index', $page_data);
+	}
+	function series($director_id = '', $offset = '')
 	{
 		$page_data['page_name']		=	'series';
 		$page_data['page_title']	=	'Watch Tv Series';
-		$page_data['genre_id']	=	$genre_id;
+		$page_data['director_id']	=	$director_id;
 
 		// pagination configuration
-		$url = base_url() . 'index.php?browse/series/' . $genre_id;
+		$url = base_url() . 'index.php?browse/series/' . $director_id;
         $per_page = 20;
-		$this->db->where('genre_id' , $genre_id);
+		$this->db->where('genre_id', $director_id);
         $total_result = $this->db->count_all_results('series');
         $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
         $this->pagination->initialize($config);
@@ -214,7 +223,7 @@ class Browse extends CI_Controller {
 		$this->db->select('year');
         $page_data['years'] = $this->db->get_where('series')->result_array();
 
-        $page_data['series'] = $this->crud_model->get_series($genre_id , $per_page, $this->uri->segment(4));
+        $page_data['series'] = $this->crud_model->get_series($director_id , $per_page, $this->uri->segment(4));
 		$page_data['total_result']	=	$total_result;
 
 		$this->load->view('frontend/index', $page_data);

@@ -332,9 +332,22 @@ class Admin extends CI_Controller {
 		if (isset($_POST) && !empty($_POST))
 		{
 			$data['title']			=	$this->input->post('title');
-			$data['url']			=	$this->input->post('url');
+			//$data['url']			=	$this->input->post('url');
 			$data['season_id']		=	$season_id;
 			$this->db->update('episode', $data, array('episode_id'=>$episode_id));
+			if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+				$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
+				$video_path = 'assets/global/episode_video/' . $video_name;
+		
+				// رفع الملف إلى المجلد المحدد
+				move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
+		
+				// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
+				$this->db->update('episode', ['url' => $video_name], ['episode_id' => $episode_id]);
+			} else {
+				echo "Error uploading episode video.";
+				return;
+			}
 			move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/episode_thumb/' . $episode_id . '.jpg');
 			redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
 		}

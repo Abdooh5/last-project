@@ -109,13 +109,13 @@
 						<input type="file" class="form-control" name="url" id="url">
 					</div>
 				</div>
-				<div class="form-group">
+				<!-- <div class="form-group">
 					<label class="form-label">Thumbnail</label>
 					<span class="help">- icon image of the movie</span>
 					<div class="controls">
 						<input type="file" class="form-control" name="thumb">
 					</div>
-				</div>
+				</div> -->
 				<div class="form-group">
 					<input type="submit" class="btn btn-success" value="Create episode">
 				</div>
@@ -147,16 +147,16 @@
 					<label class="form-label">Video Url</label>
 					<span class="help">- youtube or any hosted video</span>
 					<div class="controls">
-						<input type="text" class="form-control" name="url" id="url" value="<?php echo $row['url'];?>">
+						<input type="file" class="form-control" name="url" id="url" value="<?php echo $row['url'];?>">
 					</div>
 				</div>
-				<div class="form-group">
+				<!-- <div class="form-group">
 					<label class="form-label">Thumbnail</label>
 					<span class="help">- icon image of the movie</span>
 					<div class="controls">
 						<input type="file" class="form-control" name="thumb">
 					</div>
-				</div>
+				</div> -->
 				<div class="form-group">
 					<input type="submit" class="btn btn-success" value="Update episode">
 				</div>

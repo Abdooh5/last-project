@@ -23,6 +23,7 @@ class Home extends CI_Controller {
 		$page_data['page_name']		=	'landing';
 		$page_data['page_title']	=	'Welcome';
 		$this->load->view('frontend/index', $page_data);
+		//$this->load->view('frontend/flixer/home', $page_data);
 	}
 
 	function signup()

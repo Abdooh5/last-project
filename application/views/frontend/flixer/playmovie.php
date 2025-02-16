@@ -143,7 +143,12 @@
 				onclick="process_list('movie' , 'add', <?php echo $row['movie_id'];?>)">
 			<i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list');?>
 			</a>
+
 			</span>
+			<a href="<?php echo base_url().'assets/global/movie_video/'.$row['url']; ?>" download class="btn btn-danger btn-md" id="download_button" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
+    <i class="fa fa-download"></i> <?php echo get_phrase('Download'); ?>
+</a>
+
 			<button class="btn btn-danger btn-md" id = 'watch_button' style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
 				<i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer');?>
 			</button>

@@ -14,6 +14,20 @@
 	    font-size: 12px;
 	    width: 100%;
 	}
+
+	.thumb-container {
+    width: 180px; /* أو أي عرض يناسب التصميم */
+    height: 250px; /* ارتفاع ثابت */
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.thumb-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* يجعل الصور تملأ الإطار مع الحفاظ على التناسق */
+}
+
 </style>
 <figure class="effect-sadie col-lg-2 col-md-4 col-sm-6 pb-0">
 	<img src="<?php echo $thumb;?>" alt="img02"/>

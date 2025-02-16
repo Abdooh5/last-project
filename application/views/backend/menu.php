@@ -67,7 +67,7 @@
     <ul id="main-menu" class="">
         <div style="text-align: -webkit-center;" id="branding_element">
           <h4 style="color: #a2a3b7;text-align: -webkit-center;margin-bottom: 25px;font-weight: 300;margin-top: 10px;">
-              <a href="#"><img class="nav-icon" src="<?php echo base_url('assets/global/logo.png'); ?>" style="max-height:25px;"></a>
+              <a href="#"><img class="nav-icon" src="<?php echo base_url('assets/global/logo.JPg'); ?>" style="max-height:50px;"></a>
           </h4>
         </div>
            <li class="side-nav-item <?php if ($page_name == 'dashboard')echo 'active';?>">

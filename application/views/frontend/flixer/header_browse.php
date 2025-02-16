@@ -1,4 +1,5 @@
 <!-- TOP HEADING SECTION -->
+
 <style>
 	.nav_transparent {
 	padding: 10px 0px 10px; border: 1px;
@@ -30,29 +31,29 @@
 		<div class="navbar-collapse collapse" id="navbar-main">
 			<ul class="nav navbar-nav">
 				<!-- MOVIES GENRE WISE-->
-				<li class="dropdown">
-					<a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
-						<?php echo get_phrase('Movie');?> <span class="caret"></span>
-					</a>
-					<ul class="dropdown-menu" aria-labelledby="themes">
-						<?php
-							$genres		=	$this->crud_model->get_genres();
-							foreach ($genres as $row):
-							?>
-						<li><a href="<?php echo base_url();?>index.php?browse/movie/<?php echo $row['genre_id'];?>">
-							<?php
-								echo $row['name'];
-								// shows number of movies available
-								$this->db->where('genre_id', $row['genre_id']);
-								$num_rows = $this->db->count_all_results('movie');
-								if ($num_rows > 0)
-									echo ' (' . $num_rows . ')';
-							?>
-							</a>
-						</li>
-						<?php endforeach;?>
-					</ul>
-				</li>
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('Movie');?> <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="themes">
+        <?php
+            $genres = $this->crud_model->get_genres();
+            foreach ($genres as $row):
+        ?>
+        <li><a href="<?php echo base_url();?>index.php?browse/movie/<?php echo $row['genre_id'];?>">
+            <?php
+                echo $row['name'];
+                // shows number of movies available
+                $this->db->where('genre_id', $row['genre_id']);
+                $num_rows = $this->db->count_all_results('movie');
+                if ($num_rows > 0)
+                    echo ' (' . $num_rows . ')';
+            ?>
+            </a>
+        </li>
+        <?php endforeach;?>
+    </ul>
+</li>
 				<!-- TV SERIES GENRE WISE-->
 				<li class="dropdown">
 					<a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
@@ -77,6 +78,121 @@
 						<?php endforeach;?>
 					</ul>
 				</li>
+
+	<!-- TV Programs GENRE WISE (Static Categories) -->
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('tv_Programs'); ?> <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="themes">
+        <li>
+<?php 
+$genre_name = 'أكشن'; // استبدل باسم النوع المطلوب
+$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+
+?>
+         <a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
+                أكشن (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
+            </a>
+        </li>
+        <li>
+<?php 
+$genre_name = 'كوميدي'; // استبدل باسم النوع المطلوب
+$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+
+?>
+
+<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
+                كوميدي (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
+            </a>
+        </li>
+        <li>
+		<?php 
+$genre_name = 'تعليمي'; // استبدل باسم النوع المطلوب
+$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+
+?>
+		<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
+                تعليمي (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
+            </a>
+        </li>
+    </ul>
+</li>
+
+
+<!-- TV Programs GENRE WISE (Static Categories) -->
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('مسلسلات'); ?> <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="themes">
+        <li>
+<?php 
+$genre_name = 'تركي '; // استبدل باسم النوع المطلوب
+$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+
+?>
+         <a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
+	  مسلسلات تركية (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
+            </a>
+        </li>
+        <li>
+<?php 
+$genre_name = 'سوري'; // استبدل باسم النوع المطلوب
+$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+
+?>
+
+<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
+ مسلسلات سورية (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
+            </a>
+        </li>
+        <li>
+		<?php 
+$genre_name = 'هندي'; // استبدل باسم النوع المطلوب
+$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+
+?>
+		<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
+		مسلسلات هندية (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
+            </a>
+        </li>
+    </ul>
+</li>
+
+<!-- TV SERIES anmy WISE-->
+<li class="dropdown">
+<?php 
+$director_name = "أكشن"; // اسم النوع الذي نبحث عنه
+$genre = $this->db->get_where('genre', array('name' => $director_name))->row(); // استخدام المتغير الصحيح
+
+// التحقق من النتيجة وطباعة الـ genre_id
+if ($genre) {
+    $genre_id = $genre->genre_id; // نأخذ الـ genre_id من النتيجة المسترجعة
+    ?>
+    <a href="<?php echo base_url();?>index.php?browse/series/<?php echo $genre_id;?>" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('أنمي'); ?>
+    </a>
+    <?php
+} else {
+    echo "النوع غير موجود.";
+}
+?>
+</li>
+
+
+
+<!-- أحدث السلاسل التلفزيونية -->
+<li>
+    <a href="<?php echo base_url(); ?>index.php?browse/latest_series" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('latest_added'); ?>
+    </a>
+</li>
+
+
+
+
+
 				<!-- MY LIST -->
 				<?php if($this->session->userdata('active_user') != 'admin'): ?>
 					<li>
@@ -204,6 +320,8 @@
 		</div>
 	</div>
 </div>
+
+
 <?php
 	if ($page_name == 'home' || $page_name == 'playmovie' || $page_name == 'playseries' || $page_name == 'blogs' || $page_name == 'blog_detail_page')
 		$padding_amount = '0px';

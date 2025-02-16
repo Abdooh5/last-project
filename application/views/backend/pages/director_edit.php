@@ -13,13 +13,10 @@
             <div class="panel-body">
 				<form method="post" action="<?php echo base_url();?>index.php?admin/director_edit/<?php echo $director_id;?>" enctype="multipart/form-data">
 					<div class="form-group mb-3">
-	                    <label for="name">Actor Name</label>
+	                    <label for="name">category Name</label>
 	                    <input type="text" class="form-control" id = "name" name="name" value="<?php echo $director_detail->name;?>">
 	                </div>
-					<div class="form-group mb-3">
-	                    <label for="thumb">Image</label>
-	                    <input type="file" class="form-control" name="thumb">
-	                </div>
+		
 					
 					<div class="form-group">
 						<input type="submit" class="btn btn-success" value="Update">

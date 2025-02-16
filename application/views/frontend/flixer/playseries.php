@@ -1,5 +1,9 @@
 <?php include 'header_browse.php';?>
+<link rel="stylesheet" type="text/css" href="assets/css/slick.min.css"/>
+<link rel="stylesheet" type="text/css" href="assets/css/slick-theme.min.css"/>
+
 <style>
+	
 	@media screen and (max-width: 765px) {
 	  .mobile_vedio_player{
 	  	width: 100%;
@@ -18,7 +22,44 @@
 	    width: 100%;
 	  }
 	}
+	.episode-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
 
+    .episode-card {
+        text-align: center;
+        background: #222;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .episode-card img {
+        width: 100%;
+        border-radius: 8px;
+    }
+
+    .episode-card h5 {
+        color: #fff;
+        margin-top: 10px;
+    }
+	.episode-thumb {
+        position: relative;
+        display: inline-block;
+    }
+    .episode-number {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 10px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 5px;
+    }
 </style>
 <?php
 	$series_details	=	$this->db->get_where('series' , array('series_id' => $series_id))->result_array();
@@ -63,9 +104,11 @@
                 ?>
 
                 <!-- VIDEO PLAYER BASED ON URL TYPE -->
+
+					
                 
                     <link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
-                    <video poster="<?php echo $this->crud_model->get_thumb_url('episode', $episode_details['episode_id']); ?>" id="player" playsinline controls>
+                    <video poster="<?php echo$this->crud_model->get_thumb_url('series' , $row['series_id']); ?>" id="player" playsinline controls>
                         <?php if (get_video_extension($video_url) == 'webm'): ?>
                             <source src="<?php echo 'assets/global/episode_video/'.$video_url; ?>" type="video/webm">
                         <?php elseif (get_video_extension($video_url) == 'mp4'): ?>
@@ -102,63 +145,6 @@
 				
 				<!-- Video player generator ends -->
 
-				<?php
-				if(video_type($row['trailer_url']) == 'vimeo' || video_type($row['trailer_url']) == 'youtube'):
-					$iframe_embed = $this->crud_model->is_iframe($row['trailer_url']);
-					if ($iframe_embed == true):
-					?>
-					<!-- loads iframe embed option as video player -->
-					<style>
-					.intrinsic-container {
-					  position: relative;
-					  height: 0;
-					  overflow: hidden;
-					}
-
-					/* 16x9 Aspect Ratio */
-					.intrinsic-container-16x9 {
-					  padding-bottom: 56.25%;
-					}
-
-					/* 4x3 Aspect Ratio */
-					.intrinsic-container-4x3 {
-					  padding-bottom: 75%;
-					}
-
-					.intrinsic-container iframe {
-					  position: absolute;
-					  top:0;
-					  left: 0;
-					  width: 100%;
-					  height: 100%;
-					}
-					</style>
-					<!-- <div class="intrinsic-container intrinsic-container-16x9">
-	  					<iframe src="<?php echo $row['url'];?>" allowfullscreen style="border:0px; width:100%; height:100%;"></iframe>
-					</div> -->
-					<?php
-					endif;
-					if ($iframe_embed == false):
-					?>
-					<!-- loads jwplayer as video player
-					<script src="https://content.jwplatform.com/libraries/O7BMTay5.js"></script>
-					<div id="video_player_div"><?php echo $row['title'];?></div>
-
-
-					<script>
-						jwplayer("video_player_div").setup({
-							"file": "<?php echo $row['url'];?>",
-							"image": "<?php echo $this->crud_model->get_poster_url('movie' , $row['movie_id']);?>",
-							"width": "100%",
-							aspectratio: "16:9",
-							listbar: {
-							  position: 'right',
-							  size: 260
-							},
-						  });
-					</script>-->
-					<?php endif;?>
-				<?php endif;?>
 			</div>
 
 		</div>
@@ -234,18 +220,23 @@
 			<span id="mylist_button_holder">
 			</span>
 			<span id="mylist_add_button" style="display:none;">
+			
+			<a href="<?php echo base_url().'assets/global/episode_video/'.$video_url; ?>" download 
+   class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;">
+    <i class="fa fa-download"></i> <?php echo get_phrase('Download');?></a>
+			<button class="btn btn-danger btn-md" id = 'watch_button' style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
+				<i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer');?>
+			</button>
 			<a href="#" class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;"
 				onclick="process_list('series' , 'add', <?php echo $row['series_id'];?>)">
 			<i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list');?>
 			</a>
-			<button class="btn btn-danger btn-md" id = 'watch_button' style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
-				<i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer');?>
-			</button>
+    
 			</span>
 			<span id="mylist_delete_button" style="display:none;">
 			<a href="#" class="btn btn-default btn-md" style="font-size: 16px; margin-top: 20px;"
 				onclick="process_list('series' , 'delete', <?php echo $row['series_id'];?>)">
-			<i class="fa fa-check"></i> <?php echo get_phrase('Added_to_My_list');?>
+			<iss="fa fa-check"></i> <?php echo get_phrase('Added_to_My_list');?>
 			</a>
 			</span>
 			<!-- MOVIE GENRE -->
@@ -320,21 +311,24 @@
 								</ul>
 							</div>
 						</div>
-						<div class="row">
-							<?php
-								$counter	=	0;
-								$episodes	=	$this->crud_model->get_episodes_of_season($season_id);
-								foreach ($episodes as $row2):
-								?>
-							<div class="col-md-3">
-								<a href="<?php echo site_url('index.php?browse/playseries/'.$series_id.'/'.$season_id.'/'.$row2['episode_id']) ?>">
-								<img src="<?php echo $this->crud_model->get_thumb_url('episode' , $row2['episode_id']);?>"
-									style="height: 150px; margin-top:10px;" /></a>
-								<br>
-								<h5><?php echo $row2['title'];?></h5>
-							</div>
-							<?php endforeach;?>
-						</div>
+						<div class="episode-container">
+        <?php
+        $episodes = $this->crud_model->get_episodes_of_season($season_id);
+		$episode_number = 1;
+        foreach ($episodes as $episode):
+        ?>
+            <div class="episode-card">
+                <a href="<?php echo site_url('index.php?browse/playseries/'.$series_id.'/'.$season_id.'/'.$episode['episode_id']); ?>" class="episode-thumb">
+                    <img src="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']); ?>" alt="<?php echo $episode['title']; ?>">
+					<div class="episode-number"><?php echo $episode_number; ?></div>
+                </a>
+                <!-- <h5><?php echo $episode['title']; ?></h5> -->
+            </div>
+			<?php 
+        $episode_number++; 
+        endforeach; 
+        ?>
+    </div>
 						</p>
 					</div>
 					<!-- TAB FOR ACTORS -->

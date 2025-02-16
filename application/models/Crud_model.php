@@ -1032,6 +1032,10 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 	    }
     	return $this->db->get('actor');
     }
+	function get_directors($actor_id = ""){
+		$query 		=	 $this->db->get('director');
+        return $query->result_array();
+    }
     
     function get_application_details() {
   $purchase_code = get_settings('purchase_code');
