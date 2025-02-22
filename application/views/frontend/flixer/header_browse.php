@@ -126,39 +126,39 @@ $genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
         <?php echo get_phrase('مسلسلات'); ?> <span class="caret"></span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
-        <li>
-<?php 
-$genre_name = 'تركي '; // استبدل باسم النوع المطلوب
-$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+        <?php 
+		$category_name=' مسلسلات';
+		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
 
-?>
-         <a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
-	  مسلسلات تركية (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
-            </a>
-        </li>
-        <li>
-<?php 
-$genre_name = 'سوري'; // استبدل باسم النوع المطلوب
-$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
+        $countries = [
+            'تركي' => 'مسلسلات تركية',
+            'مصري' => 'مسلسلات مصرية',
+            'خليجي' => 'مسلسلات خليجية',
+            'شامي' => 'مسلسلات شامية' ,
+			 'أجنبي' => 'مسلسلات أجنبية',
+            'هندي' => 'مسلسلات هندية',
+			'أسيوي' => 'مسلسلات أسيوي',
+        ];
+        
+        foreach ($countries as $country_name => $display_name) {
+            $country = $this->db->get_where('country', ['name' => $country_name])->row();
+            if ($country) {
+                $count = $this->db->where('country_id', $country->country_id)->count_all_results('series');
+                ?>
+                <li>
+                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>">
+                        <?php echo $display_name; ?> (<?php echo $count; ?>)
+                    </a>
+                </li>
+                <?php
+            }
+        }
 
-?>
-
-<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
- مسلسلات سورية (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
-            </a>
-        </li>
-        <li>
-		<?php 
-$genre_name = 'هندي'; // استبدل باسم النوع المطلوب
-$genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
-
-?>
-		<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id?>">
-		مسلسلات هندية (<?php echo $this->db->where('genre_id', $genre->genre_id)->count_all_results('series'); ?>)
-            </a>
-        </li>
+      
+        ?>
     </ul>
 </li>
+
 
 <!-- TV SERIES anmy WISE-->
 <li class="dropdown">
@@ -179,6 +179,57 @@ if ($genre) {
 }
 ?>
 </li>
+
+
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('برامج تلفيزيونية'); ?> <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="themes">
+        <?php 
+		$category_name='برامج تلفيزيونية';
+        $countries = [
+            'عربي' => 'برامج عربية',
+            'أجنبي' => 'برامج أجنبية',
+            
+        ];
+        
+        foreach ($countries as $country_name => $display_name) {
+            $country = $this->db->get_where('country', ['name' => $country_name])->row();
+            if ($country) {
+                $count = $this->db->where('country_id', $country->country_id)->count_all_results('series');
+                ?>
+                <li>
+                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>">
+                        <?php echo $display_name; ?> (<?php echo $count; ?>)
+                    </a>
+                </li>
+                <?php
+            }
+        }
+
+        $genres = [
+            'رمضاني' => 'برامج رمضانية',
+            'مصارعة' => ' مصارعة'
+        ];
+        
+        foreach ($genres as $genre_name => $display_name) {
+            $genre = $this->db->get_where('genre', ['name' => $genre_name])->row();
+            if ($genre) {
+                $count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
+                ?>
+                <li>
+                    <a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id; ?>">
+                        <?php echo $display_name; ?> (<?php echo $count; ?>)
+                    </a>
+                </li>
+                <?php
+            }
+        }
+        ?>
+    </ul>
+</li>
+
 
 
 
