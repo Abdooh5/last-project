@@ -462,6 +462,11 @@ class Crud_model extends CI_Model {
         $query = $this->db->get('movie', $limit, $offset);
         return $query->result_array();
     }
+	function get_movies_by_country($country_id, $limit, $offset) {
+		$this->db->where('country_id', $country_id);
+		$this->db->limit($limit, $offset);
+		return $this->db->get('movie')->result_array();
+	}
 
 	function create_movie() {
 			// البيانات المدخلة
@@ -720,6 +725,33 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
         return $query->result_array();
     }
 
+	function get_series_by_year($year, $cate_id, $limit = 20, $offset = 0)
+	{
+		$this->db->from('series');
+		if (!empty($year)) {
+			$this->db->where('year', $year);
+		}
+		if (!empty($cate_id)) {
+			$this->db->where('director', $cate_id);
+		}
+		$this->db->limit($limit, $offset);
+		return $this->db->get()->result_array();
+	}
+	public function get_series_by_country($country_id, $cate_id, $limit = 20, $offset = 0)
+	{
+		$this->db->from('series');  // تحديد الجدول الأساسي
+		if (!empty($country_id)) {
+			$this->db->where('country_id', $country_id);
+		}
+		if (!empty($cate_id)) {
+			$this->db->where('director', $cate_id); // ✅ استخدام 'director' وليس 'director_id'
+		}
+		
+		$this->db->limit($limit, $offset);
+		$query = $this->db->get();
+	
+		return $query->result_array();
+	}
 	function get_seasons_of_series($series_id = '')
 	{
 		$this->db->order_by('season_id', 'desc');

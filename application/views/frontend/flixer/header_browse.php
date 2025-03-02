@@ -127,7 +127,7 @@ $genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
-		$category_name=' مسلسلات';
+		$category_name='مسلسلات';
 		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
 
         $countries = [
@@ -146,7 +146,44 @@ $genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
                 $count = $this->db->where('country_id', $country->country_id)->count_all_results('series');
                 ?>
                 <li>
-                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>">
+                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>/<?php echo $cate_id ?>">
+                        <?php echo $display_name; ?> (<?php echo $count; ?>)
+                    </a>
+                </li>
+                <?php
+            }
+        }
+
+      
+        ?>
+    </ul>
+</li>
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('أفلام'); ?> <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="themes">
+        <?php 
+		$category_name=' مسلسلات';
+		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+
+        $countries = [
+            'تركي' => 'أفلام تركية',
+          
+            'عربي' => 'أفلام عربية' ,
+			 'أجنبي' => 'أفلام أجنبية',
+            'هندي' => 'أفلام هندية',
+			'أسيوي' => 'أفلام أسيوي',
+        ];
+        
+        foreach ($countries as $country_name => $display_name) {
+            $country = $this->db->get_where('country', ['name' => $country_name])->row();
+            if ($country) {
+                $count = $this->db->where('country_id', $country->country_id)->count_all_results('movie');
+                ?>
+                <li>
+				
+                    <a href="<?php echo base_url(); ?>index.php?browse/movie_by_country/<?php echo $country->country_id; ?>">
                         <?php echo $display_name; ?> (<?php echo $count; ?>)
                     </a>
                 </li>
@@ -159,27 +196,74 @@ $genre = $this->db->get_where('genre', array('name' => $genre_name))->row();
     </ul>
 </li>
 
-
 <!-- TV SERIES anmy WISE-->
 <li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('أنمي'); ?> <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="themes">
 <?php 
 $director_name = "أكشن"; // اسم النوع الذي نبحث عنه
 $genre = $this->db->get_where('genre', array('name' => $director_name))->row(); // استخدام المتغير الصحيح
+$genres = [
+	'كرتون' => 'كرتون',
+	'أنمي عربي قديم' => ' أنميات عربية قديمة'
+];
 
-// التحقق من النتيجة وطباعة الـ genre_id
-if ($genre) {
-    $genre_id = $genre->genre_id; // نأخذ الـ genre_id من النتيجة المسترجعة
-    ?>
-    <a href="<?php echo base_url();?>index.php?browse/series/<?php echo $genre_id;?>" style="color: #e50914; font-weight: bold;">
-        <?php echo get_phrase('أنمي'); ?>
-    </a>
-    <?php
-} else {
-    echo "النوع غير موجود.";
+foreach ($genres as $genre_name => $display_name) {
+	$genre = $this->db->get_where('genre', ['name' => $genre_name])->row();
+	if ($genre) {
+		$count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
+		?>
+		<li>
+			<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id; ?>">
+				<?php echo $display_name; ?> (<?php echo $count; ?>)
+			</a>
+		</li>
+		<?php
+	}
 }
 ?>
+</ul>
 </li>
 
+<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('مسلسلات رمضان'); ?> <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="themes">
+        <?php 
+		$category_name='مسلسلات رمضان';
+		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+		
+		$year = [
+			'2021' => 'مسلسلات رمضان 2021',
+			'2022' => 'مسلسلات رمضان 2022',
+			'2023' => 'مسلسلات رمضان 2023',
+			'2024' => 'مسلسلات رمضان 2024',
+			'2025' => 'مسلسلات رمضان 2025',
+		];
+		
+		foreach ($year as $year_name => $display_name) {
+			// جلب عدد المسلسلات بناءً على السنة
+			$count = $this->db->where('year', $year_name)->count_all_results('series');
+		
+			// التحقق مما إذا كانت هناك مسلسلات لهذه السنة
+			if ($count > 0) {
+				?>
+				<li>
+					<a href="<?php echo base_url(); ?>index.php?browse/series_by_year/<?php echo $year_name; ?>/<?php echo $cate_id; ?>">
+						<?php echo $display_name; ?> (<?php echo $count; ?>)
+					</a>
+				</li>
+				<?php
+			}
+		}
+		?>
+
+     
+    </ul>
+</li>
 
 <li class="dropdown">
     <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
@@ -229,6 +313,15 @@ if ($genre) {
         ?>
     </ul>
 </li>
+
+
+
+
+
+<!-- TV Programs GENRE WISE (Static Categories) -->
+
+
+
 
 
 

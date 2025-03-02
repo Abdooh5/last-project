@@ -160,7 +160,40 @@ class Browse extends CI_Controller {
 
 		$this->load->view('frontend/index', $page_data);
 	}
-
+	function movie_by_country($country_name = '', $offset = '')
+	{
+		$page_data['check_movie'] = true;
+		$page_data['page_name'] = 'movie';
+		$page_data['page_title'] = 'Watch Movie';
+		$page_data['country_name'] = $country_name;
+	
+		//  تكوين رابط التصفح (pagination) بناءً على الدولة
+		$url = base_url() . 'index.phpbrowsemovie'. $country_name;
+		$per_page = 20;
+	
+		//  جلب عدد الأفلام بناءً على الدولة
+		if (!empty($country_name)) {
+			$this->db->where('country_id', $country_name);
+		}
+		$total_result = $this->db->count_all_results('movie');
+	
+		//  ضبط إعدادات التصفح
+		$config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+		$this->pagination->initialize($config);
+	
+		//  جلب الأفلام بناءً على الدولة مع دعم التصفح
+		$page_data['movies'] = $this->crud_model->get_movies_by_country($country_name, $per_page, $this->uri->segment(4));
+	
+		//  جلب جميع الدول المتاحة (Distinct)
+		$this->db->distinct();
+		$this->db->select('country_id');
+		$page_data['countries'] = $this->db->get('movie')->result_array();
+	
+		$page_data['total_result'] = $total_result;
+	
+		//  تحميل الواجهة
+		$this-load-view('frontendindex', $page_data);
+	}
 	function filter($type = '', $genre_id = '', $actor_id = '', $director_id ='', $year = '', $country = '')
 	{
 		if (empty($type) || empty($genre_id) || empty($actor_id)) {
@@ -250,6 +283,80 @@ class Browse extends CI_Controller {
 
 		$this->load->view('frontend/index', $page_data);
 	}
+	function series_by_country($country_id = '', $cate_id = '', $offset = '')
+	{
+		$page_data['page_name']  = 'series';
+		$page_data['page_title'] = 'Watch TV Series by Country and Director';
+		$page_data['country_id'] = $country_id;
+		$page_data['director']    = $cate_id;
+	
+		// تكوين رابط التصفح (pagination)
+		$url = base_url() . 'index.php?browse/series_by_country/' . $country_id . '/' . $cate_id;
+		$per_page = 20;
+	
+		// تعديل الاستعلام ليشمل الدولة والمخرج
+		$this->db->from('series');  // تحديد الجدول الأساسي
+		if (!empty($country_id)) {
+			$this->db->where('country_id', $country_id);
+		}
+		if (!empty($cate_id)) {
+			$this->db->where('director', $cate_id); // ✅ استخدام 'director' بدلاً من 'director_id'
+		}
+		$total_result = $this->db->count_all_results();
+	
+		// تهيئة التصفح (pagination)
+		$config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+		$this->pagination->initialize($config);
+	
+		// جلب سنوات المسلسلات المتاحة (Distinct)
+		$this->db->distinct();
+		$this->db->select('year');
+		$page_data['years'] = $this->db->get('series')->result_array();
+	
+		// جلب المسلسلات بناءً على الدولة و الفئة
+		$page_data['series'] = $this->crud_model->get_series_by_country($country_id, $cate_id, $per_page, $offset);
+		$page_data['total_result'] = $total_result;
+	
+		// تحميل الصفحة
+		$this->load->view('frontend/index', $page_data);
+	}
+	function series_by_year($year = '', $cate_id = '', $offset = '')
+{ 
+    $page_data['page_name']  = 'series';
+    $page_data['page_title'] = 'Watch TV Series by Year and Category';
+    $page_data['year']       = $year;
+    $page_data['cate_id']    = $cate_id;
+
+    // إعداد رابط التصفح
+    $url = base_url() . 'index.php?browse/series_by_year/' . $year . '/' . $cate_id;
+    $per_page = 20;
+
+    // تصفية الاستعلام ليشمل السنة والفئة
+    $this->db->from('series');
+    if (!empty($year)) {
+        $this->db->where('year', $year);
+    }
+    if (!empty($cate_id)) {
+        $this->db->where('director', $cate_id); // ✅ استخدم 'director' للمطابقة مع الفئة
+    }
+    $total_result = $this->db->count_all_results();
+
+    // تهيئة التصفح (pagination)
+    $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+    $this->pagination->initialize($config);
+
+    // تحديد السنوات المتاحة
+    $this->db->distinct();
+    $this->db->select('year');
+    $page_data['years'] = $this->db->get('series')->result_array();
+
+    // استرجاع المسلسلات حسب السنة والفئة
+    $page_data['series'] = $this->crud_model->get_series_by_year($year, $cate_id, $per_page, $offset);
+    $page_data['total_result'] = $total_result;
+
+    // تحميل الصفحة
+    $this->load->view('frontend/index', $page_data);
+}
 
 	function playmovie($movie_id = '')
 	{
