@@ -160,39 +160,29 @@ class Browse extends CI_Controller {
 
 		$this->load->view('frontend/index', $page_data);
 	}
-	function movie_by_country($country_name = '', $offset = '')
+	function movie_by_country($country_id = '', $offset = '')
 	{
-		$page_data['check_movie'] = true;
-		$page_data['page_name'] = 'movie';
-		$page_data['page_title'] = 'Watch Movie';
-		$page_data['country_name'] = $country_name;
-	
-		//  تكوين رابط التصفح (pagination) بناءً على الدولة
-		$url = base_url() . 'index.phpbrowsemovie'. $country_name;
-		$per_page = 20;
-	
-		//  جلب عدد الأفلام بناءً على الدولة
-		if (!empty($country_name)) {
-			$this->db->where('country_id', $country_name);
-		}
-		$total_result = $this->db->count_all_results('movie');
-	
-		//  ضبط إعدادات التصفح
-		$config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
-		$this->pagination->initialize($config);
-	
-		//  جلب الأفلام بناءً على الدولة مع دعم التصفح
-		$page_data['movies'] = $this->crud_model->get_movies_by_country($country_name, $per_page, $this->uri->segment(4));
-	
-		//  جلب جميع الدول المتاحة (Distinct)
-		$this->db->distinct();
-		$this->db->select('country_id');
-		$page_data['countries'] = $this->db->get('movie')->result_array();
-	
-		$page_data['total_result'] = $total_result;
-	
-		//  تحميل الواجهة
-		$this-load-view('frontendindex', $page_data);
+		$page_data['check_movie']   = true;
+		$page_data['page_name']		=	'movie';
+		$page_data['page_title']	=	'Watch Movie';
+		$page_data['genre_id']	=	$country_id;
+
+		// pagination configuration
+		$url = base_url() . 'index.php?browse/movie_by_country/' . $country_id;
+        $per_page = 20;
+		$this->db->where('country_id' , $country_id);
+        $total_result = $this->db->count_all_results('movie');
+        $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+        $this->pagination->initialize($config);
+
+        $page_data['movies'] = $this->crud_model->get_movies_by_country($country_id , $per_page, $this->uri->segment(4));
+
+        $this->db->distinct('year');
+		$this->db->select('year');
+        $page_data['years'] = $this->db->get_where('movie')->result_array();
+		$page_data['total_result']	=	$total_result;
+
+		$this->load->view('frontend/index', $page_data);
 	}
 	function filter($type = '', $genre_id = '', $actor_id = '', $director_id ='', $year = '', $country = '')
 	{

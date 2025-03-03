@@ -58,7 +58,8 @@
         foreach ($countries as $country_name => $display_name) {
             $country = $this->db->get_where('country', ['name' => $country_name])->row();
             if ($country) {
-                $count = $this->db->where('country_id', $country->country_id)->count_all_results('series');
+                $this->db->where('country_id', $country->country_id);
+				$count= $this->db->where('director', $cate_id)->count_all_results('series');
                 ?>
                 <li>
                     <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>/<?php echo $cate_id ?>">
@@ -79,7 +80,7 @@
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
-		$category_name=' مسلسلات';
+		$category_name=' أفلام';
 		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
 
         $countries = [
@@ -160,6 +161,7 @@ foreach ($genres as $genre_name => $display_name) {
 		];
 		
 		foreach ($year as $year_name => $display_name) {
+			$this->db->where('director', $cate_id);
 			// جلب عدد المسلسلات بناءً على السنة
 			$count = $this->db->where('year', $year_name)->count_all_results('series');
 		
@@ -187,6 +189,7 @@ foreach ($genres as $genre_name => $display_name) {
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
 		$category_name='برامج تلفيزيونية';
+		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
         $countries = [
             'عربي' => 'برامج عربية',
             'أجنبي' => 'برامج أجنبية',
@@ -196,10 +199,11 @@ foreach ($genres as $genre_name => $display_name) {
         foreach ($countries as $country_name => $display_name) {
             $country = $this->db->get_where('country', ['name' => $country_name])->row();
             if ($country) {
+				$this->db->where('director', $cate_id);
                 $count = $this->db->where('country_id', $country->country_id)->count_all_results('series');
                 ?>
                 <li>
-                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>">
+                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>/<?php echo $cate_id; ?>">
                         <?php echo $display_name; ?> (<?php echo $count; ?>)
                     </a>
                 </li>
