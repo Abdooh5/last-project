@@ -250,29 +250,41 @@ class Browse extends CI_Controller {
 		$page_data['page_title'] = "أحدث السلاسل المضافة";
 		$this->load->view('frontend/index', $page_data);
 	}
-	function series($director_id = '', $offset = '')
-	{
-		$page_data['page_name']		=	'series';
-		$page_data['page_title']	=	'Watch Tv Series';
-		$page_data['director_id']	=	$director_id;
+	function series($genre_id = '', $director_id = '', $offset = '')
+{
+    $page_data['page_name']    = 'series';
+    $page_data['page_title']   = 'Watch Tv Series';
+    $page_data['genre_id']     = $genre_id;
+    $page_data['director']     = $director_id;
 
-		// pagination configuration
-		$url = base_url() . 'index.php?browse/series/' . $director_id;
-        $per_page = 20;
-		$this->db->where('genre_id', $director_id);
-        $total_result = $this->db->count_all_results('series');
-        $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
-        $this->pagination->initialize($config);
+    // تكوين رابط التصفح (pagination)
+    $url = base_url() . 'index.php?browse/series/' . $genre_id . '/' . $director_id;
+    $per_page = 20;
 
-        $this->db->distinct('year');
-		$this->db->select('year');
-        $page_data['years'] = $this->db->get_where('series')->result_array();
+    // تعديل الاستعلام ليشمل النوع والمخرج فقط
+    $this->db->from('series');  // تحديد الجدول الأساسي
+    if (!empty($genre_id) && $genre_id !== 'all') {
+        $this->db->where('genre_id', $genre_id);  // شرط النوع
+    }
+    if (!empty($director_id) && $director_id !== 'all') {
+        $this->db->where('director', $director_id);  // شرط المخرج
+    }
 
-        $page_data['series'] = $this->crud_model->get_series($director_id , $per_page, $this->uri->segment(4));
-		$page_data['total_result']	=	$total_result;
+    // حساب العدد الكلي للنتائج
+    $total_result = $this->db->count_all_results();
 
-		$this->load->view('frontend/index', $page_data);
-	}
+    // تهيئة التصفح (pagination)
+    $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+    $this->pagination->initialize($config);
+
+    // جلب المسلسلات بناءً على النوع والمخرج
+    $page_data['series'] = $this->crud_model->get_series($genre_id, $director_id, $per_page, $offset);
+    $page_data['total_result'] = $total_result;
+
+    // تحميل الصفحة
+    $this->load->view('frontend/index', $page_data);
+}
+
 	function series_by_country($country_id = '', $cate_id = '', $offset = '')
 	{
 		$page_data['page_name']  = 'series';

@@ -119,8 +119,9 @@
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
 <?php 
-$director_name = "أكشن"; // اسم النوع الذي نبحث عنه
-$genre = $this->db->get_where('genre', array('name' => $director_name))->row(); // استخدام المتغير الصحيح
+	$category_name='أنمي';
+	$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+	
 $genres = [
 	'كرتون' => 'كرتون',
 	'أنمي عربي قديم' => ' أنميات عربية قديمة'
@@ -129,10 +130,11 @@ $genres = [
 foreach ($genres as $genre_name => $display_name) {
 	$genre = $this->db->get_where('genre', ['name' => $genre_name])->row();
 	if ($genre) {
+		$this->db->where('director', $cate_id);
 		$count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
 		?>
 		<li>
-			<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id; ?>">
+			<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id; ?>/<?php echo $cate_id; ?>">
 				<?php echo $display_name; ?> (<?php echo $count; ?>)
 			</a>
 		</li>
@@ -219,10 +221,11 @@ foreach ($genres as $genre_name => $display_name) {
         foreach ($genres as $genre_name => $display_name) {
             $genre = $this->db->get_where('genre', ['name' => $genre_name])->row();
             if ($genre) {
-                $count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
+				$this->db->where('director', $cate_id);
+				$count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
                 ?>
                 <li>
-                    <a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id; ?>">
+                    <a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id; ?>/<?php echo $cate_id; ?>">
                         <?php echo $display_name; ?> (<?php echo $count; ?>)
                     </a>
                 </li>

@@ -60,20 +60,25 @@
 <div class="row" style="margin:20px 60px;">
 	<h4 style="text-transform: capitalize;">
 		<?php echo $this->db->get_where('genre', array('genre_id' => $genre_id))->row()->name;?>
-		<?php echo get_phrase('movies');?>
+		<?php echo get_phrase('movies'); ?>
 		(<?php echo $total_result;?>)
 	</h4>
 	<div class="content">
-		<div class="grid">
+		<div class="movie-grid">
 			<?php
 			foreach ($movies as $row)
 			{
 				$title	=	$row['title'];
 				$link	=	base_url().'index.php?browse/playmovie/'.$row['movie_id'];
 				$thumb	=	$this->crud_model->get_thumb_url('movie' , $row['movie_id']);
-				include 'thumb.php';
-			}
 			?>
+			<div class="thumb-container">
+				<a href="<?php echo $link; ?>">
+					<img src="<?php echo $thumb; ?>" alt="<?php echo $title; ?>" class="thumb-img">
+				</a>
+				<div class="thumb-title"><?php echo $title; ?></div>
+			</div>
+			<?php } ?>
 		</div>
 	</div>
 	<div style="clear: both;"></div>
@@ -96,3 +101,40 @@
         window.location = "<?php echo base_url();?>index.php?browse/filter/movie/"+genre_id+ "/" + actor_id+ "/" + director_id+ "/" + year + "/" + country;
     }
 </script>
+
+<style>
+/* CSS Grid for Movie Thumbs */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.thumb-container {
+    background-color: #111;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.thumb-container:hover {
+    transform: scale(1.05);
+}
+
+.thumb-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.thumb-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    margin-top: 8px;
+}
+</style>

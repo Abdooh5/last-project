@@ -716,14 +716,28 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 
 	}
 
-	function get_series($genre_id, $limit = NULL, $offset = 0)
-	{
+	function get_series($genre_id, $director_id, $limit = NULL, $offset = 0)
+{
+    $this->db->order_by('series_id', 'desc');
 
-        $this->db->order_by('series_id', 'desc');
+    // تطبيق شرط النوع إذا كانت القيمة موجودة وليست "all"
+    if (!empty($genre_id) && $genre_id !== 'all') {
         $this->db->where('genre_id', $genre_id);
-        $query = $this->db->get('series', $limit, $offset);
-        return $query->result_array();
     }
+
+    // تطبيق شرط المخرج إذا كانت القيمة موجودة وليست "all"
+    if (!empty($director_id) && $director_id !== 'all') {
+        $this->db->where('director', $director_id);
+    }
+
+    $query = $this->db->get('series', $limit, $offset);
+
+    // لتصحيح الاستعلام يمكنك إلغاء التعليق للسطر التالي لمعرفة الاستعلام النهائي:
+    // echo $this->db->last_query();
+
+    return $query->result_array();
+}
+
 
 	function get_series_by_year($year, $cate_id, $limit = 20, $offset = 0)
 	{
