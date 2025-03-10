@@ -17,6 +17,17 @@
 					</div>
 				</div>
 				<div class="col-md-6 col-lg-2">
+                    <div class="select" style="width: 100%; margin-bottom: 10px">
+                        <select name="genre_id" id="genre_id" class="custom-select">
+                            <option value="all"><?php echo get_phrase('all_genres'); ?></option>
+                            <?php $genres = $this->db->get('genre')->result_array(); ?>
+                            <?php foreach ($genres as $key => $genre): ?>
+                                <option value="<?php echo $genre['genre_id']; ?>"><?php echo $genre['name']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+				<!-- <div class="col-md-6 col-lg-2">
 					<div class="select" style="width: 100%; margin-bottom: 10px">
 						<select name="director_id" id="director_id" class="custom-select">
 							<option value="all"><?php echo get_phrase('all_directors'); ?></option>
@@ -26,7 +37,7 @@
 							<?php endforeach; ?>
 						</select>
 					</div>
-				</div>
+				</div> -->
 				<div class="col-md-6 col-lg-2">
 					<div class="select" style="width: 100%; margin-bottom: 10px">
 						<select name="year" id="year" class="custom-select">
@@ -92,13 +103,14 @@
 </div>
 
 <script>
-    function submit(genre_id)
+    function submit()
     {
         actor_id  = document.getElementById("actor_id").value;
         director_id  = document.getElementById("director_id").value;
+        genre_id  = document.getElementById("genre_id").value;
         year  = document.getElementById("year").value;
         country  = document.getElementById("country").value;
-        window.location = "<?php echo base_url();?>index.php?browse/filter/movie/"+genre_id+ "/" + actor_id+ "/" + director_id+ "/" + year + "/" + country;
+        window.location = "<?php echo base_url();?>index.php?browse/filter/series/"+genre_id+ "/" + actor_id+ "/" + director_id+ "/" + year + "/" + country;
     }
 </script>
 

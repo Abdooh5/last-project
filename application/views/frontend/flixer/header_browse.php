@@ -151,36 +151,34 @@ foreach ($genres as $genre_name => $display_name) {
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
-		$category_name='مسلسلات رمضان';
-		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
-		
-		$year = [
-			'2021' => 'مسلسلات رمضان 2021',
-			'2022' => 'مسلسلات رمضان 2022',
-			'2023' => 'مسلسلات رمضان 2023',
-			'2024' => 'مسلسلات رمضان 2024',
-			'2025' => 'مسلسلات رمضان 2025',
-		];
-		
-		foreach ($year as $year_name => $display_name) {
-			$this->db->where('director', $cate_id);
-			// جلب عدد المسلسلات بناءً على السنة
-			$count = $this->db->where('year', $year_name)->count_all_results('series');
-		
-			// التحقق مما إذا كانت هناك مسلسلات لهذه السنة
-			if ($count > 0) {
-				?>
-				<li>
-					<a href="<?php echo base_url(); ?>index.php?browse/series_by_year/<?php echo $year_name; ?>/<?php echo $cate_id; ?>">
-						<?php echo $display_name; ?> (<?php echo $count; ?>)
-					</a>
-				</li>
-				<?php
-			}
-		}
-		?>
+        $category_name = 'مسلسلات رمضان';
+        
+        $cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
 
-     
+        $year = [
+            '2021' => 'مسلسلات رمضان 2021',
+            '2022' => 'مسلسلات رمضان 2022',
+            '2023' => 'مسلسلات رمضان 2023',
+            '2024' => 'مسلسلات رمضان 2024',
+            '2025' => 'مسلسلات رمضان 2025',
+        ];
+
+        foreach ($year as $year_name => $display_name) {
+            $this->db->where('director', $cate_id);
+            $count = $this->db->where('year', $year_name)->count_all_results('series');
+
+            // التحقق مما إذا كانت هناك مسلسلات لهذه السنة
+            if ($count > 0 || true) { // إظهار العنصر حتى لو كانت المسلسلات صفر
+                ?>
+                <li>
+                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_year/<?php echo $year_name; ?>/<?php echo $cate_id; ?>">
+                        <?php echo $display_name; ?> (<?php echo $count; ?>)
+                    </a>
+                </li>
+                <?php
+            }
+        }
+        ?>
     </ul>
 </li>
 

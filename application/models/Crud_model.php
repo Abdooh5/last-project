@@ -1017,41 +1017,29 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
       return $item_list;
     }
 
-    public function get_actor_genre_wise_movies_and_tv_series($actor_id = "", $item = "", $genre_id = "",  $director_id = "", $year = "", $country = "") {
-      $item_list = array();
-      if ($genre_id != 'all') {
-          $this->db->where('genre_id', $genre_id);
-      }
-      $item_details = $this->db->get($item)->result_array();
-      $cheker = array();
-      foreach ($item_details as $row) {
-        $actor_array = json_decode($row['actors'], true);
-        if(in_array($actor_id, $actor_array)){
-          array_push($cheker, $row[$item.'_id']);
-        }
-      }
-
-      	if($director_id != 'all'){
-        	$this->db->where('director', $director_id);
-        }
-        if($year != 'all'){
-        	$this->db->where('year', $year);
-        }
-
-        if($country != 'all'){
-        	$this->db->where('country_id', $country);
-        }
-
-        if($actor_id != 'all'){
-        	if(count($cheker) > 0){
-        		$this->db->where_in($item.'_id', $cheker);
-        	}else{
-        		$this->db->where($item.'_id', 0);
-        	}
-    	}
-        $item_list = $this->db->get($item)->result_array();
-      return $item_list;
-    }
+    public function get_filtered_items($type, $genre_id, $actor_id, $director_id, $year, $country) {
+		$this->db->from($type);
+		
+		if ($genre_id != 'all') {
+			$this->db->where('genre_id', $genre_id);
+		}
+		if ($director_id != 'all') {
+			$this->db->where('director', $director_id);
+		}
+		if ($year != 'all') {
+			$this->db->where('year', $year);
+		}
+		if ($country != 'all') {
+			$this->db->where('country_id', $country);
+		}
+		
+		if ($actor_id != 'all') {
+			$this->db->like('actors', json_encode($actor_id));
+		}
+		
+		return $this->db->get()->result_array();
+	}
+	
 
     // public function get_director_wise_movies_and_tv_series($director_id = "", $item = "") {
     //   $item_list = array();

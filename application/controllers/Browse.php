@@ -184,37 +184,30 @@ class Browse extends CI_Controller {
 
 		$this->load->view('frontend/index', $page_data);
 	}
-	function filter($type = '', $genre_id = '', $actor_id = '', $director_id ='', $year = '', $country = '')
-	{
-		if (empty($type) || empty($genre_id) || empty($actor_id)) {
-			redirect(base_url().'index.php?browse/home' , 'refresh');
+	public function filter($type = '', $genre_id = '', $actor_id = '', $director_id = '', $year = '', $country = '') {
+		if (empty($type)) {
+			redirect(base_url().'index.php?browse/home', 'refresh');
 		}
-		if ($actor_id == 'all' && $director_id == 'all' && $year == 'all' && $country == 'all' && $type == 'movie') {
-			redirect(base_url().'index.php?browse/movie/'.$genre_id , 'refresh');
-		}else if ($actor_id == 'all' && $director_id == 'all' && $year == 'all' && $country == 'all' && $type == 'series') {
-			redirect(base_url().'index.php?browse/series/'.$genre_id , 'refresh');
-		}
-
-		$page_data['type']   = $type;
-		$page_data['page_name']		= 'filter';
-		$page_data['page_title']	= get_phrase('filter_result');
-		$page_data['genre_id']	=	$genre_id;
-		$page_data['actor_id']	=	$actor_id;
-		$page_data['director_id']	=	$director_id;
-		$page_data['search_key_year']	=	$year;
-		$page_data['search_key_country']	=	$country;
-
-		$this->db->distinct('year');
-		$this->db->select('year');
-        $page_data['years'] = $this->db->get_where($type)->result_array();
-
-		$page_data['items'] = $this->crud_model->get_actor_genre_wise_movies_and_tv_series($actor_id, $type, $genre_id, $director_id, $year, $country);
-        $total_result = count($page_data['items']);
-
-		$page_data['total_result']	=	$total_result;
+		
+		// إعداد بيانات الصفحة
+		$page_data = [
+			'type' => $type,
+			'page_name' => 'filter',
+			'page_title' => get_phrase('filter_result'),
+			'genre_id' => $genre_id,
+			'actor_id' => $actor_id,
+			'director_id' => $director_id,
+			'search_key_year' => $year,
+			'search_key_country' => $country,
+			'years' => $this->db->distinct()->select('year')->get($type)->result_array()
+		];
+		
+		// جلب العناصر بناءً على الفلاتر
+		$page_data['items'] = $this->crud_model->get_filtered_items($type, $genre_id, $actor_id, $director_id, $year, $country);
+		$page_data['total_result'] = count($page_data['items']);
+		
 		$this->load->view('frontend/index', $page_data);
 	}
-
 	//Save movie progress
 	function movie_progress($param1 = '', $param2 = '', $param3 = '', $param4 = ''){
 
@@ -255,7 +248,7 @@ class Browse extends CI_Controller {
     $page_data['page_name']    = 'series';
     $page_data['page_title']   = 'Watch Tv Series';
     $page_data['genre_id']     = $genre_id;
-    $page_data['director']     = $director_id;
+    $page_data['director_id']     = $director_id;
 
     // تكوين رابط التصفح (pagination)
     $url = base_url() . 'index.php?browse/series/' . $genre_id . '/' . $director_id;
@@ -290,7 +283,7 @@ class Browse extends CI_Controller {
 		$page_data['page_name']  = 'series';
 		$page_data['page_title'] = 'Watch TV Series by Country and Director';
 		$page_data['country_id'] = $country_id;
-		$page_data['director']    = $cate_id;
+		$page_data['director_id']    = $cate_id;
 	
 		// تكوين رابط التصفح (pagination)
 		$url = base_url() . 'index.php?browse/series_by_country/' . $country_id . '/' . $cate_id;
@@ -327,7 +320,7 @@ class Browse extends CI_Controller {
     $page_data['page_name']  = 'series';
     $page_data['page_title'] = 'Watch TV Series by Year and Category';
     $page_data['year']       = $year;
-    $page_data['cate_id']    = $cate_id;
+    $page_data['director_id']    = $cate_id;
 
     // إعداد رابط التصفح
     $url = base_url() . 'index.php?browse/series_by_year/' . $year . '/' . $cate_id;
