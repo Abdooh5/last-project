@@ -208,6 +208,27 @@ class Browse extends CI_Controller {
 		
 		$this->load->view('frontend/index', $page_data);
 	}
+	public function filter_movie( $genre_id = '', $actor_id = '',  $year = '', $country = '') {
+
+		
+		// إعداد بيانات الصفحة
+		$page_data = [
+			'type' => 'movie',
+			'page_name' => 'filter',
+			'page_title' => get_phrase('filter_result'),
+			'genre_id' => $genre_id,
+			'actor_id' => $actor_id,
+			'search_key_year' => $year,
+			'search_key_country' => $country,
+			'years' => $this->db->distinct()->select('year')->get('movie')->result_array()
+		];
+		
+		// جلب العناصر بناءً على الفلاتر
+		$page_data['items'] = $this->crud_model->get_filtered_movie($genre_id, $actor_id, $year, $country);
+		$page_data['total_result'] = count($page_data['items']);
+		
+		$this->load->view('frontend/index', $page_data);
+	}
 	//Save movie progress
 	function movie_progress($param1 = '', $param2 = '', $param3 = '', $param4 = ''){
 

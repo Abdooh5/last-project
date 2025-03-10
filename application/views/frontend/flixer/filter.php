@@ -112,7 +112,7 @@
             if ($type == 'movie') {
                 echo get_phrase('movies');
             }elseif ($type == 'series') {
-                echo get_phrase('');
+                echo get_phrase('Tv_series');
             }
          ?>
 		(<?php echo $total_result;?>)

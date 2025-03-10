@@ -1039,7 +1039,26 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 		
 		return $this->db->get()->result_array();
 	}
-	
+	public function get_filtered_movie( $genre_id, $actor_id, $year, $country) {
+		$this->db->from('movie');
+		
+		if ($genre_id != 'all') {
+			$this->db->where('genre_id', $genre_id);
+		}
+		
+		if ($year != 'all') {
+			$this->db->where('year', $year);
+		}
+		if ($country != 'all') {
+			$this->db->where('country_id', $country);
+		}
+		
+		if ($actor_id != 'all') {
+			$this->db->like('actors', json_encode($actor_id));
+		}
+		
+		return $this->db->get()->result_array();
+	}
 
     // public function get_director_wise_movies_and_tv_series($director_id = "", $item = "") {
     //   $item_list = array();
