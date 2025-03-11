@@ -59,58 +59,42 @@ class Crud_model extends CI_Model {
 	*/
 	function signup_user()
 	{
-		$data['email'] 		= $this->input->post('email');
-		$data['password'] 	= sha1($this->input->post('password'));
-		$data['type'] 		= 0; // user type = customer
-
-		$this->db->where('email' , $data['email']);
-		$this->db->from('user');
-        $total_number_of_matching_user = $this->db->count_all_results();
-		// validate if duplicate email exists
-		$unverified_user = $this->db->get_where('user', array('email' => $data['email'], 'status' => 0));
-        if ($total_number_of_matching_user == 0 || $unverified_user->num_rows() > 0) {
-        	if(get_settings('email_verification') == 1){
-        		$data['status'] 		= 0;
-        		$data['verification_code'] 		= rand(100000, 999999);
-
-        		if($unverified_user->num_rows() > 0){
-        			$this->email_model->send_email_verification_mail($data['email'], $unverified_user->row('verification_code'));
-        		}else{
-        			$this->email_model->send_email_verification_mail($data['email'], $data['verification_code']);
-        			$this->db->insert('user' , $data);
-        		}
-        		$this->session->set_userdata('register_email', $data['email']);
-				redirect(base_url().'index.php?home/verification_code' , 'refresh');
-        	}else{
-        		$data['status'] 		= 1;
-        	}
-
-
-			$this->db->insert('user' , $data);
-			$user_id	=	$this->db->insert_id();
-
-			// create a free subscription for premium package for 30 days
-			$trial_period	=	$this->get_settings('trial_period');
-			if($trial_period == 'on') {
-				$this->create_free_subscription($user_id);
-			}
-
-            $this->signin($this->input->post('email') , $this->input->post('password'));
-			$this->session->set_flashdata('signup_result', 'success');
-
-			if ($total_number_of_matching_user > 0){
-        		$this->session->set_flashdata('signup_result', 'failed');
-				return false;
-        	}else{
-				return true;
-			}
-        }
-		else {
-			$this->session->set_flashdata('signup_result', 'failed');
-			return false;
+		$data['email'] = $this->input->post('email');
+		$data['password'] = sha1($this->input->post('password'));
+		$data['status'] = 1;  // تفعيل الحساب مباشرة
+	
+		// التحقق إذا كان البريد الإلكتروني موجودًا بالفعل
+		$existing_email = $this->db->get_where('user', array('email' => $data['email']))->num_rows();
+		if ($existing_email > 0) {
+			return false; // البريد الإلكتروني موجود بالفعل
 		}
-
+	
+		// إدخال المستخدم في قاعدة البيانات
+		$insert = $this->db->insert('user', $data);
+	
+		if (!$insert) {
+			return false; // فشل الإدخال
+		}
+	
+		// الحصول على معرف المستخدم بعد الإدخال
+		$user_id = $this->db->insert_id();
+	
+		// إنشاء اشتراك تجريبي إذا تم تمكينه
+		$trial_period = $this->crud_model->get_settings('trial_period');
+		if ($trial_period == 'on') {
+			$this->create_free_subscription($user_id); // إنشاء الاشتراك المجاني
+		}
+	
+		// إرجاع بيانات المستخدم بعد التسجيل
+		return array(
+			'user_id' => $user_id,
+			'email' => $data['email']
+		);
 	}
+	
+	
+	
+
 
 	// create a free subscription for premium package for 30 days
 	function create_free_subscription($user_id = '')
@@ -307,21 +291,22 @@ class Crud_model extends CI_Model {
 	// returns currently active subscription_id, or false if no active found
 	function validate_subscription()
 	{
-		$user_id			=	$this->session->userdata('user_id');
-		$timestamp_current	=	strtotime(date("Y-m-d H:i:s"));
-		$this->db->where('user_id', $user_id);
-		$this->db->where('timestamp_to >' ,  $timestamp_current);
-		$this->db->where('timestamp_from <' ,  $timestamp_current);
-		$this->db->where('status' ,  1);
-		$query				=	$this->db->get('subscription');
-		if ($query->num_rows() > 0) {
-            $row = $query->row();
-			$subscription_id	=	$row->subscription_id;
-			return $subscription_id;
-		}
-        else if ($query->num_rows() == 0) {
-			return false;
-		}
+		// $user_id			=	$this->session->userdata('user_id');
+		// $timestamp_current	=	strtotime(date("Y-m-d H:i:s"));
+		// $this->db->where('user_id', $user_id);
+		// $this->db->where('timestamp_to >' ,  $timestamp_current);
+		// $this->db->where('timestamp_from <' ,  $timestamp_current);
+		// $this->db->where('status' ,  1);
+		// $query				=	$this->db->get('subscription');
+		// if ($query->num_rows() > 0) {
+        //     $row = $query->row();
+		// 	$subscription_id	=	$row->subscription_id;
+		// 	return $subscription_id;
+		// }
+        // else if ($query->num_rows() == 0) {
+		// 	return false;
+		// }
+		return true;
 	}
 
 	function get_subscription_detail($subscription_id)

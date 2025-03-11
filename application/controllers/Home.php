@@ -27,34 +27,49 @@ class Home extends CI_Controller {
 	}
 
 	function signup()
-	{
-		$this->login_check();
-		if (isset($_POST) && !empty($_POST))
-		{
-			if(!$this->crud_model->check_recaptcha() && get_settings('recaptcha') == 1){
-				$this->session->set_flashdata('error_message', get_phrase('recaptcha_verification_failed'));
-				redirect(base_url().'index.php?home/signup' , 'refresh');
-			}
+{
+    $this->login_check();  // التأكد من عدم تسجيل دخول المستخدم بالفعل
+    if (isset($_POST) && !empty($_POST))
+    {
+        // التحقق من reCAPTCHA إذا كانت مفعلة
+        if(!$this->crud_model->check_recaptcha() && get_settings('recaptcha') == 1){
+            $this->session->set_flashdata('error_message', get_phrase('recaptcha_verification_failed'));
+            redirect(base_url().'index.php?home/signup', 'refresh');
+        }
 
-			$signup_result = $this->crud_model->signup_user();
-			if ($signup_result == true){
-				sleep(2);
-				$trial_period	=	$this->crud_model->get_settings('trial_period');
+        // تسجيل المستخدم الجديد
+        $signup_result = $this->crud_model->signup_user();
 
-				if ($trial_period == 'on')
-					redirect(base_url().'index.php?browse/switchprofile' , 'refresh');
-				else if ($trial_period == 'off')
-					redirect(base_url().'index.php?browse/youraccount' , 'refresh');
-			} else if ($signup_result == false){
-				redirect(base_url().'index.php?home/signup' , 'refresh');
-			}
-			
-		}
-		$page_data['page_name']		=	'signup';
-		$page_data['page_title']	=	get_phrase('sign_up');
-		$this->load->view('frontend/index', $page_data);
+        // إذا تم التسجيل بنجاح
+        if ($signup_result == true){
+            sleep(2); // تأخير بسيط لانتظار العمليات الأخرى
 
-	}
+            // نقوم بتسجيل الدخول للمستخدم مباشرة بعد التسجيل
+            $this->session->set_userdata('user_login_status', 1);
+            $this->session->set_userdata('user_id', $signup_result['user_id']);
+            $this->session->set_userdata('email', $signup_result['email']);
+            $this->session->set_userdata('is_logged_in', true);
+
+            // يتم تفعيل الاشتراك مباشرة
+            $this->crud_model->validate_subscription(); // تتأكد أنه دائمًا مفعل
+
+            // إعادة التوجيه إلى صفحة الحساب مباشرة
+            redirect(base_url().'index.php?browse/youraccount', 'refresh');
+        } else {
+            // في حال فشل التسجيل
+            $this->session->set_flashdata('signup_result', 'failed');
+            redirect(base_url().'index.php?home/signup', 'refresh');
+        }
+    }
+
+    // بيانات الصفحة الخاصة بالتسجيل
+    $page_data['page_name'] = 'signup';
+    $page_data['page_title'] = get_phrase('sign_up');
+    $this->load->view('frontend/index', $page_data);
+}
+
+	
+
 
 	public function verification_code(){
 		if($this->session->userdata('register_email') == null){

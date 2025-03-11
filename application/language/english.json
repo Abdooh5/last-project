@@ -1110,5 +1110,8 @@
     "أفلام": "أفلام",
     "مسلسلات_رمضان": "مسلسلات رمضان",
     "email_already_exists": "Email already exists",
-    "all_genres": "All genres"
+    "all_genres": "All genres",
+    "current_email": "Current email",
+    "new_email": "New email",
+    "email_changed_successfully.": "Email changed successfully."
 }
