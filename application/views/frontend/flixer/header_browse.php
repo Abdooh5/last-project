@@ -84,8 +84,7 @@
 		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
 
         $countries = [
-            'تركي' => 'أفلام تركية',
-          
+            'تركي' => 'أفلام تركية',    
             'عربي' => 'أفلام عربية' ,
 			 'أجنبي' => 'أفلام أجنبية',
             'هندي' => 'أفلام هندية',
