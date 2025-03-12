@@ -209,3 +209,4 @@ $trailer_path=base_url('assets/global/movie_trailer/' . $trailer_name);
 		</div>
 	</div>
 </div>
+

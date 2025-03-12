@@ -495,20 +495,20 @@ class Crud_model extends CI_Model {
 				move_uploaded_file($_FILES['poster']['tmp_name'], 'assets/global/movie_poster/' . $movie_id . '.jpg');
 			}
 
-					// رفع الاعلان (واستخدام اسم الملف الأصلي)
-if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
-	$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
-	$video_path = 'assets/global/movie_viedo/' . $video_name;
-
-	// رفع الملف إلى المجلد المحدد
-	move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
-
-	// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-	$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
-} else {
-	echo "Error uploading movie trailer.";
-	return;
-}
+		// رفع الاعلان (واستخدام اسم الملف الأصلي)
+		if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
+			$video_name = $_FILES['trailer_url']['name']; // اسم الملف الأصلي
+			$video_path = 'assets/global/movie_trailer/' . $video_name;
+		
+			// رفع الملف إلى المجلد المحدد
+			move_uploaded_file($_FILES['trailer_url']['tmp_name'], $video_path);
+		
+			// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
+			$this->db->update('movie', ['trailer_url' => $video_name], ['movie_id' => $movie_id]);
+		} else {
+			echo "Error uploading movie trailer.";
+			return;
+		}
 		
 			// رفع الفيديو (واستخدام اسم الملف الأصلي)
 			if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
@@ -529,77 +529,93 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 	
 	
 
-	function update_movie($movie_id = '')
-	{// البيانات المدخلة
-		$data['title']               = $this->input->post('title');
-		$data['description_short']   = $this->input->post('description_short');
-		$data['description_long']    = $this->input->post('description_long');
-		$data['year']                = $this->input->post('year');
-		$data['rating']              = $this->input->post('rating');
-		$data['country_id']          = $this->input->post('country_id');
-		$data['genre_id']            = $this->input->post('genre_id');
-		$data['featured']            = $this->input->post('featured');
-		//$data['trailer_url']         = $this->input->post('trailer_url');
-	
-	
-		// مدة الفيلم
-		$duration = $this->input->post('duration');
-		$duration = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $duration);
-		sscanf($duration, "%d:%d:%d", $hours, $minutes, $seconds);
-		$data['duration'] = $hours * 3600 + $minutes * 60 + $seconds;
-	
-		// الممثلين
-		$actors = $this->input->post('actors');
-		$actor_entries = array();
-		$number_of_entries = sizeof($actors);
-		for ($i = 0; $i < $number_of_entries ; $i++) {
-			array_push($actor_entries, $actors[$i]);
-		}
-		$data['actors'] = json_encode($actor_entries);
-	
-		// إدخال الفيلم في قاعدة البيانات
-		$this->db->update('movie', $data, array('movie_id'=>$movie_id));
-	
-		// التحقق من رفع الصور والملفات بشكل صحيح
-		if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0) {
-			move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/movie_thumb/' . $movie_id . '.jpg');
-		} else {
-			echo "Error uploading thumbnail.";
-			return;
-		}
-
-
-		// رفع الاعلان (واستخدام اسم الملف الأصلي)
-if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
-	$video_name = $_FILES['trailer_url']['name']; // اسم الملف الأصلي
-	$video_path = 'assets/global/movie_trailer/' . $video_name;
-
-	// رفع الملف إلى المجلد المحدد
-	move_uploaded_file($_FILES['trailer_url']['tmp_name'], $video_path);
-
-	// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-	$this->db->update('movie', ['trailer_url' => $video_name], ['movie_id' => $movie_id]);
-} else {
-	echo "Error uploading movie trailer.";
-	return;
-}
+		function update_movie($movie_id = '') {
+			// جلب القيم الحالية للفيلم من قاعدة البيانات
+			$current_movie = $this->db->get_where('movie', ['movie_id' => $movie_id])->row_array();
 		
-	
-// رفع الفيديو (واستخدام اسم الملف الأصلي)
-if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
-	$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
-	$video_path = 'assets/global/movie_video/' . $video_name;
+			// تجهيز البيانات للتحديث فقط إذا تم تغييرها
+			$data = [];
+		
+			if ($this->input->post('title')) {
+				$data['title'] = $this->input->post('title');
+			}
+		
+			if ($this->input->post('description_short')) {
+				$data['description_short'] = $this->input->post('description_short');
+			}
+		
+			if ($this->input->post('description_long')) {
+				$data['description_long'] = $this->input->post('description_long');
+			}
+		
+			if ($this->input->post('year')) {
+				$data['year'] = $this->input->post('year');
+			}
+		
+			if ($this->input->post('rating')) {
+				$data['rating'] = $this->input->post('rating');
+			}
+		
+			if ($this->input->post('country_id')) {
+				$data['country_id'] = $this->input->post('country_id');
+			}
+		
+			if ($this->input->post('genre_id')) {
+				$data['genre_id'] = $this->input->post('genre_id');
+			}
+		
+			if ($this->input->post('featured')) {
+				$data['featured'] = $this->input->post('featured');
+			}
+		
+			
+		
+			// معالجة مدة الفيلم فقط إذا تم تغييرها
+			if ($this->input->post('duration')) {
+				$duration = $this->input->post('duration');
+				$duration = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $duration);
+				sscanf($duration, "%d:%d:%d", $hours, $minutes, $seconds);
+				$data['duration'] = $hours * 3600 + $minutes * 60 + $seconds;
+			}
+		
+			// تحديث الممثلين إذا تم إدخال بيانات جديدة
+			if ($this->input->post('actors')) {
+				$actors = $this->input->post('actors');
+				$data['actors'] = json_encode($actors);
+			}
+		
+			// تحديث قاعدة البيانات بالقيم الجديدة فقط
+			if (!empty($data)) {
+				$this->db->update('movie', $data, ['movie_id' => $movie_id]);
+			}
+		
+			// تحديث الصور والفيديو فقط إذا تم رفع ملفات جديدة
+			if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0) {
+				move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/movie_thumb/' . $movie_id . '.jpg');
+			}
+		
+			if (isset($_FILES['poster']) && $_FILES['poster']['error'] == 0) {
+				move_uploaded_file($_FILES['poster']['tmp_name'], 'assets/global/movie_poster/' . $movie_id . '.jpg');
+			}
+		
+			if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+				$video_name = $_FILES['url']['name'];
+				$video_path = 'assets/global/movie_video/' . $video_name;
+				move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
+		
+				// تحديث قاعدة البيانات باسم الفيديو الجديد
+				$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
+			}
+			if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
+				$video_triler = $_FILES['trailer_url']['name'];
+				$video_path = 'assets/global/movie_trailer/' . $video_triler;
+				move_uploaded_file($_FILES['trailer_url']['tmp_name'], $video_path);
+		
+				// تحديث قاعدة البيانات باسم الفيديو الجديد
+				$this->db->update('movie', ['trailer_url' => $video_triler], ['movie_id' => $movie_id]);
+			}
+		}
 
-	// رفع الملف إلى المجلد المحدد
-	move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
-
-	// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-	$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
-} else {
-	echo "Error uploading movie video.";
-	return;
-}
-	}
 	
 	function add_subtitle($param1 = ""){
 		$data['movie_id'] = $param1;
