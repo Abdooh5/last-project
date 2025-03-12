@@ -43,7 +43,7 @@
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
 		$category_name='مسلسلات';
-		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+		$cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
 
         $countries = [
             'تركي' => 'مسلسلات تركية',
@@ -59,7 +59,7 @@
             $country = $this->db->get_where('country', ['name' => $country_name])->row();
             if ($country) {
                 $this->db->where('country_id', $country->country_id);
-				$count= $this->db->where('director', $cate_id)->count_all_results('series');
+				$count= $this->db->where('category', $cate_id)->count_all_results('series');
                 ?>
                 <li>
                     <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>/<?php echo $cate_id ?>">
@@ -81,7 +81,7 @@
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
 		$category_name=' أفلام';
-		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+		$cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
 
         $countries = [
             'تركي' => 'أفلام تركية',    
@@ -119,7 +119,7 @@
     <ul class="dropdown-menu" aria-labelledby="themes">
 <?php 
 	$category_name='أنمي';
-	$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+	$cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
 	
 $genres = [
 	'كرتون' => 'كرتون',
@@ -129,7 +129,7 @@ $genres = [
 foreach ($genres as $genre_name => $display_name) {
 	$genre = $this->db->get_where('genre', ['name' => $genre_name])->row();
 	if ($genre) {
-		$this->db->where('director', $cate_id);
+		$this->db->where('category', $cate_id);
 		$count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
 		?>
 		<li>
@@ -152,7 +152,7 @@ foreach ($genres as $genre_name => $display_name) {
         <?php 
         $category_name = 'مسلسلات رمضان';
         
-        $cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+        $cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
 
         $year = [
             '2021' => 'مسلسلات رمضان 2021',
@@ -163,7 +163,7 @@ foreach ($genres as $genre_name => $display_name) {
         ];
 
         foreach ($year as $year_name => $display_name) {
-            $this->db->where('director', $cate_id);
+            $this->db->where('category', $cate_id);
             $count = $this->db->where('year', $year_name)->count_all_results('series');
 
             // التحقق مما إذا كانت هناك مسلسلات لهذه السنة
@@ -188,7 +188,7 @@ foreach ($genres as $genre_name => $display_name) {
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
 		$category_name='برامج تلفيزيونية';
-		$cate_id = $this->db->select('director_id')->get_where('director', ['name' => trim($category_name)])->row()->director_id ?? null;
+		$cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
         $countries = [
             'عربي' => 'برامج عربية',
             'أجنبي' => 'برامج أجنبية',
@@ -198,7 +198,7 @@ foreach ($genres as $genre_name => $display_name) {
         foreach ($countries as $country_name => $display_name) {
             $country = $this->db->get_where('country', ['name' => $country_name])->row();
             if ($country) {
-				$this->db->where('director', $cate_id);
+				$this->db->where('category', $cate_id);
                 $count = $this->db->where('country_id', $country->country_id)->count_all_results('series');
                 ?>
                 <li>
@@ -218,7 +218,7 @@ foreach ($genres as $genre_name => $display_name) {
         foreach ($genres as $genre_name => $display_name) {
             $genre = $this->db->get_where('genre', ['name' => $genre_name])->row();
             if ($genre) {
-				$this->db->where('director', $cate_id);
+				$this->db->where('category', $cate_id);
 				$count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
                 ?>
                 <li>
