@@ -307,8 +307,8 @@
 						</a>
 					</li>
 					<li style="width:20%;">
-						<a href="#director" data-toggle="tab">
-							<?php echo get_phrase('Director');?>
+						<a href="#category" data-toggle="tab">
+							<?php echo get_phrase('Category');?>
 						</a>
 					</li>
 					<li style="width:20%;">
@@ -385,14 +385,14 @@
 							?>
 						</p>
 					</div>
-					<div class="tab-pane " id="director">
+					<div class="tab-pane " id="category">
 						<p>
 							<div style="float: left; text-align:center; color: #fff; font-weight: bold;">
-								<?php $director_id = $this->db->get_where('director', array('director_id'=>$row['director']))->row()->director_id; ?>
+								<?php $category_id = $this->db->get_where('category', array('category_id'=>$row['category']))->row()->category_id; ?>
 								<img src="<?php echo base_url('assets/global/director/'.$director_id.'.jpg'); ?>"
 									style="height: 160px; margin:5px;" />
 								<br>
-								<?php echo $this->db->get_where('director', array('director_id'=>$row['director']))->row()->name;?>
+								<?php echo $this->db->get_where('category', array('category_id'=>$row['category']))->row()->name;?>
 							</div>
 						</p>
 					</div>

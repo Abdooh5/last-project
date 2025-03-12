@@ -55,20 +55,7 @@
 						<textarea class="form-control" id="description_short" name="description_short" rows="6"></textarea>
 					</div>
 
-					<div class="form-group mb-3">
-						<label for="director">Director</label>
-						<span class="help">- select single director</span>
-						<select class="form-control select2" id="director" name="director" required>
-							<option value="">Select an Director</option>
-							<?php
-								$directors	=	$this->db->get('director')->result_array();
-								foreach ($directors as $row3):?>
-							<option value="<?php echo $row3['director_id'];?>">
-								<?php echo $row3['name'];?>
-							</option>
-							<?php endforeach;?>
-						</select>
-					</div>
+				
 
 					<div class="form-group mb-3">
 						<label for="actors">Actors</label>

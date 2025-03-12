@@ -184,7 +184,7 @@ class Browse extends CI_Controller {
 
 		$this->load->view('frontend/index', $page_data);
 	}
-	public function filter($type = '', $genre_id = '', $actor_id = '', $director_id = '', $year = '', $country = '') {
+	public function filter($type = '', $genre_id = '', $actor_id = '',  $category_id= '', $year = '', $country = '') {
 		if (empty($type)) {
 			redirect(base_url().'index.php?browse/home', 'refresh');
 		}
@@ -196,14 +196,14 @@ class Browse extends CI_Controller {
 			'page_title' => get_phrase('filter_result'),
 			'genre_id' => $genre_id,
 			'actor_id' => $actor_id,
-			'director_id' => $director_id,
+			'category_id' => $category_id,
 			'search_key_year' => $year,
 			'search_key_country' => $country,
 			'years' => $this->db->distinct()->select('year')->get($type)->result_array()
 		];
 		
 		// جلب العناصر بناءً على الفلاتر
-		$page_data['items'] = $this->crud_model->get_filtered_items($type, $genre_id, $actor_id, $director_id, $year, $country);
+		$page_data['items'] = $this->crud_model->get_filtered_items($type, $genre_id, $actor_id, $category_id, $year, $country);
 		$page_data['total_result'] = count($page_data['items']);
 		
 		$this->load->view('frontend/index', $page_data);
@@ -264,15 +264,15 @@ class Browse extends CI_Controller {
 		$page_data['page_title'] = "أحدث السلاسل المضافة";
 		$this->load->view('frontend/index', $page_data);
 	}
-	function series($genre_id = '', $director_id = '', $offset = '')
+	function series($genre_id = '', $category_id = '', $offset = '')
 {
     $page_data['page_name']    = 'series';
     $page_data['page_title']   = 'Watch Tv Series';
     $page_data['genre_id']     = $genre_id;
-    $page_data['director_id']     = $director_id;
+    $page_data['category_id']     = $category_id;
 
     // تكوين رابط التصفح (pagination)
-    $url = base_url() . 'index.php?browse/series/' . $genre_id . '/' . $director_id;
+    $url = base_url() . 'index.php?browse/series/' . $genre_id . '/' . $category_id;
     $per_page = 20;
 
     // تعديل الاستعلام ليشمل النوع والمخرج فقط
@@ -280,8 +280,8 @@ class Browse extends CI_Controller {
     if (!empty($genre_id) && $genre_id !== 'all') {
         $this->db->where('genre_id', $genre_id);  // شرط النوع
     }
-    if (!empty($director_id) && $director_id !== 'all') {
-        $this->db->where('director', $director_id);  // شرط المخرج
+    if (!empty($category_id) && $category_id !== 'all') {
+        $this->db->where('category', $category_id);  // شرط المخرج
     }
 
     // حساب العدد الكلي للنتائج
@@ -292,22 +292,22 @@ class Browse extends CI_Controller {
     $this->pagination->initialize($config);
 
     // جلب المسلسلات بناءً على النوع والمخرج
-    $page_data['series'] = $this->crud_model->get_series($genre_id, $director_id, $per_page, $offset);
+    $page_data['series'] = $this->crud_model->get_series($genre_id, $category_id, $per_page, $offset);
     $page_data['total_result'] = $total_result;
 
     // تحميل الصفحة
     $this->load->view('frontend/index', $page_data);
 }
 
-	function series_by_country($country_id = '', $cate_id = '', $offset = '')
+	function series_by_country($country_id = '', $category_id = '', $offset = '')
 	{
 		$page_data['page_name']  = 'series';
-		$page_data['page_title'] = 'Watch TV Series by Country and Director';
+		$page_data['page_title'] = 'Watch TV Series by Country and category';
 		$page_data['country_id'] = $country_id;
-		$page_data['director_id']    = $cate_id;
+		$page_data['category_id']    = $category_id;
 	
 		// تكوين رابط التصفح (pagination)
-		$url = base_url() . 'index.php?browse/series_by_country/' . $country_id . '/' . $cate_id;
+		$url = base_url() . 'index.php?browse/series_by_country/' . $country_id . '/' . $category_id;
 		$per_page = 20;
 	
 		// تعديل الاستعلام ليشمل الدولة والمخرج
@@ -316,7 +316,7 @@ class Browse extends CI_Controller {
 			$this->db->where('country_id', $country_id);
 		}
 		if (!empty($cate_id)) {
-			$this->db->where('director', $cate_id); // ✅ استخدام 'director' بدلاً من 'director_id'
+			$this->db->where('category', $category_id); 
 		}
 		$total_result = $this->db->count_all_results();
 	
@@ -330,21 +330,21 @@ class Browse extends CI_Controller {
 		$page_data['years'] = $this->db->get('series')->result_array();
 	
 		// جلب المسلسلات بناءً على الدولة و الفئة
-		$page_data['series'] = $this->crud_model->get_series_by_country($country_id, $cate_id, $per_page, $offset);
+		$page_data['series'] = $this->crud_model->get_series_by_country($country_id, $category_id, $per_page, $offset);
 		$page_data['total_result'] = $total_result;
 	
 		// تحميل الصفحة
 		$this->load->view('frontend/index', $page_data);
 	}
-	function series_by_year($year = '', $cate_id = '', $offset = '')
+	function series_by_year($year = '', $category_id = '', $offset = '')
 { 
     $page_data['page_name']  = 'series';
     $page_data['page_title'] = 'Watch TV Series by Year and Category';
     $page_data['year']       = $year;
-    $page_data['director_id']    = $cate_id;
+    $page_data['category_id']    = $category_id;
 
     // إعداد رابط التصفح
-    $url = base_url() . 'index.php?browse/series_by_year/' . $year . '/' . $cate_id;
+    $url = base_url() . 'index.php?browse/series_by_year/' . $year . '/' . $category_id;
     $per_page = 20;
 
     // تصفية الاستعلام ليشمل السنة والفئة
@@ -352,8 +352,8 @@ class Browse extends CI_Controller {
     if (!empty($year)) {
         $this->db->where('year', $year);
     }
-    if (!empty($cate_id)) {
-        $this->db->where('director', $cate_id); // ✅ استخدم 'director' للمطابقة مع الفئة
+    if (!empty($category_id)) {
+        $this->db->where('category', $category_id); // ✅ استخدم '' للمطابقة مع الفئة
     }
     $total_result = $this->db->count_all_results();
 
@@ -367,7 +367,7 @@ class Browse extends CI_Controller {
     $page_data['years'] = $this->db->get('series')->result_array();
 
     // استرجاع المسلسلات حسب السنة والفئة
-    $page_data['series'] = $this->crud_model->get_series_by_year($year, $cate_id, $per_page, $offset);
+    $page_data['series'] = $this->crud_model->get_series_by_year($year, $category_id, $per_page, $offset);
     $page_data['total_result'] = $total_result;
 
     // تحميل الصفحة

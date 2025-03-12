@@ -150,8 +150,7 @@ foreach ($genres as $genre_name => $display_name) {
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
-        $category_name = 'مسلسلات رمضان';
-        
+        $category_name = 'مسلسلات رمضان'; 
         $cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
 
         $year = [
@@ -163,6 +162,7 @@ foreach ($genres as $genre_name => $display_name) {
         ];
 
         foreach ($year as $year_name => $display_name) {
+			
             $this->db->where('category', $cate_id);
             $count = $this->db->where('year', $year_name)->count_all_results('series');
 

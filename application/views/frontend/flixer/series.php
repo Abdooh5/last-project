@@ -54,17 +54,7 @@
                         </select>
                     </div>
                 </div>
-                <!-- <div class="col-md-6 col-lg-2">
-                    <div class="select" style="width: 100%; margin-bottom: 10px">
-                        <select name="director_id" id="director_id" class="custom-select">
-                            <option value="all"><?php echo get_phrase('all_directors'); ?></option>
-                            <?php $directors = $this->db->get('director')->result_array(); ?>
-                            <?php foreach ($directors as $key => $director): ?>
-                                <option value="<?php echo $director['director_id']; ?>"><?php echo $director['name']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div> -->
+          
                 <div class="col-md-6 col-lg-2">
                     <div class="select" style="width: 100%; margin-bottom: 10px">
                         <select name="genre_id" id="genre_id" class="custom-select">
@@ -98,7 +88,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-2">
-                    <button type="submit" style="width: 100%; margin-bottom: 10px; margin-top: 2px; height: 38px;" class="btn btn-danger" onclick="submit('<?php echo $director_id; ?>')"><?php echo get_phrase('filter'); ?></button>
+                    <button type="submit" style="width: 100%; margin-bottom: 10px; margin-top: 2px; height: 38px;" class="btn btn-danger" onclick="submit('<?php echo $category_id; ?>')"><?php echo get_phrase('filter'); ?></button>
                 </div>
             </div>
         </div>
@@ -108,7 +98,7 @@
 <!-- TV SERIES LISTING IN GRID FORMAT -->
 <div class="row" style="margin:20px 60px;">
     <h4 style="text-transform: capitalize;">
-        <?php echo $this->db->get_where('director', array('director_id' => $director_id))->row()->name;?>
+        <?php echo $this->db->get_where('category', array('category_id' => $category_id))->row()->name;?>
         <?php echo $this->db->get_where('country', array('country_id' => $country_id))->row()->name;?> (<?php echo $total_result;?>)
         
     </h4>
@@ -142,13 +132,13 @@
 </div>
 
 <script>
-    function submit(director_id)
+    function submit(category_id)
     {
         actor_id  = document.getElementById("actor_id").value;
        // director_id  = document.getElementById("director_id").value;
         genre_id  = document.getElementById("genre_id").value;
         year  = document.getElementById("year").value;
         country  = document.getElementById("country").value;
-        window.location = "<?php echo base_url();?>index.php?browse/filter/series/"+genre_id+ "/" + actor_id+ "/" + director_id+ "/" + year + "/" + country;
+        window.location = "<?php echo base_url();?>index.php?browse/filter/series/"+genre_id+ "/" + actor_id+ "/" + category_id+ "/" + year + "/" + country;
     }
 </script>

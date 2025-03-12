@@ -464,7 +464,7 @@ class Crud_model extends CI_Model {
 			$data['genre_id']            = $this->input->post('genre_id');
 			$data['featured']            = $this->input->post('featured');
 			$data['trailer_url']         = $this->input->post('trailer_url');
-			$data['director']            = $this->input->post('director');
+			
 		
 			// مدة الفيلم
 			$duration = $this->input->post('duration');
@@ -496,15 +496,15 @@ class Crud_model extends CI_Model {
 			}
 
 					// رفع الاعلان (واستخدام اسم الملف الأصلي)
-if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
-	$video_name = $_FILES['trailer_url']['name']; // اسم الملف الأصلي
-	$video_path = 'assets/global/movie_trailer/' . $video_name;
+if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+	$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
+	$video_path = 'assets/global/movie_viedo/' . $video_name;
 
 	// رفع الملف إلى المجلد المحدد
-	move_uploaded_file($_FILES['trailer_url']['tmp_name'], $video_path);
+	move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
 
 	// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-	$this->db->update('movie', ['trailer_url' => $video_name], ['movie_id' => $movie_id]);
+	$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
 } else {
 	echo "Error uploading movie trailer.";
 	return;
@@ -539,8 +539,8 @@ if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
 		$data['country_id']          = $this->input->post('country_id');
 		$data['genre_id']            = $this->input->post('genre_id');
 		$data['featured']            = $this->input->post('featured');
-	//	$data['trailer_url']         = $this->input->post('trailer_url');
-		$data['director']            = $this->input->post('director');
+		//$data['trailer_url']         = $this->input->post('trailer_url');
+	
 	
 		// مدة الفيلم
 		$duration = $this->input->post('duration');
@@ -701,7 +701,7 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 
 	}
 
-	function get_series($genre_id, $director_id, $limit = NULL, $offset = 0)
+	function get_series($genre_id, $category_id, $limit = NULL, $offset = 0)
 {
     $this->db->order_by('series_id', 'desc');
 
@@ -711,8 +711,8 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
     }
 
     // تطبيق شرط المخرج إذا كانت القيمة موجودة وليست "all"
-    if (!empty($director_id) && $director_id !== 'all') {
-        $this->db->where('director', $director_id);
+    if (!empty($category_id) && $category_id !== 'all') {
+        $this->db->where('category', $category_id);
     }
 
     $query = $this->db->get('series', $limit, $offset);
@@ -724,26 +724,26 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 }
 
 
-	function get_series_by_year($year, $cate_id, $limit = 20, $offset = 0)
+	function get_series_by_year($year, $category_id, $limit = 20, $offset = 0)
 	{
 		$this->db->from('series');
 		if (!empty($year)) {
 			$this->db->where('year', $year);
 		}
 		if (!empty($cate_id)) {
-			$this->db->where('director', $cate_id);
+			$this->db->where('category', $category_id);
 		}
 		$this->db->limit($limit, $offset);
 		return $this->db->get()->result_array();
 	}
-	public function get_series_by_country($country_id, $cate_id, $limit = 20, $offset = 0)
+	public function get_series_by_country($country_id, $category_id, $limit = 20, $offset = 0)
 	{
 		$this->db->from('series');  // تحديد الجدول الأساسي
 		if (!empty($country_id)) {
 			$this->db->where('country_id', $country_id);
 		}
-		if (!empty($cate_id)) {
-			$this->db->where('director', $cate_id); // ✅ استخدام 'director' وليس 'director_id'
+		if (!empty($category_id)) {
+			$this->db->where('category', $category_id); 
 		}
 		
 		$this->db->limit($limit, $offset);
@@ -792,14 +792,14 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 		$data['name']				=	$this->input->post('name');
 		$this->db->insert('category', $data);
 		$category_id = $this->db->insert_id();
-		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/director/' . $category_id . '.jpg');
+	//	move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/director/' . $category_id . '.jpg');
 	}
 
 	function update_category($category_id = '')
 	{
 		$data['name']				=	$this->input->post('name');
 		$this->db->update('category', $data, array('category_id'=>$category_id));
-		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/director/' . $director_id . '.jpg');
+	//	move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/director/' . $director_id . '.jpg');
 	}
 
 	function create_user()
@@ -936,15 +936,15 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
         return $image_url;
     }
 
-    function get_director_image_url($id = '')
-	{
-        if (file_exists('assets/global/director/' . $id . '.jpg'))
-            $image_url = base_url() . 'assets/global/director/' . $id . '.jpg';
-        else
-            $image_url = base_url() . 'assets/global/placeholder.jpg';
+    // function get_director_image_url($id = '')
+	// {
+    //     if (file_exists('assets/global/director/' . $id . '.jpg'))
+    //         $image_url = base_url() . 'assets/global/director/' . $id . '.jpg';
+    //     else
+    //         $image_url = base_url() . 'assets/global/placeholder.jpg';
 
-        return $image_url;
-    }
+    //     return $image_url;
+    // }
 
 
     // Curl call for purchase code checking
@@ -1002,14 +1002,14 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
       return $item_list;
     }
 
-    public function get_filtered_items($type, $genre_id, $actor_id, $director_id, $year, $country) {
+    public function get_filtered_items($type, $genre_id, $actor_id, $category_id, $year, $country) {
 		$this->db->from($type);
 		
 		if ($genre_id != 'all') {
 			$this->db->where('genre_id', $genre_id);
 		}
-		if ($director_id != 'all') {
-			$this->db->where('director', $director_id);
+		if ($category_id != 'all') {
+			$this->db->where('category', $category_id);
 		}
 		if ($year != 'all') {
 			$this->db->where('year', $year);
@@ -1070,10 +1070,7 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 	    }
     	return $this->db->get('actor');
     }
-	function get_directors($actor_id = ""){
-		$query 		=	 $this->db->get('director');
-        return $query->result_array();
-    }
+	
     
     function get_application_details() {
   $purchase_code = get_settings('purchase_code');
