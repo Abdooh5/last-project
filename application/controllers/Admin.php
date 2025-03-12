@@ -402,46 +402,46 @@ class Admin extends CI_Controller {
 		redirect(base_url().'index.php?admin/actor_list' , 'refresh');
 	}
 
-	// WATCH LIST OF DIRECTOR, MANAGE THEM
-	function director_list()
+	// WATCH LIST OF Category, MANAGE THEM
+	function category_list()
 	{
-		$page_data['page_name']		=	'director_list';
-		$page_data['page_title']	=	'Manage Director';
+		$page_data['page_name']		=	'category_list';
+		$page_data['page_title']	=	'Manage Categories';
 		$this->load->view('backend/index', $page_data);
 	}
 
-	// CREATE A NEW DIRECTOR
-	function director_create()
+	// CREATE A NEW Category
+	function category_create()
 	{
 		if (isset($_POST) && !empty($_POST))
 		{
-			$this->crud_model->create_director();
-			redirect(base_url().'index.php?admin/director_list' , 'refresh');
+			$this->crud_model->create_category();
+			redirect(base_url().'index.php?admin/category_list' , 'refresh');
 		}
-		$page_data['page_name']		=	'director_create';
-		$page_data['page_title']	=	'Create director';
+		$page_data['page_name']		=	'category_create';
+		$page_data['page_title']	=	'Create category';
 		$this->load->view('backend/index', $page_data);
 	}
 
-	// EDIT A DIRECTOR
-	function director_edit($director_id = '')
+	// EDIT A Category
+	function category_edit($category_id = '')
 	{
 		if (isset($_POST) && !empty($_POST))
 		{
-			$this->crud_model->update_director($director_id);
-			redirect(base_url().'index.php?admin/director_list' , 'refresh');
+			$this->crud_model->update_category($category_id);
+			redirect(base_url().'index.php?admin/category_list' , 'refresh');
 		}
-		$page_data['director_id']		=	$director_id;
-		$page_data['page_name']		=	'director_edit';
-		$page_data['page_title']	=	'Edit director';
+		$page_data['category_id']		=	$category_id;
+		$page_data['page_name']		=	'category_edit';
+		$page_data['page_title']	=	'Edit category';
 		$this->load->view('backend/index', $page_data);
 	}
 
-	// DELETE A DIRECTOR
-	function director_delete($director_id = '')
+	// DELETE A Category
+	function category_delete($category_id = '')
 	{
-		$this->db->delete('director',  array('director_id' => $director_id));
-		redirect(base_url().'index.php?admin/director_list' , 'refresh');
+		$this->db->delete('category',  array('category_id' => $category_id));
+		redirect(base_url().'index.php?admin/category_list' , 'refresh');
 	}
 
 	// WATCH LIST OF PRICING PACKAGES, MANAGE THEM
@@ -873,11 +873,11 @@ class Admin extends CI_Controller {
 		$this->load->view('backend/index', $page_data);
 	}
 
-	function director_wise_movie_and_series($director_id) {
-		$director_details = $this->db->get_where('director', array('director_id' => $director_id))->row_array();
+	function director_wise_movie_and_series($category_id) {
+		$director_details = $this->db->get_where('category', array('category_id' => $category_id))->row_array();
 		$page_data['page_name']				=	'director_wise_movie_and_series';
 		$page_data['page_title']			=	get_phrase('movies_and_TV_series_of').' "'.$director_details['name'].'"';
-		$page_data['director_id']			=	$director_id;
+		$page_data['director_id']			=	$category_id;
 
 		$this->load->view('backend/index', $page_data);
 	}

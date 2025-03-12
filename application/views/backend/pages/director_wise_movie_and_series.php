@@ -34,7 +34,7 @@
                					</thead>
                					<tbody>
                						<?php
-                            $movies = $this->db->get_where('movie', array('director' => $director_id))->result_array();
+                            $movies = $this->db->get_where('movie', array('category' => $category_id))->result_array();
                							$counter = 1;
                							foreach ($movies as $row):
                							  ?>
@@ -74,7 +74,7 @@
                  					</thead>
                  					<tbody>
                  						<?php
-                 							$seriess = $this->db->get_where('series', array('director' => $director_id))->result_array();
+                 							$seriess = $this->db->get_where('series', array('category' => $category_id))->result_array();
                  							$counter = 1;
                  							foreach ($seriess as $row):
                  							  ?>

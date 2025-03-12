@@ -43,18 +43,18 @@
 					</div>
 
 					<div class="form-group mb-3">
-						<label for="director">Director</label>
-						<span class="help">- select single director</span>
+						<label for="category">Category</label>
+						<span class="help">- select single category</span>
 
-						<?php $serise_of_director = $series_detail->director;?>
+						<?php $serise_of_category = $series_detail->category;?>
 						
-						<select class="form-control select2" id="director" name="director" required>
-							<option value="">Select an Director</option>
+						<select class="form-control select2" id="category" name="category" required>
+							<option value="">Select an Category</option>
 							<?php
-								$directors	=	$this->db->get('director')->result_array();
+								$categories	=	$this->db->get('category')->result_array();
 
-								foreach ($directors as $row3):?>
-							<option value="<?php echo $row3['director_id'];?>" <?php if( $serise_of_director == $row3['director_id'])echo 'selected';?>>
+								foreach ($categories as $row3):?>
+							<option value="<?php echo $row3['category_id'];?>" <?php if( $serise_of_category == $row3['category_id'])echo 'selected';?>>
 								<?php echo $row3['name'];?>
 							</option>
 							<?php endforeach;?>

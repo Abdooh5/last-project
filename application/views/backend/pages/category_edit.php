@@ -1,5 +1,5 @@
 <?php
-	$director_detail = $this->db->get_where('director',array('director_id'=>$director_id))->row();
+	$director_detail = $this->db->get_where('category',array('category_id'=>$category_id))->row();
 ?>
 <div class="row">
     <div class="col-md-2"></div>
@@ -7,11 +7,11 @@
         <div class="panel panel-primary">
         	<div class="panel-heading">
 				<div class="panel-title">
-					<?php echo get_phrase('director'); ?>
+					<?php echo get_phrase('category'); ?>
 				</div>
 			</div>
             <div class="panel-body">
-				<form method="post" action="<?php echo base_url();?>index.php?admin/director_edit/<?php echo $director_id;?>" enctype="multipart/form-data">
+				<form method="post" action="<?php echo base_url();?>index.php?admin/category_edit/<?php echo $category_id;?>" enctype="multipart/form-data">
 					<div class="form-group mb-3">
 	                    <label for="name">category Name</label>
 	                    <input type="text" class="form-control" id = "name" name="name" value="<?php echo $director_detail->name;?>">
@@ -20,7 +20,7 @@
 					
 					<div class="form-group">
 						<input type="submit" class="btn btn-success" value="Update">
-						<a href="<?php echo base_url();?>index.php?admin/director_list" class="btn btn-black">Go back</a>
+						<a href="<?php echo base_url();?>index.php?admin/category_list" class="btn btn-black">Go back</a>
 					</div>
 				</form>
             </div>

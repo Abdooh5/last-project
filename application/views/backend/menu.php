@@ -127,10 +127,10 @@
                </a>
            </li>
 
-           <li class="side-nav-item <?php if ($page_name == 'director_list' || $page_name == 'director_edit' || $page_name == 'director_create')echo 'active';?>">
-               <a href="<?php echo base_url();?>index.php?admin/director_list" class="side-nav-link <?php if ($page_name == 'director_list' || $page_name == 'director_edit' || $page_name == 'director_create')echo 'active';?>">
+           <li class="side-nav-item <?php if ($page_name == 'category_list' || $page_name == 'category_edit' || $page_name == 'category_create')echo 'active';?>">
+               <a href="<?php echo base_url();?>index.php?admin/category_list" class="side-nav-link <?php if ($page_name == 'category_list' || $page_name == 'category_edit' || $page_name == 'category_create')echo 'active';?>">
                    <i class="fa fa-long-arrow-right"></i>
-                   <span> <?php echo get_phrase('directors'); ?> </span>
+                   <span> <?php echo get_phrase('categories'); ?> </span>
                </a>
            </li>
 

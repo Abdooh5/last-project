@@ -626,7 +626,7 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 		$data['rating']				=	$this->input->post('rating');
 		$data['country_id']			=	$this->input->post('country_id');
 		$data['genre_id']			=	$this->input->post('genre_id');
-		$data['director']			=	$this->input->post('director');
+		$data['category']			=	$this->input->post('category');
 		$actors						=	$this->input->post('actors');
 		$actor_entries				=	array();
 		$number_of_entries			=	sizeof($actors);
@@ -670,7 +670,7 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 		$data['rating']				=	$this->input->post('rating');
 		$data['country_id']			=	$this->input->post('country_id');
 		$data['genre_id']			=	$this->input->post('genre_id');
-		$data['director']			=	$this->input->post('director');
+		$data['category']			=	$this->input->post('category');
 		$actors						=	$this->input->post('actors');
 		$actor_entries				=	array();
 		$number_of_entries			=	sizeof($actors);
@@ -787,18 +787,18 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/actor/' . $actor_id . '.jpg');
 	}
 
-	function create_director()
+	function create_category()
 	{
 		$data['name']				=	$this->input->post('name');
-		$this->db->insert('director', $data);
-		$director_id = $this->db->insert_id();
-		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/director/' . $director_id . '.jpg');
+		$this->db->insert('category', $data);
+		$category_id = $this->db->insert_id();
+		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/director/' . $category_id . '.jpg');
 	}
 
-	function update_director($director_id = '')
+	function update_category($category_id = '')
 	{
 		$data['name']				=	$this->input->post('name');
-		$this->db->update('director', $data, array('director_id'=>$director_id));
+		$this->db->update('category', $data, array('category_id'=>$category_id));
 		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/director/' . $director_id . '.jpg');
 	}
 

@@ -40,14 +40,14 @@
 					</div>
 
 					<div class="form-group mb-3">
-						<label for="director">Director</label>
-						<span class="help">- select single director</span>
-						<select class="form-control select2" id="director" name="director" required>
-							<option value="">Select an Director</option>
+						<label for="category">Category</label>
+						<span class="help">- select single category</span>
+						<select class="form-control select2" id="category" name="category" required>
+							<option value="">Select an category</option>
 							<?php
-								$directors	=	$this->db->get('director')->result_array();
-								foreach ($directors as $row3):?>
-							<option value="<?php echo $row3['director_id'];?>">
+								$categories	=	$this->db->get('category')->result_array();
+								foreach ($categories as $row3):?>
+							<option value="<?php echo $row3['category_id'];?>">
 								<?php echo $row3['name'];?>
 							</option>
 							<?php endforeach;?>
