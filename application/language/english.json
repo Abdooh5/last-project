@@ -1115,5 +1115,6 @@
     "new_email": "New email",
     "email_changed_successfully.": "Email changed successfully.",
     "email_already_exists_or_password_wrong_given._please_try_again": "Email already exists or password wrong given. please try again",
-    "category_list": "Category list"
+    "category_list": "Category list",
+    "plan": "Plan"
 }

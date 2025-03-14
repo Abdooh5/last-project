@@ -8,7 +8,7 @@ if (!defined('BASEPATH'))
      ini_set('max_execution_time', 0);
      ini_set('memory_limit','2048M');
 
-class Install extends CI_Controller {
+class Install extends CI_Controller {cq2
 
   public function index() {
     if ($this->router->default_controller == 'install') {

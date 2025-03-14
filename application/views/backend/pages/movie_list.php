@@ -68,8 +68,7 @@
                         <a href="<?php echo base_url();?>index.php?browse/playmovie/<?php echo $row['movie_id'];?>"
                             target="_blank" class="btn btn-primary">
                             <i class="fa fa-external-link"></i> visit</a>
-                            <a href="<?php echo base_url();?>index.php?admin/subtitle/<?php echo $row['movie_id'];?>" class="btn btn-success">
-                                subtitle</a>
+                          
                                 <a href="<?php echo base_url();?>index.php?admin/movie_edit/<?php echo $row['movie_id'];?>" class="btn btn-info">
                                     edit</a>
                                     <a href="<?php echo base_url();?>index.php?admin/movie_delete/<?php echo $row['movie_id'];?>" class="btn btn-danger" onclick="return confirm('Want to delete?')">

@@ -140,7 +140,7 @@ class Home extends CI_Controller {
 					$this->session->set_userdata('active_user', 'admin');
 					redirect(base_url().'index.php?admin/dashboard' , 'refresh');
 				}else if ($this->session->userdata('login_type') == 0){
-					redirect(base_url().'index.php?browse/switchprofile' , 'refresh');
+					redirect(base_url().'index.php?browse/youraccount' , 'refresh');
 				}
 			}
 			else if ($signin_result == false){

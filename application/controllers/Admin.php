@@ -143,53 +143,53 @@ class Admin extends CI_Controller {
 
 
 
-	// SUBTITLE
-	function subtitle($param1 = '')
-	{
-		$page_data['movie_id']		= $param1;
-		$page_data['page_name']		=	'subtitle';
-		$page_data['page_title']	=	'Manage subtitle : '.$this->db->get_where('movie', array('movie_id' => $param1))->row('title');
-		$this->load->view('backend/index', $page_data);
-	}
+	// // SUBTITLE
+	// function subtitle($param1 = '')
+	// {
+	// 	$page_data['movie_id']		= $param1;
+	// 	$page_data['page_name']		=	'subtitle';
+	// 	$page_data['page_title']	=	'Manage subtitle : '.$this->db->get_where('movie', array('movie_id' => $param1))->row('title');
+	// 	$this->load->view('backend/index', $page_data);
+	// }
 
-	function add_subtitle($param1 = '')
-	{
-		if (isset($_POST) && !empty($_POST)){
-			$language = $this->input->post('language');
-			$subtitle = $this->db->get_where('subtitle', array('movie_id' => $param1, 'language' => $language))->row_array();
-			if($subtitle['language'] != $language){
-				$this->crud_model->add_subtitle($param1);
-			}
-			redirect(base_url().'index.php?admin/add_subtitle/'.$param1, 'refresh');
-		}
-		$page_data['movie_id']		= $param1;
-		$page_data['page_name']		=	'add_subtitle';
-		$page_data['page_title']	=	'Add subtitle';
-		$this->load->view('backend/index', $page_data);
-	}
+	// function add_subtitle($param1 = '')
+	// {
+	// 	if (isset($_POST) && !empty($_POST)){
+	// 		$language = $this->input->post('language');
+	// 		$subtitle = $this->db->get_where('subtitle', array('movie_id' => $param1, 'language' => $language))->row_array();
+	// 		if($subtitle['language'] != $language){
+	// 			$this->crud_model->add_subtitle($param1);
+	// 		}
+	// 		redirect(base_url().'index.php?admin/add_subtitle/'.$param1, 'refresh');
+	// 	}
+	// 	$page_data['movie_id']		= $param1;
+	// 	$page_data['page_name']		=	'add_subtitle';
+	// 	$page_data['page_title']	=	'Add subtitle';
+	// 	$this->load->view('backend/index', $page_data);
+	// }
 
-	function edit_subtitle($param1 = '', $param2 = '')
-	{
-		if (isset($_POST) && !empty($_POST)){
-			$language = $this->input->post('language');
-			$subtitle = $this->db->get_where('subtitle', array('movie_id' => $param2, 'language' => $language))->row_array();
-			if($subtitle['language'] != $language){
-				$this->crud_model->edit_subtitle($param1, $param2);
-			}
-			redirect(base_url().'index.php?admin/subtitle/'.$param2, 'refresh');
-		}
-		$page_data['subtitle_id']	= $param1;
-		$page_data['movie_id']		= $param2;
-		$page_data['page_name']		=	'edit_subtitle';
-		$page_data['page_title']	=	'Edit subtitle';
-		$this->load->view('backend/index', $page_data);
-	}
+	// function edit_subtitle($param1 = '', $param2 = '')
+	// {
+	// 	if (isset($_POST) && !empty($_POST)){
+	// 		$language = $this->input->post('language');
+	// 		$subtitle = $this->db->get_where('subtitle', array('movie_id' => $param2, 'language' => $language))->row_array();
+	// 		if($subtitle['language'] != $language){
+	// 			$this->crud_model->edit_subtitle($param1, $param2);
+	// 		}
+	// 		redirect(base_url().'index.php?admin/subtitle/'.$param2, 'refresh');
+	// 	}
+	// 	$page_data['subtitle_id']	= $param1;
+	// 	$page_data['movie_id']		= $param2;
+	// 	$page_data['page_name']		=	'edit_subtitle';
+	// 	$page_data['page_title']	=	'Edit subtitle';
+	// 	$this->load->view('backend/index', $page_data);
+	// }
 
-	function delete_subtitle($param1 = '', $param2 = ''){
-		$this->db->where('id', $param1);
-		$this->db->delete('subtitle');
-		redirect(base_url().'index.php?admin/subtitle/'.$param2, 'refresh');
-	}
+	// function delete_subtitle($param1 = '', $param2 = ''){
+	// 	$this->db->where('id', $param1);
+	// 	$this->db->delete('subtitle');
+	// 	redirect(base_url().'index.php?admin/subtitle/'.$param2, 'refresh');
+	// }
 
 
 	// EDIT A MOVIE
@@ -444,30 +444,30 @@ class Admin extends CI_Controller {
 		redirect(base_url().'index.php?admin/category_list' , 'refresh');
 	}
 
-	// WATCH LIST OF PRICING PACKAGES, MANAGE THEM
-	function plan_list()
-	{
-		$page_data['page_name']		=	'plan_list';
-		$page_data['page_title']	=	'Manage plan';
-		$this->load->view('backend/index', $page_data);
-	}
+	// // WATCH LIST OF PRICING PACKAGES, MANAGE THEM
+	// function plan_list()
+	// {
+	// 	$page_data['page_name']		=	'plan_list';
+	// 	$page_data['page_title']	=	'Manage plan';
+	// 	$this->load->view('backend/index', $page_data);
+	// }
 
 	// EDIT A ACTOR
-	function plan_edit($plan_id = '')
-	{
-		if (isset($_POST) && !empty($_POST))
-		{
-			$data['name']			=	$this->input->post('name');
-			$data['price']			=	$this->input->post('price');
-			$data['status']			=	$this->input->post('status');
-			$this->db->update('plan', $data,  array('plan_id' => $plan_id));
-			redirect(base_url().'index.php?admin/plan_list' , 'refresh');
-		}
-		$page_data['plan_id']		=	$plan_id;
-		$page_data['page_name']		=	'plan_edit';
-		$page_data['page_title']	=	'Edit plan';
-		$this->load->view('backend/index', $page_data);
-	}
+	// function plan_edit($plan_id = '')
+	// {
+	// 	if (isset($_POST) && !empty($_POST))
+	// 	{
+	// 		$data['name']			=	$this->input->post('name');
+	// 		$data['price']			=	$this->input->post('price');
+	// 		$data['status']			=	$this->input->post('status');
+	// 		$this->db->update('plan', $data,  array('plan_id' => $plan_id));
+	// 		redirect(base_url().'index.php?admin/plan_list' , 'refresh');
+	// 	}
+	// 	$page_data['plan_id']		=	$plan_id;
+	// 	$page_data['page_name']		=	'plan_edit';
+	// 	$page_data['page_title']	=	'Edit plan';
+	// 	$this->load->view('backend/index', $page_data);
+	// }
 
 	// WATCH LIST OF USERS, MANAGE THEM
 	function user_list()
@@ -512,19 +512,19 @@ class Admin extends CI_Controller {
 	}
 
 	// WATCH SUBSCRIPTION, PAYMENT REPORT
-	function report($month = '', $year = '')
-	{
-		if ($month == '')
-			$month	=	date("F");
-		if ($year == '')
-			$year = date("Y");
+	// function report($month = '', $year = '')
+	// {
+	// 	if ($month == '')
+	// 		$month	=	date("F");
+	// 	if ($year == '')
+	// 		$year = date("Y");
 
-		$page_data['month']			=	$month;
-		$page_data['year']			=	$year;
-		$page_data['page_name']		=	'report';
-		$page_data['page_title']	=	'Customer subscription & payment report';
-		$this->load->view('backend/index', $page_data);
-	}
+	// 	$page_data['month']			=	$month;
+	// 	$page_data['year']			=	$year;
+	// 	$page_data['page_name']		=	'report';
+	// 	$page_data['page_title']	=	'Customer subscription & payment report';
+	// 	$this->load->view('backend/index', $page_data);
+	// }
 
 	// WATCH LIST OF FAQS, MANAGE THEM
 	function faq_list()
@@ -678,28 +678,28 @@ class Admin extends CI_Controller {
 		$this->load->view('backend/index', $page_data);
 	}
 
-	function payment_settings($param1 = "", $param2 = "") {
+	// function payment_settings($param1 = "", $param2 = "") {
 
-		if ($param1 == 'system_currency') {
-            $this->crud_model->system_currency();
-            redirect(base_url('index.php?admin/payment_settings'), 'refresh');
-        }
+	// 	if ($param1 == 'system_currency') {
+    //         $this->crud_model->system_currency();
+    //         redirect(base_url('index.php?admin/payment_settings'), 'refresh');
+    //     }
 
-        if ($param1 == 'paypal') {
-            $this->crud_model->update_paypal_keys();
-            redirect(base_url('index.php?admin/payment_settings'), 'refresh');
-        }
+    //     if ($param1 == 'paypal') {
+    //         $this->crud_model->update_paypal_keys();
+    //         redirect(base_url('index.php?admin/payment_settings'), 'refresh');
+    //     }
 
-        if ($param1 == 'stripe') {
-            $this->crud_model->update_stripe_keys();
-            redirect(base_url('index.php?admin/payment_settings'), 'refresh');
-        }
+    //     if ($param1 == 'stripe') {
+    //         $this->crud_model->update_stripe_keys();
+    //         redirect(base_url('index.php?admin/payment_settings'), 'refresh');
+    //     }
 
-        $this->session->set_userdata('last_page', 'payment_settings');
-        $page_data['page_name'] = 'payment_settings';
-        $page_data['page_title'] = get_phrase('payment_settings');
-        $this->load->view('backend/index', $page_data);
-    }
+    //     $this->session->set_userdata('last_page', 'payment_settings');
+    //     $page_data['page_name'] = 'payment_settings';
+    //     $page_data['page_title'] = get_phrase('payment_settings');
+    //     $this->load->view('backend/index', $page_data);
+    // }
 
     public function smtp_settings($param1 = "") {
         if ($param1 == 'update') {
@@ -713,12 +713,12 @@ class Admin extends CI_Controller {
         $this->load->view('backend/index', $page_data);
     }
 
-	function report_invoice($param1 = '', $param2 = ''){
-		$page_data['subscription_id'] = $param1;
-		$page_data['user_id'] = $param2;
-		$page_data['page_title']			=	'Customer subscription & payment invoice';
-		$this->load->view('backend/pages/report_invoice', $page_data);
-	}
+	// function report_invoice($param1 = '', $param2 = ''){
+	// 	$page_data['subscription_id'] = $param1;
+	// 	$page_data['user_id'] = $param2;
+	// 	$page_data['page_title']			=	'Customer subscription & payment invoice';
+	// 	$this->load->view('backend/pages/report_invoice', $page_data);
+	// }
 
 	function get_list_of_directories_and_files($dir = APPPATH, &$results = array()) {
 		$files = scandir($dir);

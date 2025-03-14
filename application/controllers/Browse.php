@@ -561,57 +561,6 @@ class Browse extends CI_Controller {
 
 	}
 
-	// function cancelplan()
-	// {
-	// 	if (isset($_POST) && !empty($_POST))
-	// 	{
-	// 		$subscription_id	=	$this->crud_model->validate_subscription();
-	// 		$this->db->update('subscription', array('status' => 0), array('subscription_id' => $subscription_id));
-	// 		$this->session->set_flashdata('status', 'subscription_cancelled');
-	// 		redirect(base_url().'index.php?browse/youraccount' , 'refresh');
-	// 	}
-	// 	$page_data['page_name']			=	'cancelplan';
-	// 	$page_data['page_title']		=	'Cancel Plan';
-	// 	$this->load->view('frontend/index', $page_data);
-
-	// }
-
-	// function purchaseplan()
-	// {
-	// 	if (isset($_POST) && !empty($_POST))
-	// 	{
-
-	// 		redirect(base_url().'index.php?browse/youraccount' , 'refresh');
-	// 	}
-	// 	$page_data['page_name']			=	'purchaseplan';
-	// 	$page_data['page_title']		=	'Purchase Package';
-	// 	$this->load->view('frontend/index', $page_data);
-
-	// }
-
-	// function purchasestripe()
-	// {
-	// 	$active_theme					=	$this->crud_model->get_active_theme();
-	// 	$page_data['plan_id']			=	$this->input->post('plan_id');
-	// 	$page_data['page_title']		=	'Purchase Package';
-	// 	$this->load->view('frontend/'.$active_theme.'/purchasestripe', $page_data);
-	// }
-
-
-	// function billinghistory()
-	// {
-	// 	$page_data['page_name']		=	'billinghistory';
-	// 	$page_data['page_title']	=	'Billing History';
-	// 	$this->load->view('frontend/index', $page_data);
-	// }
-
-	function report_invoice($param1 = '', $param2 = ''){
-		$page_data['subscription_id'] = $param1;
-		$page_data['user_id']	  = $param2;
-		$page_data['page_title']			=	'Subscription & payment invoice';
-		$this->load->view('frontend/flixer/report_invoice', $page_data);
-	}
-
 	// CHECK IF LOGGED IN USER ACCOUNT HAS SELECTED ANY OF HIS PROFILE(S), MUST BE CHECKED AFTER SUBSCRIPTION CHECK
 	function active_user_check()
 	{
@@ -659,22 +608,5 @@ class Browse extends CI_Controller {
 			redirect(base_url().'index.php?browse/switchprofile' , 'refresh');
 	}
 
-	// public function checkout($planId = "") {
-	// 	if (empty($planId)) {
-	// 		redirect(base_url().'index.php?browse/purchaseplan' , 'refresh');
-	// 	}
-
-	// 	$checker = array('status' => 1, 'plan_id' => $planId);
-	// 	$this->db->where($checker);
-	// 	$query   = $this->db->get('plan');
-
-	// 	if ($query->row_array() == 0) {
-	// 		redirect(base_url().'index.php?browse/purchaseplan' , 'refresh');
-	// 	}
-	// 	$plan_details = $query->row_array();
-	// 	$page_data['plan_details'] = $plan_details;
-	// 	$page_data['total_price_of_checking_out'] = $plan_details['price'];
-    //     $page_data['page_title'] = get_phrase("payment_gateway");
-    //     $this->load->view('payment/index', $page_data);
-	// }
+	
 }

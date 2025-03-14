@@ -30,6 +30,8 @@
     <script>const player = new Plyr('#player');</script>
 
 <?php endif; ?>
+
+
 <!-- Video player generator ends -->
 
 </div>

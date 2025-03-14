@@ -148,19 +148,7 @@
                </a>
            </li>
 
-           <li class="side-nav-item <?php if ($page_name == 'plan_list' || $page_name == 'plan_edit')echo 'active';?>">
-               <a href="<?php echo base_url();?>index.php?admin/plan_list" class="side-nav-link <?php if ($page_name == 'plan_list' || $page_name == 'plan_edit')echo 'active';?>">
-                   <i class="fa fa-shopping-cart"></i>
-                   <span> <?php echo get_phrase('membership_package'); ?> </span>
-               </a>
-           </li>
 
-           <li class="side-nav-item <?php if ($page_name == 'report')echo 'active';?>">
-               <a href="<?php echo base_url();?>index.php?admin/report" class="side-nav-link <?php if ($page_name == 'report')echo 'active';?>">
-                   <i class="fa fa-flag-checkered"></i>
-                   <span> <?php echo get_phrase('report'); ?> </span>
-               </a>
-           </li>
 
             <li
             <?php
@@ -201,9 +189,7 @@
                        <a href="<?php echo base_url();?>index.php?admin/settings" class = ""><?php echo get_phrase('website_settings'); ?></a>
                    </li>
 
-                   <li class = "<?php if($page_name == 'payment_settings') echo 'active'; ?>">
-                       <a href="<?php echo base_url();?>index.php?admin/payment_settings" class = ""><?php echo get_phrase('payment_settings'); ?></a>
-                   </li>
+              
 
                    <li class = "<?php if($page_name == 'manage_language') echo 'active'; ?>">
                        <a href="<?php echo base_url();?>index.php?admin/manage_language" class = ""><?php echo get_phrase('language_settings'); ?></a>
