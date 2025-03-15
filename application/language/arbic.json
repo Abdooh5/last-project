@@ -1113,5 +1113,6 @@
     "current_email": "Current email",
     "new_email": "New email",
     "email_already_exists_or_password_wrong_given._please_try_again": "Email already exists or password wrong given. please try again",
-    "email_changed_successfully.": "Email changed successfully."
+    "email_changed_successfully.": "Email changed successfully.",
+    "password_sent_to_your_email": "Password sent to your email"
 }

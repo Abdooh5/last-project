@@ -83,6 +83,7 @@ class Home extends CI_Controller {
 	public function resend_verification_code(){
         $email = $this->input->post('email');
         $verification_code = $this->db->get_where('user', array('email' => $email))->row('verification_code');
+
         $this->email_model->send_email_verification_mail($email, $verification_code);
         
         return true;
@@ -182,6 +183,8 @@ class Home extends CI_Controller {
 		$page_data['page_title']	=	'Forget Password';
 		$this->load->view('frontend/index', $page_data);
 	}
+
+	
 
 	function signout()
 	{
