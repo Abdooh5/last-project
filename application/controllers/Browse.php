@@ -425,7 +425,7 @@ class Browse extends CI_Controller {
 		$this->subscription_check();
 		$page_data['page_name']			=	'switchprofile';
 		$page_data['page_title']		=	'Switch Profile';
-		$page_data['current_plan_id']	=	$this->crud_model->get_current_plan_id();
+		//$page_data['current_plan_id']	=	$this->crud_model->get_current_plan_id();
 		$this->load->view('frontend/index', $page_data);
 
 	}
@@ -449,7 +449,7 @@ class Browse extends CI_Controller {
 		$this->subscription_check();
 		$page_data['page_name']			=	'manageprofile';
 		$page_data['page_title']		=	'Manage Profile';
-		$page_data['current_plan_id']	=	$this->crud_model->get_current_plan_id();
+		//$page_data['current_plan_id']	=	$this->crud_model->get_current_plan_id();
 		$this->load->view('frontend/index', $page_data);
 
 	}

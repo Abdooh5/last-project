@@ -20,12 +20,12 @@ class Crud_model extends CI_Model {
 	* PLANS QUERIES
 	*/
 
-	function get_active_plans()
-	{
-		$this->db->where('status', 1);
-		$query 		=	 $this->db->get('plan');
-        return $query->result_array();
-	}
+	// function get_active_plans()
+	// {
+	// 	$this->db->where('status', 1);
+	// 	$query 		=	 $this->db->get('plan');
+    //     return $query->result_array();
+	// }
 
 	function get_active_theme()
 	{
@@ -80,10 +80,10 @@ class Crud_model extends CI_Model {
 		$user_id = $this->db->insert_id();
 	
 		// إنشاء اشتراك تجريبي إذا تم تمكينه
-		$trial_period = $this->crud_model->get_settings('trial_period');
-		if ($trial_period == 'on') {
-			$this->create_free_subscription($user_id); // إنشاء الاشتراك المجاني
-		}
+		// $trial_period = $this->crud_model->get_settings('trial_period');
+		// if ($trial_period == 'on') {
+		// 	$this->create_free_subscription($user_id); // إنشاء الاشتراك المجاني
+		// }
 	
 		// إرجاع بيانات المستخدم بعد التسجيل
 		return array(
@@ -97,40 +97,22 @@ class Crud_model extends CI_Model {
 
 
 	// create a free subscription for premium package for 30 days
-	function create_free_subscription($user_id = '')
-	{
-		$trial_period_days			=	$this->get_settings('trial_period_days');
-		$increment_string			=	'+' . $trial_period_days . ' days';
+	// function create_free_subscription($user_id = '')
+	// {
+	// 	$trial_period_days			=	$this->get_settings('trial_period_days');
+	// 	$increment_string			=	'+' . $trial_period_days . ' days';
 
-		$data['plan_id']			=	3;
-		$data['user_id']			=	$user_id;
-		$data['paid_amount']		=	0;
-		$data['payment_timestamp']	=	strtotime(date("Y-m-d H:i:s"));
-		$data['timestamp_from']		=	strtotime(date("Y-m-d H:i:s"));
-		$data['timestamp_to']		=	strtotime($increment_string, $data['timestamp_from']);
-		$data['payment_method']		=	'FREE';
-		$data['payment_details']	=	'';
-		$data['status']				=	1;
-		$this->db->insert('subscription' , $data);
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	// 	$data['plan_id']			=	3;
+	// 	$data['user_id']			=	$user_id;
+	// 	$data['paid_amount']		=	0;
+	// 	$data['payment_timestamp']	=	strtotime(date("Y-m-d H:i:s"));
+	// 	$data['timestamp_from']		=	strtotime(date("Y-m-d H:i:s"));
+	// 	$data['timestamp_to']		=	strtotime($increment_string, $data['timestamp_from']);
+	// 	$data['payment_method']		=	'FREE';
+	// 	$data['payment_details']	=	'';
+	// 	$data['status']				=	1;
+	// 	$this->db->insert('subscription' , $data);
+	// }
 
 
 
@@ -291,80 +273,65 @@ class Crud_model extends CI_Model {
 	// returns currently active subscription_id, or false if no active found
 	function validate_subscription()
 	{
-		// $user_id			=	$this->session->userdata('user_id');
-		// $timestamp_current	=	strtotime(date("Y-m-d H:i:s"));
-		// $this->db->where('user_id', $user_id);
-		// $this->db->where('timestamp_to >' ,  $timestamp_current);
-		// $this->db->where('timestamp_from <' ,  $timestamp_current);
-		// $this->db->where('status' ,  1);
-		// $query				=	$this->db->get('subscription');
-		// if ($query->num_rows() > 0) {
-        //     $row = $query->row();
-		// 	$subscription_id	=	$row->subscription_id;
-		// 	return $subscription_id;
-		// }
-        // else if ($query->num_rows() == 0) {
-		// 	return false;
-		// }
 		return true;
 	}
 
 	function get_subscription_detail($subscription_id)
 	{
-		$this->db->where('subscription_id', $subscription_id);
-		$query 		=	 $this->db->get('subscription');
-        return $query->result_array();
+		// $this->db->where('subscription_id', $subscription_id);
+		// $query 		=	 $this->db->get('subscription');
+        // return $query->result_array();
 	}
 
 	function get_current_plan_id()
 	{
-		// CURRENT SUBSCRIPTION ID
-		$subscription_id			=	$this->crud_model->validate_subscription();
-		// CURRENT SUBSCCRIPTION DETAIL
-		$subscription_detail		=	$this->crud_model->get_subscription_detail($subscription_id);
-		foreach ($subscription_detail as $row)
-			$current_plan_id		=	$row['plan_id'];
-		return $current_plan_id;
+		// // CURRENT SUBSCRIPTION ID
+		// $subscription_id			=	true;
+		// // CURRENT SUBSCCRIPTION DETAIL
+		// $subscription_detail		=	$this->crud_model->get_subscription_detail($subscription_id);
+		// foreach ($subscription_detail as $row)
+		// 	$current_plan_id		=	$row['plan_id'];
+		// return $current_plan_id;
 	}
 
-	function get_subscription_of_user($user_id = '')
-	{
-		$this->db->where('user_id', $user_id);
-        $query = $this->db->get('subscription');
-        return $query->result_array();
-	}
+	// function get_subscription_of_user($user_id = '')
+	// {
+	// 	$this->db->where('user_id', $user_id);
+    //     $query = $this->db->get('subscription');
+    //     return $query->result_array();
+	// }
 
-	function get_active_plan_of_user($user_id = '')
-	{
-		$timestamp_current	=	strtotime(date("Y-m-d H:i:s"));
-		$this->db->where('user_id', $user_id);
-		$this->db->where('timestamp_to >' ,  $timestamp_current);
-		$this->db->where('timestamp_from <' ,  $timestamp_current);
-		$this->db->where('status' ,  1);
-		$query				=	$this->db->get('subscription');
-		if ($query->num_rows() > 0) {
-            $row = $query->row();
-			$subscription_id	=	$row->subscription_id;
-			return $subscription_id;
-		}
-        else if ($query->num_rows() == 0) {
-			return false;
-		}
-	}
+	// function get_active_plan_of_user($user_id = '')
+	// {
+	// 	$timestamp_current	=	strtotime(date("Y-m-d H:i:s"));
+	// 	$this->db->where('user_id', $user_id);
+	// 	$this->db->where('timestamp_to >' ,  $timestamp_current);
+	// 	$this->db->where('timestamp_from <' ,  $timestamp_current);
+	// 	$this->db->where('status' ,  1);
+	// 	$query				=	$this->db->get('subscription');
+	// 	if ($query->num_rows() > 0) {
+    //         $row = $query->row();
+	// 		$subscription_id	=	$row->subscription_id;
+	// 		return $subscription_id;
+	// 	}
+    //     else if ($query->num_rows() == 0) {
+	// 		return false;
+	// 	}
+	// }
 
-	function get_subscription_report($month, $year)
-	{
-		$first_day_this_month 			= 	date('01-m-Y' , strtotime($month." ".$year));
-		$last_day_this_month  			= 	date('t-m-Y' , strtotime($month." ".$year));
-		$timestamp_first_day_this_month	=	strtotime($first_day_this_month);
-		$timestamp_last_day_this_month	=	strtotime($last_day_this_month);
+	// function get_subscription_report($month, $year)
+	// {
+	// 	$first_day_this_month 			= 	date('01-m-Y' , strtotime($month." ".$year));
+	// 	$last_day_this_month  			= 	date('t-m-Y' , strtotime($month." ".$year));
+	// 	$timestamp_first_day_this_month	=	strtotime($first_day_this_month);
+	// 	$timestamp_last_day_this_month	=	strtotime($last_day_this_month);
 
-		$this->db->where('payment_timestamp >' , $timestamp_first_day_this_month);
-		$this->db->where('payment_timestamp <' , $timestamp_last_day_this_month);
-		$subscriptions = $this->db->get('subscription')->result_array();
+	// 	$this->db->where('payment_timestamp >' , $timestamp_first_day_this_month);
+	// 	$this->db->where('payment_timestamp <' , $timestamp_last_day_this_month);
+	// 	$subscriptions = $this->db->get('subscription')->result_array();
 
-		return $subscriptions;
-	}
+	// 	return $subscriptions;
+	// }
 
 	function get_current_user_detail()
 	{
@@ -617,21 +584,21 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 		}
 		
 	
-	function add_subtitle($param1 = ""){
-		$data['movie_id'] = $param1;
-		$data['language'] = $this->input->post('language');
-		$data['file']	  = $this->input->post('language').'-'.$param1.'.vtt';
-		$this->db->insert('subtitle', $data);
-		move_uploaded_file($_FILES['file']['tmp_name'], 'assets/global/movie_caption/'.$this->input->post('language').'-'.$param1 . '.vtt');
-	}
+	// function add_subtitle($param1 = ""){
+	// 	$data['movie_id'] = $param1;
+	// 	$data['language'] = $this->input->post('language');
+	// 	$data['file']	  = $this->input->post('language').'-'.$param1.'.vtt';
+	// 	$this->db->insert('subtitle', $data);
+	// 	move_uploaded_file($_FILES['file']['tmp_name'], 'assets/global/movie_caption/'.$this->input->post('language').'-'.$param1 . '.vtt');
+	// }
 
-	function edit_subtitle($param1 = "", $param2 = ""){
-		$data['language'] = $this->input->post('language');
-		$data['file']	  = $this->input->post('language').'-'.$param2.'.vtt';
-		$this->db->where('id', $param1);
-		$this->db->update('subtitle', $data);
-		move_uploaded_file($_FILES['file']['tmp_name'], 'assets/global/movie_caption/'.$this->input->post('language').'-'.$param2 . '.vtt');
-	}
+	// function edit_subtitle($param1 = "", $param2 = ""){
+	// 	$data['language'] = $this->input->post('language');
+	// 	$data['file']	  = $this->input->post('language').'-'.$param2.'.vtt';
+	// 	$this->db->where('id', $param1);
+	// 	$this->db->update('subtitle', $data);
+	// 	move_uploaded_file($_FILES['file']['tmp_name'], 'assets/global/movie_caption/'.$this->input->post('language').'-'.$param2 . '.vtt');
+	// }
 
 	function create_series()
 	{

@@ -51,10 +51,12 @@ class Home extends CI_Controller {
             $this->session->set_userdata('is_logged_in', true);
 
             // يتم تفعيل الاشتراك مباشرة
-            $this->crud_model->validate_subscription(); // تتأكد أنه دائمًا مفعل
+			$this->crud_model->validate_subscription();
+
+			// تتأكد أنه دائمًا مفعل
 
             // إعادة التوجيه إلى صفحة الحساب مباشرة
-            redirect(base_url().'index.php?browse/youraccount', 'refresh');
+            redirect(base_url().'index.php?browse/manageprofile', 'refresh');
         } else {
             // في حال فشل التسجيل
             $this->session->set_flashdata('signup_result', 'failed');
@@ -141,7 +143,7 @@ class Home extends CI_Controller {
 					$this->session->set_userdata('active_user', 'admin');
 					redirect(base_url().'index.php?admin/dashboard' , 'refresh');
 				}else if ($this->session->userdata('login_type') == 0){
-					redirect(base_url().'index.php?browse/youraccount' , 'refresh');
+					redirect(base_url().'index.php?browse/manageprofile' , 'refresh');
 				}
 			}
 			else if ($signin_result == false){
