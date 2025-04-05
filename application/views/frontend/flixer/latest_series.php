@@ -33,15 +33,7 @@
 }
 </style>
 
-<?php 
-// جلب آخر 20 مسلسل باستخدام id بترتيب تنازلي
-//$series = $this->db->order_by('movie_id', 'DESC')->limit(3)->get('series')->result_array(); 
 
-// جلب آخر 20 فيلم باستخدام id بترتيب تنازلي
-//$movies = $this->db->order_by('series_id', 'DESC')->limit(20)->get('movie')->result_array(); 
-?>
-
-<?php  $series = $this->db->order_by('series_id', 'DESC')->limit(6)->get('series')->result_array();  ?>
 <!-- عرض أحدث المسلسلات مع سلايدر متحرك -->
 <div class="row" style="margin:20px 60px;">
     <h4 style="text-transform: capitalize; color: #e50914; font-weight: bold;">

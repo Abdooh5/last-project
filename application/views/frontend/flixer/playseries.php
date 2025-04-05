@@ -322,6 +322,7 @@
 					<div class="tab-pane" id="about">
 						<p>
 							<?php echo $row['description_long'];?>
+							<?php echo $row['description_short'];?>
 						</p>
 					</div>
 					<!-- TAB FOR EPISODES -->
@@ -403,7 +404,7 @@
         <div class="content">
             <div class="grid">
                 <?php
-                $series = $this->crud_model->get_series($row['genre_id'], 10, 0);
+                $series = $this->crud_model->get_seriess($row['genre_id'], 10, 0);
                 foreach ($series as $row):
                     $title = $row['title'];
                     $link = base_url().'index.php?browse/playseries/'.$row['series_id'];

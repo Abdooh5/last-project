@@ -683,7 +683,17 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 		}
 
 	}
-
+	function get_seriess($genre_id, $limit = NULL, $offset = 0)
+	{
+		$this->db->order_by('series_id', 'desc');
+	
+		// تطبيق شرط النوع إذا كانت القيمة موجودة وليست "all"
+		if (!empty($genre_id) && $genre_id !== 'all') {
+			$this->db->where('genre_id', $genre_id);
+		}
+		$query = $this->db->get('series', $limit, $offset);
+	    return $query->result_array();
+	}	
 	function get_series($genre_id, $category_id, $limit = NULL, $offset = 0)
 {
     $this->db->order_by('series_id', 'desc');
@@ -919,15 +929,15 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
         return $image_url;
     }
 
-    // function get_director_image_url($id = '')
-	// {
-    //     if (file_exists('assets/global/director/' . $id . '.jpg'))
-    //         $image_url = base_url() . 'assets/global/director/' . $id . '.jpg';
-    //     else
-    //         $image_url = base_url() . 'assets/global/placeholder.jpg';
+    function get_director_image_url($id = '')
+	{
+        if (file_exists('assets/global/director/' . $id . '.jpg'))
+            $image_url = base_url() . 'assets/global/director/' . $id . '.jpg';
+        else
+            $image_url = base_url() . 'assets/global/placeholder.jpg';
 
-    //     return $image_url;
-    // }
+        return $image_url;
+    }
 
 
     // Curl call for purchase code checking

@@ -10,14 +10,14 @@
             <div class="panel-body">
 				<form method="post" action="<?php echo base_url();?>index.php?admin/category_create" enctype="multipart/form-data">
 					<div class="form-group mb-3">
-	                    <label for="name">Actor Name</label>
-						<span class="help">e.g. "Leonardo di Caprio"</span>
+	                    <label for="name">Category Name</label>
+						<span class="help">e.g. "Anmy, series"</span>
 	                    <input type="text" class="form-control" id = "name" name="name">
 	                </div>
-					<div class="form-group mb-3">
+					<!-- <div class="form-group mb-3">
 	                    <label for="name">Image</label>
 	                    <input type="file" class="form-control" name="thumb">
-	                </div>
+	                </div> -->
 					<div class="form-group">
 						<input type="submit" class="btn btn-success" value="Create">
 						<a href="<?php echo base_url();?>index.php?admin/director_list" class="btn btn-black">Go back</a>

@@ -32,9 +32,9 @@
 					foreach ($categories as $row):
 					  ?>
 				<tr>
-					<td style="vertical-align: middle;"><?php echo $counter++;?></td>
-					<td><a href="<?php echo base_url().'index.php?admin/director_wise_movie_and_series/'.$row['director_id']; ?>"><img src="<?php echo $this->crud_model->get_director_image_url($row['category_id']);?>" style="height: 60px;" /></a></td>
-					<td style="vertical-align: middle;"><a href="<?php echo base_url().'index.php?admin/director_wise_movie_and_series/'.$row['director_id']; ?>" style="color: #6c757d;"><?php echo $row['name'];?></a></td>
+				<td style="vertical-align: middle;"><?php echo $counter++;?></td>
+				<td><a href="<?php echo base_url().'index.php?admin/director_wise_movie_and_series/'.$row['category_id']; ?>"><img src="<?php echo $this->crud_model->get_director_image_url($row['category_id']);?>" style="height: 60px;" /></a></td>
+					<td style="vertical-align: middle;"><a href="<?php echo base_url().'index.php?admin/director_wise_movie_and_series/'.$row['category_id']; ?>" style="color: #6c757d;"><?php echo $row['name'];?></a></td>
 					<td style="vertical-align: middle;">
 						<a href="<?php echo base_url();?>index.php?admin/category_edit/<?php echo $row['category_id'];?>" class="btn btn-info">
 						edit</a>

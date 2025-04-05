@@ -257,7 +257,7 @@ class Browse extends CI_Controller {
 	public function latest_series()
 	{
 		$this->db->order_by('series_id', 'DESC'); // ترتيب تنازلي لجلب الأحدث
-		$this->db->limit(20); // عدد النتائج الظاهرة (يمكنك تغييره)
+		$this->db->limit(50); // عدد النتائج الظاهرة (يمكنك تغييره)
 		$page_data['series'] = $this->db->get('series')->result_array();
 		
 		$page_data['page_name']  = 'latest_series';

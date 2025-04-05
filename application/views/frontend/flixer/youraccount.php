@@ -58,7 +58,7 @@
 							<?php
 							if (isset($active_user)) :
 							?>
-								<img src="<?php echo base_url();?>assets/global/<?php echo $bar_thumb;?>" style="margin:10px 10px 10px 0px; height: 30px;" />
+								<img src="<?php echo $bar_thumb;?>" style="margin:10px 10px 10px 0px; height: 30px;" />
 								<?php echo $bar_text;?>
 								<br>
 							<?php endif;?>

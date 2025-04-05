@@ -13,7 +13,7 @@
             <div class="panel-body">
 				<form method="post" action="<?php echo base_url();?>index.php?admin/category_edit/<?php echo $category_id;?>" enctype="multipart/form-data">
 					<div class="form-group mb-3">
-	                    <label for="name">category Name</label>
+					<label for="name">Category Name</label>
 	                    <input type="text" class="form-control" id = "name" name="name" value="<?php echo $director_detail->name;?>">
 	                </div>
 		

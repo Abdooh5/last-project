@@ -1114,5 +1114,7 @@
     "new_email": "New email",
     "email_already_exists_or_password_wrong_given._please_try_again": null,
     "email_changed_successfully.": "Email changed successfully.",
-    "password_sent_to_your_email": "Password sent to your email"
+    "password_sent_to_your_email": "Password sent to your email",
+    "_نتائج_البحث_عن": " نتائج البحث عن",
+    "category_list": "Category list"
 }

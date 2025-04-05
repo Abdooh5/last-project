@@ -175,9 +175,9 @@ foreach ($movie_details as $row):
                     <li style="width:25%;">
                         <a href="#cast" data-toggle="tab"><?php echo get_phrase('Cast'); ?></a>
                     </li>
-                    <li style="width:25%;">
+                    <!-- <li style="width:25%;">
                         <a href="#category" data-toggle="tab"><?php echo get_phrase('Category'); ?></a>
-                    </li>
+                    </li> -->
                     <li style="width:25%;">
                         <a href="#more" data-toggle="tab"><?php echo get_phrase('More'); ?></a>
                     </li>

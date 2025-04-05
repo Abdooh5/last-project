@@ -877,7 +877,7 @@ class Admin extends CI_Controller {
 		$director_details = $this->db->get_where('category', array('category_id' => $category_id))->row_array();
 		$page_data['page_name']				=	'director_wise_movie_and_series';
 		$page_data['page_title']			=	get_phrase('movies_and_TV_series_of').' "'.$director_details['name'].'"';
-		$page_data['director_id']			=	$category_id;
+		$page_data['category_id']			=	$category_id;
 
 		$this->load->view('backend/index', $page_data);
 	}
