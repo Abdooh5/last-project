@@ -1,12 +1,6 @@
 <div class="row" style="margin-left:0px; margin-right:0px; margin-top: 20px;">
     <div class="col-md-12 col-sm-12 clearfix " style="background-color:#ffffff; box-shadow: 0px 10px 30px 0px rgba(82,63,105,0.08); border-radius: 5px;">
-        <!-- <ul class="list-inline links-list pull-left" style="margin-top:9px;">
-            <li>
-                <a href="#" target="_blank">
-                    <i class="entypo-paper-plane"></i> Website
-                </a>
-            </li>
-        </ul> -->
+      
         <!-- Profile Info -->
         <ul class="list-inline links-list pull-left" style="margin-top:9px;">
             <li>

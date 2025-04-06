@@ -21,7 +21,7 @@
 						#
 					</th>
 					<th>User Email</th>
-					<th>Subscribed Package</th>
+					
 					<th>Manage</th>
 				</tr>
 			</thead>
@@ -34,16 +34,7 @@
 				<tr>
 					<td><?php echo $counter++;?></td>
 					<td style="text-transform: uppercase;"><?php echo $row['email'];?></td>
-					<td>
-						<?php
-							$plan_id	=	$this->crud_model->get_active_plan_of_user($row['user_id']);
-							if ($plan_id != false)
-							{
-								$plan_name	=	$this->db->get_where('plan', array('plan_id' => $plan_id))->row()->name;
-								echo $plan_name;
-							}
-							?>
-					</td>
+					
 					<td>
 						<a href="<?php echo base_url();?>index.php?admin/user_edit/<?php echo $row['user_id'];?>" class="btn btn-info">
 						edit</a>

@@ -176,7 +176,7 @@
         		$page_name == 'faq_edit' 		||
         		$page_name == 'faq_create' 		||
         		$page_name == 'manage_language' ||
-            $page_name == 'payment_settings' ||
+           
         		$page_name == 'settings'  ||
             $page_name == 'smtp_settings' ) $is_active = 'opened'; ?>
             class="side-nav-item <?php echo $is_active; ?>">
@@ -211,12 +211,12 @@
                    <span> <?php echo get_phrase('account'); ?> </span>
                </a>
            </li>
-           <li class="side-nav-item <?php if($page_name == 'about')echo 'active';?>">
+           <!-- <li class="side-nav-item <?php if($page_name == 'about')echo 'active';?>">
                <a href="<?php echo base_url();?>index.php?admin/about" class="side-nav-link <?php if($page_name == 'about')echo 'active';?>">
                    <i class="fa fa-info"></i>
                    <span> <?php echo get_phrase('about'); ?> </span>
                </a>
-           </li>
+           </li> -->
        </ul>
        <div class="clearfix"></div>
    </div>

@@ -4,12 +4,12 @@
             <div class="card-body">
                 <!-- <h4 class="header-title">Actor List</h4> -->
                 <ul class="nav nav-pills bg-light nav-justified mb-3">
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a href="#movie" data-toggle="tab" aria-expanded="false" class="nav-link rounded-0 active">
                             <i class="mdi mdi-home-variant d-lg-none d-block mr-1"></i>
                             <span class="d-none d-lg-block">Movies</span>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         <a href="#series" data-toggle="tab" aria-expanded="true" class="nav-link rounded-0">
                             <i class="mdi mdi-account-circle d-lg-none d-block mr-1"></i>
@@ -18,7 +18,7 @@
                     </li>
                 </ul>
 
-                <div class="tab-content">
+                <!-- <div class="tab-content">
                     <div class="tab-pane active" id="movie">
                        <table id="" class="table dt-responsive nowrap" width="100%">
                					<thead>
@@ -58,7 +58,7 @@
                						<?php endforeach;?>
                					</tbody>
                				</table>
-                    </div>
+                    </div> -->
                     <div class="tab-pane show" id="series">
                        <table id="" class="table dt-responsive nowrap" width="100%">
                  					<thead>

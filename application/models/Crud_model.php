@@ -1065,7 +1065,7 @@ if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
     }
 	
     
-    function get_application_details() {
+function get_application_details() {
   $purchase_code = get_settings('purchase_code');
   $returnable_array = array(
     'purchase_code_status' => get_phrase('not_found'),

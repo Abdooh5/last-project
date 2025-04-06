@@ -96,7 +96,7 @@
                         <label for="example-select5"><?php echo get_phrase('recaptcha'); ?> (v2)</label>
                         <select class="form-control" id="example-select5" name="recaptcha">
 							<option value="0" <?php if (get_settings('recaptcha') == 0)echo 'selected';?>> <?php echo get_phrase('disabled'); ?></option>
-							<option value="1" <?php if (get_settings('recaptcha') == 1)echo 'selected';?>> <?php echo get_phrase('enabled'); ?></option>
+							<option value="0" <?php if (get_settings('recaptcha') == 1)echo 'selected';?>> <?php echo get_phrase('enabled'); ?></option>
                         </select>
                     </div>
 
@@ -136,19 +136,10 @@
 						</div>
 					</div>
 
-					<div class="form-group mb-3">
-                        <label for="example-textarea">Website privacy policy</label>
-                        <textarea class="form-control" id="ckeditor1" name="privacy_policy" rows="3"><?php echo $privacy_policy;?></textarea>
-                    </div>
+					
 
-					<div class="form-group mb-3">
-                        <label for="example-textarea">Website refund policy</label>
-                        <textarea class="form-control" id="ckeditor2" name="refund_policy" rows="3"><?php echo $refund_policy;?></textarea>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="example-textarea"><?php echo get_phrase('cookie_policy'); ?></label>
-                        <textarea class="form-control" id="ckeditor3" name="cookie_policy" rows="3"><?php echo get_settings('cookie_policy'); ?></textarea>
-                    </div>
+					
+                    
 	            </div>
 	        </div>
 	    </div>
@@ -183,11 +174,11 @@
 		<?php echo form_close(); ?>
 	</div>
 </div>
-
+<!-- 
 <script>
 	$('document').ready(function(){
 		CKEDITOR.replace( 'ckeditor1' );
 		CKEDITOR.replace( 'ckeditor2' );
 		CKEDITOR.replace( 'ckeditor3' );
 	});
-</script>
+</script> -->
