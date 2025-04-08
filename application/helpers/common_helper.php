@@ -51,6 +51,16 @@ if ( ! function_exists('get_video_extension'))
     }
 }
 
+
+if (!function_exists('get_username_by_id')) {
+    function get_username_by_id($user_id) {
+        $CI = &get_instance();
+        $CI->load->database();
+        $user = $CI->db->get_where('users', ['user_id' => $user_id])->row();
+        return $user ? $user->name : 'غير معروف';
+    }
+}
+
 if (! function_exists('get_settings')) {
   function get_settings($type = '') {
     $CI =&  get_instance();

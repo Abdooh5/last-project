@@ -211,6 +211,12 @@
                    <span> <?php echo get_phrase('account'); ?> </span>
                </a>
            </li>
+                <li class="side-nav-item <?php if($page_name == 'admin_messages')echo 'active';?>">
+               <a href="<?php echo base_url();?>index.php?general/admin_messages" class="side-nav-link <?php if($page_name == 'admin_messages')echo 'active';?>">
+                   <i class="fa fa-info"></i>
+                   <span> <?php echo get_phrase('admin_messages'); ?> </span>
+               </a>
+           </li>
            <!-- <li class="side-nav-item <?php if($page_name == 'about')echo 'active';?>">
                <a href="<?php echo base_url();?>index.php?admin/about" class="side-nav-link <?php if($page_name == 'about')echo 'active';?>">
                    <i class="fa fa-info"></i>

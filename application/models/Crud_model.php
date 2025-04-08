@@ -15,7 +15,11 @@ class Crud_model extends CI_Model {
 		$description	=	$this->db->get_where('settings', array('type'=>$type))->row()->description;
 		return $description;
 	}
-
+	public function send_message($data) {
+		// إضافة الرسالة إلى قاعدة البيانات
+		$this->db->insert('messages', $data);
+	}
+	
 	/*
 	* PLANS QUERIES
 	*/

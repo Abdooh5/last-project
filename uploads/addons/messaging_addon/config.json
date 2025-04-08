@@ -1,0 +1,25 @@
+{
+  "name": "Messaging Addon",
+  "unique_identifier": "messaging_addon",
+  "version": "1.0",
+  "about": "Simple messaging system between admin and user",
+  "files": [
+    {
+      "root_directory": "uploads/addons/messaging_addon/controllers/Messaging.php",
+      "update_directory": "application/controllers/Messaging.php"
+    },
+    {
+      "root_directory": "uploads/addons/messaging_addon/models/Messaging_model.php",
+      "update_directory": "application/models/Messaging_model.php"
+    },
+    {
+      "root_directory": "uploads/addons/messaging_addon/views/backend/admin/messaging.php",
+      "update_directory": "application/views/backend/admin/messaging.php"
+    },
+    {
+      "root_directory": "uploads/addons/messaging_addon/views/frontend/user/messages.php",
+      "update_directory": "application/views/frontend/user/messages.php"
+    }
+  ],
+  "sql_file": "install.sql"
+}

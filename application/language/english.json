@@ -1117,5 +1117,9 @@
     "email_already_exists_or_password_wrong_given._please_try_again": "Email already exists or password wrong given. please try again",
     "category_list": "Category list",
     "plan": "Plan",
-    "tv_series_of": "Tv series of"
+    "tv_series_of": "Tv series of",
+    "messages": "Messages",
+    "admin_messages": "Admin messages",
+    "الأسئلة_الشائعة": "الأسئلة الشائعة",
+    "أسال_الادارة": "أسال الادارة"
 }
