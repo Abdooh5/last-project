@@ -3,7 +3,6 @@
 <link rel="stylesheet" type="text/css" href="assets/css/slick-theme.min.css"/>
 
 <style>
-	
 	@media screen and (max-width: 765px) {
 	  .mobile_vedio_player{
 	  	width: 100%;
@@ -28,19 +27,16 @@
         gap: 15px;
         margin-top: 20px;
     }
-
     .episode-card {
         text-align: center;
         background: #222;
         padding: 10px;
         border-radius: 8px;
     }
-
     .episode-card img {
         width: 100%;
         border-radius: 8px;
     }
-
     .episode-card h5 {
         color: #fff;
         margin-top: 10px;
@@ -66,7 +62,6 @@
     gap: 15px; /* زيادة المسافة بين الصور */
     margin-top: 20px;
 }
-
 #more .episode-card {
     text-align: center;
     background-color: #1e1e1e;
@@ -75,213 +70,185 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease-in-out;
 }
-
 #more .episode-card:hover {
     transform: scale(1.05);
 }
-
 #more .episode-card img {
     width: 100%;
     height: 320px; /* تعيين ارتفاع ثابت للصور */
     object-fit: cover; /* للحفاظ على أبعاد الصورة دون تشوه */
     border-radius: 8px;
 }
-
 #more .episode-card h5 {
     color: #fff;
     margin-top: 10px;
     font-size: 16px;
     font-weight: bold;
 }
-
-
 </style>
+
 <?php
-	$series_details	=	$this->db->get_where('series' , array('series_id' => $series_id))->result_array();
-	// $series_trailer=$series_details->trailer_url;
+	$series_details = $this->db->get_where('series', array('series_id' => $series_id))->result_array();
 	foreach ($series_details as $row):
-	?>
+?>
 <link rel="stylesheet" type="text/css" href="<?php echo base_url() . 'assets/frontend/' . $selected_theme;?>/hovercss/demo.css" />
 <link rel="stylesheet" type="text/css" href="<?php echo base_url() . 'assets/frontend/' . $selected_theme;?>/hovercss/set1.css" />
 <style>
 	.movie_thumb{}
-	.btn_opaque{font-size:20px; border: 1px solid #939393;text-decoration: none;margin: 10px;background-color: rgba(0, 0, 0, 0.74); color: #fff;}
-	.btn_opaque:hover{border: 1px solid #939393;text-decoration: none;background-color: rgba(57, 57, 57, 0.74);color:#fff;}
+	.btn_opaque {
+	    font-size:20px; 
+	    border: 1px solid #939393;
+	    text-decoration: none;
+	    margin: 10px;
+	    background-color: rgba(0, 0, 0, 0.74); 
+	    color: #fff;
+	}
+	.btn_opaque:hover{
+	    border: 1px solid #939393;
+	    text-decoration: none;
+	    background-color: rgba(57, 57, 57, 0.74);
+	    color:#fff;
+	}
 	.video_cover {
-	position: relative;padding-bottom: 30px;
+		position: relative;
+		padding-bottom: 30px;
 	}
 	.video_cover:after {
-	content : "";
-	display: block;
-	position: absolute;
-	top: 0;
-	left: 0;
-	background-image: url(<?php echo $this->crud_model->get_poster_url('series' , $row['series_id']);?>);
-	width: 100%;
-	height: 100%;
-	opacity : 0.2;
-	z-index: -1;
-	background-size:cover;
+		content: "";
+		display: block;
+		position: absolute;
+		top: 0;
+		left: 0;
+		background-image: url(<?php echo $this->crud_model->get_poster_url('series', $row['series_id']);?>);
+		width: 100%;
+		height: 100%;
+		opacity: 0.2;
+		z-index: -1;
+		background-size: cover;
 	}
-	.select_black{background-color: #000;height: 45px;padding: 12px;font-weight: bold;color: #fff;}
-	.profile_manage{font-size: 25px;border: 1px solid #ccc;padding: 5px 30px;text-decoration: none;}
-	.profile_manage:hover{font-size: 25px;border: 1px solid #fff;padding: 5px 30px;text-decoration: none;color:#fff;}
+	.select_black {
+	    background-color: #000;
+	    height: 45px;
+	    padding: 12px;
+	    font-weight: bold;
+	    color: #fff;
+	}
+	.profile_manage {
+	    font-size: 25px;
+	    border: 1px solid #ccc;
+	    padding: 5px 30px;
+	    text-decoration: none;
+	}
+	.profile_manage:hover {
+	    font-size: 25px;
+	    border: 1px solid #fff;
+	    padding: 5px 30px;
+	    text-decoration: none;
+	    color:#fff;
+	}
 </style>
+
 <!-- VIDEO PLAYER -->
 <div class="video_cover">
 	<div class="container" style="padding-top:100px; text-align: center;">
 		<div class="row">
 			<div class="col-lg-12" id="series_div">
 			<?php 
-                    $episode_details = $this->crud_model->get_episode_details_by_id($episode_id);
-                    $video_url = $episode_details['url'];
-
-                ?>
-
-                <!-- VIDEO PLAYER BASED ON URL TYPE -->
-
-					
-                
-                    <link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
-                    <video poster="<?php echo$this->crud_model->get_thumb_url('series' , $row['series_id']); ?>" id="player" playsinline controls>
-                        <?php if (get_video_extension($video_url) == 'webm'): ?>
-                            <source src="<?php echo 'assets/global/episode_video/'.$video_url; ?>" type="video/webm">
-                        <?php elseif (get_video_extension($video_url) == 'mp4'): ?>
-                            <source src="<?php echo 'assets/global/episode_video/'.$video_url; ?>" type="video/mp4">
-                        <?php else: ?>
-                            <h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
-                        <?php endif; ?>
-                    </video>
-                    <script src="<?php echo base_url();?>assets/global/plyr/plyr.js"></script>
-                    <script>const player = new Plyr('#player');</script>
-             
-            </div>
+                $episode_details = $this->crud_model->get_episode_details_by_id($episode_id);
+                $video_url = $episode_details['url'];
+            ?>
+            <!-- VIDEO PLAYER BASED ON URL TYPE -->
+                <link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
+                <video poster="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']); ?>" id="player" playsinline controls>
+                    <?php if (get_video_extension($video_url) == 'webm'): ?>
+                        <source src="<?php echo 'assets/global/episode_video/'.$video_url; ?>" type="video/webm">
+                    <?php elseif (get_video_extension($video_url) == 'mp4'): ?>
+                        <source src="<?php echo 'assets/global/episode_video/'.$video_url; ?>" type="video/mp4">
+                    <?php else: ?>
+                        <h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
+                    <?php endif; ?>
+                </video>
+                <script src="<?php echo base_url();?>assets/global/plyr/plyr.js"></script>
+                <script>const player = new Plyr('#player');</script>
+			</div>
 
 			<div class="col-lg-12 hidden" id="trailer_div">
-
-
-
-
-				<!-- Video player generator starts -->
-				
-					<link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
-					<video poster="<?php echo $this->crud_model->get_thumb_url('series' , $row['series_id']);?>" id="trailer_url" playsinline controls>
+				<!-- Video player for trailer -->
+				<link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
+				<video poster="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']);?>" id="trailer_url" playsinline controls>
 					<?php if (get_video_extension($row['trailer_url']) == 'mp4'): ?>
-				      	<source src="<?php echo 'assets/global/series_trailer/'.$row['trailer_url']; ?>" type="video/mp4">
+					  	<source src="<?php echo 'assets/global/series_trailer/'.$row['trailer_url']; ?>" type="video/mp4">
 					<?php elseif (get_video_extension($row['trailer_url']) == 'webm'): ?>
 						<source src="<?php echo 'assets/global/series_trailer/'.$row['trailer_url']; ?>" type="video/webm">
 					<?php else: ?>
 						<h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
 					<?php endif; ?>
-					</video>
-
-					<script src="<?php echo base_url();?>assets/global/plyr/plyr.js"></script>
-					<script>const trailer_url = new Plyr('#trailer_url');</script>
-				
-				<!-- Video player generator ends -->
-
+				</video>
+				<script src="<?php echo base_url();?>assets/global/plyr/plyr.js"></script>
+				<script>const trailer_url = new Plyr('#trailer_url');</script>
 			</div>
 
 		</div>
 	</div>
 </div>
+
 <!-- VIDEO DETAILS HERE -->
 <div class="container" style="margin-top: 30px;">
 	<div class="row">
 		<div class="col-lg-8">
 			<div class="row">
 				<div class="col-lg-3">
-					<img src="<?php echo $this->crud_model->get_thumb_url('series' , $row['series_id']);?>" style="height: 60px; margin:20px;" />
+					<img src="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']);?>" style="height: 60px; margin:20px;" />
 				</div>
 				<div class="col-lg-9">
 					<!-- VIDEO TITLE -->
-					<h3>
-						<?php echo $row['title'];?>
-					</h3>
+					<h3><?php echo $row['title'];?></h3>
 					<!-- RATING CALCULATION -->
 					<div>
-						<?php
-							for($i = 1 ; $i <= $row['rating'] ; $i++):
-							?>
-						<i class="fa fa-star" aria-hidden="true" style="color: #e2cc0c;"></i>
+						<?php for($i = 1; $i <= $row['rating']; $i++): ?>
+							<i class="fa fa-star" aria-hidden="true" style="color: #e2cc0c;"></i>
 						<?php endfor;?>
-						<?php
-							for($i = 5 ; $i > $row['rating'] ; $i--):
-							?>
-						<i class="fa fa-star-o" aria-hidden="true"></i>
+						<?php for($i = 5; $i > $row['rating']; $i--): ?>
+							<i class="fa fa-star-o" aria-hidden="true"></i>
 						<?php endfor;?>
 					</div>
 				</div>
 			</div>
 		</div>
-		<script>
-			// submit the add/delete request for mylist
-			// type = movie/series, task = add/delete, id = movie_id/series_id
-			function process_list(type, task, id)
-			{
-				$.ajax({
-					url: "<?php echo base_url();?>index.php?browse/process_list/" + type + "/" + task + "/" + id,
-					success: function(result){
-			        //alert(result);
-			        if (task == 'add')
-			        {
-			        	$("#mylist_button_holder").html( $("#mylist_delete_button").html() );
-			        }
-			        else if (task == 'delete')
-			        {
-			        	$("#mylist_button_holder").html( $("#mylist_add_button").html() );
-			        }
-			    }});
-			}
-
-			// Show the add/delete wishlist button on page load
-			   $( document ).ready(function() {
-
-			   	// Checking if this movie_id exist in the active user's wishlist
-			    mylist_exist_status = "<?php echo $this->crud_model->get_mylist_exist_status('series' , $row['series_id']);?>";
-
-			    if (mylist_exist_status == 'true')
-			    {
-			    	$("#mylist_button_holder").html( $("#mylist_delete_button").html() );
-			    }
-			    else if (mylist_exist_status == 'false')
-			    {
-			    	$("#mylist_button_holder").html( $("#mylist_add_button").html() );
-			    }
-			});
-		</script>
+		
+		<!-- أزرار التحميل ومشاهدة التريلر تظهر دائمًا هنا -->
 		<div class="col-lg-4">
-			<!-- ADD OR DELETE FROM PLAYLIST -->
-			<span id="mylist_button_holder">
-			</span>
-			<span id="mylist_add_button" style="display:none;">
-			
-			<a href="<?php echo base_url().'assets/global/episode_video/'.$video_url; ?>" download 
-   class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;">
-    <i class="fa fa-download"></i> <?php echo get_phrase('Download');?></a>
-			<button class="btn btn-danger btn-md" id = 'watch_button' style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
-				<i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer');?>
-			</button>
-			<a href="#" class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;"
-				onclick="process_list('series' , 'add', <?php echo $row['series_id'];?>)">
-			<i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list');?>
-			</a>
-    
-			</span>
-			<span id="mylist_delete_button" style="display:none;">
-			<a href="#" class="btn btn-default btn-md" style="font-size: 16px; margin-top: 20px;"
-				onclick="process_list('series' , 'delete', <?php echo $row['series_id'];?>)">
-			<iss="fa fa-check"></i> <?php echo get_phrase('Added_to_My_list');?>
-			</a>
-			</span>
-			<!-- MOVIE GENRE -->
+			<div id="video_controls">
+			    <a href="<?php echo base_url().'assets/global/episode_video/'.$video_url; ?>" download 
+			       class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;">
+			        <i class="fa fa-download"></i> <?php echo get_phrase('Download');?>
+			    </a>
+			    <button class="btn btn-danger btn-md" id="watch_button" style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
+			        <i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer');?>
+			    </button>
+			</div>
+			<!-- زر إضافة/حذف المسلسل إلى القائمة في عنصر منفصل -->
+			<div id="mylist_button_holder" style="margin-top:20px;">
+			    <span id="mylist_add_button" style="display:none;">
+			        <a href="#" class="btn btn-danger btn-md" style="font-size: 16px;"
+			           onclick="process_list('series','add',<?php echo $row['series_id'];?>)">
+			            <i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list');?>
+			        </a>
+			    </span>
+			    <span id="mylist_delete_button" style="display:none;">
+			        <a href="#" class="btn btn-default btn-md" style="font-size: 16px;"
+			           onclick="process_list('series','delete',<?php echo $row['series_id'];?>)">
+			            <i class="fa fa-check"></i> <?php echo get_phrase('Delete_From_My_list');?>
+			        </a>
+			    </span>
+			</div>
+			<!-- معلومات إضافية عن الفيلم -->
 			<div style="margin-top: 10px;">
 				<strong><?php echo get_phrase('Genre');?></strong> :
 				<a href="<?php echo base_url();?>index.php?browse/series/<?php echo $row['genre_id'];?>">
 				<?php echo $this->db->get_where('genre',array('genre_id'=>$row['genre_id']))->row('name');?>
 				</a>
 			</div>
-			<!-- MOVIE YEAR -->
 			<div>
 				<strong><?php echo get_phrase('Year');?></strong> : <?php echo $row['year'];?>
 			</div>
@@ -331,97 +298,97 @@
 						<div class="btn-group">
 							<div class="btn-group">
 								<a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-								<?php echo $this->db->get_where('season', array('season_id'=>$season_id))->row('name');?>
-								<span class="caret"></span>
+								    <?php echo $this->db->get_where('season', array('season_id'=>$season_id))->row('name');?>
+								    <span class="caret"></span>
 								</a>
 								<ul class="dropdown-menu" style="z-index: 10000;">
 									<?php
-										$seasons	=	$this->db->get_where('season', array('series_id'=>$series_id))->result_array();
+										$seasons = $this->db->get_where('season', array('series_id'=>$series_id))->result_array();
 										foreach ($seasons as $row2):
-										?>
-									<li><a href="<?php echo base_url();?>index.php?browse/playseries/<?php echo $series_id.'/'.$row2['season_id'];?>">
-										<?php echo $row2['name'];?></a>
+									?>
+									<li>
+									    <a href="<?php echo base_url();?>index.php?browse/playseries/<?php echo $series_id.'/'.$row2['season_id'];?>">
+									        <?php echo $row2['name'];?>
+									    </a>
 									</li>
-									<?php
-										endforeach;?>
+									<?php endforeach;?>
 								</ul>
 							</div>
 						</div>
 						<div class="episode-container">
-        <?php
-        $episodes = $this->crud_model->get_episodes_of_season($season_id);
-		$episode_number = 1;
-        foreach ($episodes as $episode):
-        ?>
-            <div class="episode-card">
-                <a href="<?php echo site_url('index.php?browse/playseries/'.$series_id.'/'.$season_id.'/'.$episode['episode_id']); ?>" class="episode-thumb">
-                    <img src="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']); ?>" alt="<?php echo $episode['title']; ?>">
-					<div class="episode-number"><?php echo $episode_number; ?></div>
-                </a>
-                <!-- <h5><?php echo $episode['title']; ?></h5> -->
-            </div>
-			<?php 
-        $episode_number++; 
-        endforeach; 
-        ?>
-    </div>
+						    <?php
+						        $episodes = $this->crud_model->get_episodes_of_season($season_id);
+						        $episode_number = 1;
+						        foreach ($episodes as $episode):
+						    ?>
+						        <div class="episode-card">
+						            <a href="<?php echo site_url('index.php?browse/playseries/'.$series_id.'/'.$season_id.'/'.$episode['episode_id']); ?>" class="episode-thumb">
+						                <img src="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']); ?>" alt="<?php echo $episode['title']; ?>">
+										<div class="episode-number"><?php echo $episode_number; ?></div>
+						            </a>
+						        </div>
+						    <?php 
+						        $episode_number++; 
+						        endforeach; 
+						    ?>
+					    </div>
 						</p>
 					</div>
-					<!-- TAB FOR ACTORS -->
-					<div class="tab-pane " id="cast">
+					<!-- TAB FOR CAST -->
+					<div class="tab-pane" id="cast">
 						<p>
 							<?php
-								$actors	=	json_decode($row['actors']);
-								for($i = 0; $i< sizeof($actors) ; $i++)
-								{
-									?>
-						<div style="float: left; text-align:center; color: #fff; font-weight: bold;">
-							<img src="<?php echo $this->crud_model->get_actor_image_url($actors[$i]);?>"
-								style="height: 160px; margin:5px;" />
-							<br>
-							<a href="<?php echo base_url('index.php?browse/filter/series/all/'.$actors[$i].'/all/all'); ?>" style="color: white;"><?php echo $this->db->get_where('actor', array('actor_id'=>$actors[$i]))->row()->name;?></a>
-						</div>
-						<?php
-							}
+								$actors = json_decode($row['actors']);
+								for($i = 0; $i < sizeof($actors); $i++){
+							?>
+							<div style="float: left; text-align:center; color: #fff; font-weight: bold;">
+								<img src="<?php echo $this->crud_model->get_actor_image_url($actors[$i]);?>"
+								     style="height: 160px; margin:5px;" />
+								<br>
+								<a href="<?php echo base_url('index.php?browse/filter/series/all/'.$actors[$i].'/all/all'); ?>" style="color: white;">
+								    <?php echo $this->db->get_where('actor', array('actor_id'=>$actors[$i]))->row()->name;?>
+								</a>
+							</div>
+							<?php
+								}
 							?>
 						</p>
 					</div>
-					<div class="tab-pane " id="category">
+					<!-- TAB FOR CATEGORY -->
+					<div class="tab-pane" id="category">
 						<p>
 							<div style="float: left; text-align:center; color: #fff; font-weight: bold;">
 								<?php $category_id = $this->db->get_where('category', array('category_id'=>$row['category']))->row()->category_id; ?>
 								<img src="<?php echo base_url('assets/global/director/'.$director_id.'.jpg'); ?>"
-									style="height: 160px; margin:5px;" />
+								     style="height: 160px; margin:5px;" />
 								<br>
 								<?php echo $this->db->get_where('category', array('category_id'=>$row['category']))->row()->name;?>
 							</div>
 						</p>
 					</div>
-					
-<!-- TAB FOR SAME CATEGORY SERIES -->
-<div class="tab-pane" id="more">
-    <p>
-        <div class="content">
-            <div class="grid">
-                <?php
-                $series = $this->crud_model->get_seriess($row['genre_id'], 10, 0);
-                foreach ($series as $row):
-                    $title = $row['title'];
-                    $link = base_url().'index.php?browse/playseries/'.$row['series_id'];
-                    $thumb = $this->crud_model->get_thumb_url('series', $row['series_id']);
-                ?>
-                    <div class="episode-card">
-                        <a href="<?php echo $link; ?>">
-                            <img src="<?php echo $thumb; ?>" alt="<?php echo $title; ?>">
-                        </a>
-                        <h5><?php echo $title; ?></h5>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </p>
-</div>
-
+					<!-- TAB FOR SAME CATEGORY SERIES -->
+					<div class="tab-pane" id="more">
+					    <p>
+					        <div class="content">
+					            <div class="grid">
+					                <?php
+					                $series = $this->crud_model->get_seriess($row['genre_id'], 10, 0);
+					                foreach ($series as $row_series):
+					                    $title = $row_series['title'];
+					                    $link = base_url().'index.php?browse/playseries/'.$row_series['series_id'];
+					                    $thumb = $this->crud_model->get_thumb_url('series', $row_series['series_id']);
+					                ?>
+					                    <div class="episode-card">
+					                        <a href="<?php echo $link; ?>">
+					                            <img src="<?php echo $thumb; ?>" alt="<?php echo $title; ?>">
+					                        </a>
+					                        <h5><?php echo $title; ?></h5>
+					                    </div>
+					                <?php endforeach; ?>
+					            </div>
+					        </div>
+					    </p>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -436,17 +403,65 @@
 		if ($('#trailer_div').hasClass('hidden')) {
 			$('#trailer_div').removeClass('hidden');
 			$('#series_div').addClass('hidden');
-			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_series') ?>');
+			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_series'); ?>');
 			player.pause();
-		}else {
+		} else {
 			$('#series_div').removeClass('hidden');
 			$('#trailer_div').addClass('hidden');
-			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_trailer') ?>');
+			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_trailer'); ?>');
 			trailer_url.pause();
 		}
 		$("html, body").animate({scrollTop: 0}, 500);
-
 	}
+
+	// submit the add/delete request for mylist
+// type = movie/series, task = add/delete, id = movie_id/series_id
+function process_list(type, task, id) {
+	$.ajax({
+		url: "<?php echo base_url();?>index.php?browse/process_list/" + type + "/" + task + "/" + id,
+		type: 'GET',
+		success: function(result) {
+			// عندما يتم إضافة المسلسل إلى القائمة
+			if (task == 'add') {
+				// تحديث الزر إلى زر "تمت الإضافة"
+				$("#mylist_button_holder").html($("#mylist_delete_button").html());
+				$("#mylist_add_button").hide();
+				$("#mylist_delete_button").show();
+			} 
+			// عندما يتم حذف المسلسل من القائمة
+			else if (task == 'delete') {
+				// تحديث الزر إلى زر "إضافة إلى القائمة"
+				$("#mylist_button_holder").html($("#mylist_add_button").html());
+				$("#mylist_add_button").show();
+				$("#mylist_delete_button").hide();
+			}
+		},
+		error: function(xhr, status, error) {
+			// التعامل مع الأخطاء في حال حدوثها
+			alert('حدث خطأ أثناء تنفيذ العملية. الرجاء المحاولة لاحقًا.');
+		}
+	});
+}
+
+// show the add/delete wishlist button on page load
+$(document).ready(function() {
+	// استعلام لمعرفة إذا كان المسلسل موجودًا في القائمة
+	mylist_exist_status = "<?php echo $this->crud_model->get_mylist_exist_status('series', $row['series_id']);?>";
+	
+	// إذا كان المسلسل موجودًا في القائمة، عرض زر الحذف
+	if (mylist_exist_status == 'true') {
+		$("#mylist_button_holder").html($("#mylist_delete_button").html());
+		$("#mylist_add_button").hide();
+		$("#mylist_delete_button").show();
+	} 
+	// إذا كان المسلسل غير موجود في القائمة، عرض زر الإضافة
+	else if (mylist_exist_status == 'false') {
+		$("#mylist_button_holder").html($("#mylist_add_button").html());
+		$("#mylist_add_button").show();
+		$("#mylist_delete_button").hide();
+	}
+});
+
 </script>
 <script language="javascript" type="text/javascript" src="jquery-1.8.2.js"></script>
 <script language="javascript" type="text/javascript">

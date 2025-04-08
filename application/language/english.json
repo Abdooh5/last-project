@@ -1121,5 +1121,7 @@
     "messages": "Messages",
     "admin_messages": "Admin messages",
     "الأسئلة_الشائعة": "الأسئلة الشائعة",
-    "أسال_الادارة": "أسال الادارة"
+    "أسال_الادارة": "أسال الادارة",
+    "30": "30",
+    "delete_from_my_list": "Delete from my list"
 }

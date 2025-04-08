@@ -131,25 +131,30 @@ foreach ($movie_details as $row):
         </div>
 
         <div class="col-lg-4">
-            <!-- ADD OR DELETE FROM PLAYLIST -->
-            <span id="mylist_button_holder"></span>
-            <span id="mylist_add_button" style="display:none;">
-                <a href="#" class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;" onclick="process_list('movie' , 'add', <?php echo $row['movie_id']; ?>)">
-                    <i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list'); ?>
-                </a>
-            </span>
-            <a href="<?php echo base_url() . 'assets/global/movie_video/' . $row['url']; ?>" download class="btn btn-danger btn-md" id="download_button" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
+        <a href="<?php echo base_url() . 'assets/global/movie_video/' . $row['url']; ?>" download class="btn btn-danger btn-md" id="download_button" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
                 <i class="fa fa-download"></i> <?php echo get_phrase('Download'); ?>
             </a>
 
             <button class="btn btn-danger btn-md" id="watch_button" style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
                 <i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer'); ?>
             </button>
-            <span id="mylist_delete_button" style="display:none;">
-                <a href="#" class="btn btn-default btn-md" style="font-size: 16px; margin-top: 20px;" onclick="process_list('movie' , 'delete', <?php echo $row['movie_id']; ?>)">
-                    <i class="fa fa-check"></i> <?php echo get_phrase('Added_to_My_list'); ?>
-                </a>
-            </span>
+            <!-- ADD OR DELETE FROM PLAYLIST -->
+            <div id="mylist_button_holder" style="margin-top:20px;">
+			    <span id="mylist_add_button" style="display:none;">
+			        <a href="#" class="btn btn-danger btn-md" style="font-size: 16px;"
+			           onclick="process_list('movie','add',<?php echo $row['movie_id'];?>)">
+			            <i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list');?>
+			        </a>
+			    </span>
+			    <span id="mylist_delete_button" style="display:none;">
+			        <a href="#" class="btn btn-default btn-md" style="font-size: 16px;"
+			           onclick="process_list('movie','delete',<?php echo $row['movie_id'];?>)">
+			            <i class="fa fa-check"></i> <?php echo get_phrase('Delete_from_My_list');?>
+			        </a>
+			    </span>
+			</div>
+           
+        
 
             <!-- MOVIE GENRE -->
             <div style="margin-top: 10px;">
@@ -265,6 +270,51 @@ foreach ($movie_details as $row):
 		$("html, body").animate({scrollTop: 0}, 500);
 
 	}
+    function process_list(type, task, id) {
+	$.ajax({
+		url: "<?php echo base_url();?>index.php?browse/process_list/" + type + "/" + task + "/" + id,
+		type: 'GET',
+		success: function(result) {
+			// عندما يتم إضافة المسلسل إلى القائمة
+			if (task == 'add') {
+				// تحديث الزر إلى زر "تمت الإضافة"
+				$("#mylist_button_holder").html($("#mylist_delete_button").html());
+				$("#mylist_add_button").hide();
+				$("#mylist_delete_button").show();
+			} 
+			// عندما يتم حذف المسلسل من القائمة
+			else if (task == 'delete') {
+				// تحديث الزر إلى زر "إضافة إلى القائمة"
+				$("#mylist_button_holder").html($("#mylist_add_button").html());
+				$("#mylist_add_button").show();
+				$("#mylist_delete_button").hide();
+			}
+		},
+		error: function(xhr, status, error) {
+			// التعامل مع الأخطاء في حال حدوثها
+			alert('حدث خطأ أثناء تنفيذ العملية. الرجاء المحاولة لاحقًا.');
+		}
+	});
+}
+
+// show the add/delete wishlist button on page load
+$(document).ready(function() {
+	// استعلام لمعرفة إذا كان المسلسل موجودًا في القائمة
+	mylist_exist_status = "<?php echo $this->crud_model->get_mylist_exist_status('movie', $row['movie_id']);?>";
+	
+	// إذا كان المسلسل موجودًا في القائمة، عرض زر الحذف
+	if (mylist_exist_status == 'true') {
+		$("#mylist_button_holder").html($("#mylist_delete_button").html());
+		$("#mylist_add_button").hide();
+		$("#mylist_delete_button").show();
+	} 
+	// إذا كان المسلسل غير موجود في القائمة، عرض زر الإضافة
+	else if (mylist_exist_status == 'false') {
+		$("#mylist_button_holder").html($("#mylist_add_button").html());
+		$("#mylist_add_button").show();
+		$("#mylist_delete_button").hide();
+	}
+});
 </script>
 <script language="javascript" type="text/javascript" src="jquery-1.8.2.js"></script>
 <script language="javascript" type="text/javascript">
