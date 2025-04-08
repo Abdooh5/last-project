@@ -45,7 +45,7 @@ class General extends CI_Controller {
 	
 		// نجلب آخر رسالة من كل مرسل (group by sender)
 		$sql = "SELECT * FROM messages 
-				WHERE receiver_id = ? AND parent_id IS NULL 
+				WHERE receiver_id = ?
 				GROUP BY sender_id 
 				ORDER BY MAX(timestamp) DESC";
 		
@@ -149,7 +149,6 @@ public function send_reply() {
     $data = [
         'sender_id'   => 1,
         'receiver_id' => $recipient_id,
-        'subject'     => 'رد على محادثة',
         'message'     => $reply_message,
         'timestamp'   => time(),
         'is_read'     => 0
@@ -181,7 +180,6 @@ public function send_reply() {
 		$data = [
 			'sender_id' => $sender_id,
 			'receiver_id' => 1,
-			'subject' => '', // إذا ما في موضوع
 			'message' => $message,
 			'timestamp' => time()
 		];

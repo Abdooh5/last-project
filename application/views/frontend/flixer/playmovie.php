@@ -254,7 +254,7 @@ foreach ($movie_details as $row):
 		if ($('#trailer_div').hasClass('hidden')) {
 			$('#trailer_div').removeClass('hidden');
 			$('#series_div').addClass('hidden');
-			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_series') ?>');
+			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_movie') ?>');
 			player.pause();
 		}else {
 			$('#series_div').removeClass('hidden');

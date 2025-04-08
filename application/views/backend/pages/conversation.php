@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <title><?php echo $page_title; ?></title>
@@ -43,11 +43,15 @@
             text-align: center;
         }
 
-        #chat-box-container {
-            flex: 1;
-            overflow: hidden;
-            direction: ltr; /* عشان شريط التمرير يروح يسار */
-        }
+        #chat-box {
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px 15px;
+    background-color: #e9ddd0;
+    direction: rtl;
+    transform: scaleX(-1); /* يعكس العنصر */
+}
+
 
         #chat-box {
             height: 100%;
@@ -66,12 +70,17 @@
             border-radius: 4px;
         }
 
+        /* .message-container {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+        } */
         .message-container {
             margin: 10px 0;
             display: flex;
             flex-direction: column;
-        }
-
+    transform: scaleX(-1); /* يرجع الرسائل لطبيعتها */
+}
         .message-bubble {
             padding: 10px 15px;
             max-width: 70%;
@@ -148,11 +157,12 @@
 
 <div class="chat-wrapper">
     <div class="chat-header">
-        <button class="back-btn" onclick="history.back()">⬅</button>
+     
         <div class="title">
             المستخدم: #<?php echo $user_id; ?><br>
            
         </div>
+        <button class="back-btn" onclick="history.back()">⬅</button>
     </div>
 
     <div id="chat-box-container">
@@ -182,12 +192,13 @@
     </div>
 
     <div class="chat-footer">
-        <form action="<?php echo site_url('index.php?general/send_reply'); ?>" method="post">
-            <input type="hidden" name="recipient_id" value="<?php echo $user_id; ?>">
-            <input type="hidden" name="message_id" value="0">
-            <textarea name="reply" rows="1" placeholder="اكتب رسالتك..." required></textarea>
-            <button type="submit">إرسال</button>
-        </form>
+    <form action="<?php echo site_url('index.php?general/send_reply'); ?>" method="post">
+    <input type="hidden" name="recipient_id" value="<?php echo $user_id; ?>">
+    <input type="hidden" name="message_id" value="0">
+    <button type="submit">إرسال</button>
+    <textarea name="reply" rows="1" placeholder="اكتب رسالتك..." required></textarea>
+</form>
+
     </div>
 </div>
 
