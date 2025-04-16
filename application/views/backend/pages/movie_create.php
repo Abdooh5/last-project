@@ -14,12 +14,12 @@
 	                </div>
 					<div class="form-group mb-3">
 	                    <label for="url">Movie Trailer Url</label>
-						<span class="help">- youtube or any hosted video</span>
+						<!-- <span class="help">- youtube or any hosted video</span> -->
 	                    <input type="file" class="form-control" name="trailer_url" id="trailer_url" required>
 	                </div>
 					<div class="form-group mb-3">
 	                    <label for="url">Movie Url</label>
-						<span class="help">- youtube or any hosted video</span>
+						<!-- <span class="help">- youtube or any hosted video</span> -->
 	                    <input type="file" class="form-control" name="url" id="url" required>
 	                </div>
 

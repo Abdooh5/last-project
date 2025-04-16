@@ -123,6 +123,7 @@
 	
 $genres = [
 	'كرتون' => 'كرتون',
+    'أنمي' => 'أنمي',
 	'أنمي عربي قديم' => ' أنميات عربية قديمة'
 ];
 
@@ -163,8 +164,8 @@ foreach ($genres as $genre_name => $display_name) {
 
         foreach ($year as $year_name => $display_name) {
 			
-            $this->db->where('category', $cate_id);
-            $count = $this->db->where('year', $year_name)->count_all_results('series');
+             $this->db->where('category', $cate_id);
+            $count = $this->db->where('year', 2025)->count_all_results('series');
 
             // التحقق مما إذا كانت هناك مسلسلات لهذه السنة
             if ($count > 0 || true) { // إظهار العنصر حتى لو كانت المسلسلات صفر
