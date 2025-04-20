@@ -102,7 +102,7 @@
 						<label for="year">Publishing Year</label>
 						<span class="help">- year of publishing time</span>
 						<select class="form-control" id="year" name="year" required>
-							<?php for ($i = date("Y"); $i > 2000 ; $i--):?>
+							<?php for ($i = date("Y"); $i > 1980 ; $i--):?>
 							<option value="<?php echo $i;?>">
 								<?php echo $i;?>
 							</option>
@@ -150,6 +150,95 @@
 		</div>
 	</div>
 </div>
+<script>
+$(document).ready(function() {
+
+    function selectMatchingOption(selector, valueFromApi) {
+        let found = false;
+        let cleanApiValue = valueFromApi.trim().toLowerCase();
+
+        $(selector + ' option').each(function() {
+            let optionText = $(this).text().trim().toLowerCase();
+            if (optionText.includes(cleanApiValue) || cleanApiValue.includes(optionText)) {
+                $(this).prop('selected', true);
+                found = true;
+                return false; // أوقف الحلقة عند أول تطابق
+            }
+        });
+
+        if (found) {
+            $(selector).trigger('change');
+        } else {
+            console.log(`❌ لم يتم العثور على تطابق لـ: ${valueFromApi} داخل ${selector}`);
+        }
+    }
+
+    $('#simpleinput1').on('blur', function () {
+        let title = $(this).val();
+        if (title.length > 0) {
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php?admin/fetch_omdb_data',
+                method: 'POST',
+                data: { title: title },
+                success: function(response) {
+                    let data = JSON.parse(response);
+                    if (data.Response === "True") {
+                        // تعبئة الحقول
+                        $('#description_long').val(data.Plot);
+                        $('#description_short').val(data.Plot);
+                        $('[name="year"]').val(data.Year);
+                        $('[name="duration"]').val(data.Runtime);
+                        $('[name="rating"]').val(Math.round(data.imdbRating / 2));
+
+                        // تحديد النوع تلقائيًا
+                        selectMatchingOption('#genre_id', data.Genre.split(',')[0]);
+
+                        // تحديد الدولة تلقائيًا
+                        selectMatchingOption('#country_id', data.Country.split(',')[0]);
+
+                        // تحديد الممثلين تلقائيًا
+                        let actorsFromApi = data.Actors.split(',');
+                        $('#actors option').each(function() {
+                            let optionText = $(this).text().trim().toLowerCase();
+                            actorsFromApi.forEach(function(actor) {
+                                if (optionText.includes(actor.trim().toLowerCase())) {
+                                    $(this).prop('selected', true);
+                                }
+                            }.bind(this)); // مهم حتى يعمل داخل each
+                        });
+                        $('#actors').trigger('change');
+
+                        // عرض البوستر ورفعه تلقائيًا
+						if (data.Poster && data.Poster !== "N/A") {
+    let posterURL = data.Poster;
+    $('#video_player_div').html(`<img src="${posterURL}" class="img-fluid" style="max-height:300px;">`);
+    // حفظ الرابط لاستخدامه لاحقًا في السيرفر
+    if ($('[name="poster_url"]').length === 0) {
+        $('<input type="hidden" name="poster_url" value="'+posterURL+'">').appendTo('form');
+    } else {
+        $('[name="poster_url"]').val(posterURL);
+    }
+}
+
+                    } else {
+                        alert('فيلم غير موجود أو حدث خطأ في جلب البيانات');
+                    }
+                },
+                error: function() {
+                    alert('حدث خطأ أثناء الاتصال بالسيرفر.');
+                }
+            });
+        }
+    });
+
+});
+</script>
+
+
+
+
+
+
 
 <script>
 	// //file upload with ajax

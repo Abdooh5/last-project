@@ -425,78 +425,95 @@ class Crud_model extends CI_Model {
 	}
 
 	function create_movie() {
-			// البيانات المدخلة
-			$data['title']               = $this->input->post('title');
-			$data['description_short']   = $this->input->post('description_short');
-			$data['description_long']    = $this->input->post('description_long');
-			$data['year']                = $this->input->post('year');
-			$data['rating']              = $this->input->post('rating');
-			$data['country_id']          = $this->input->post('country_id');
-			$data['genre_id']            = $this->input->post('genre_id');
-			$data['featured']            = $this->input->post('featured');
-			$data['trailer_url']         = $this->input->post('trailer_url');
-			
-		
-			// مدة الفيلم
-			$duration = $this->input->post('duration');
-			$duration = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $duration);
-			sscanf($duration, "%d:%d:%d", $hours, $minutes, $seconds);
-			$data['duration'] = $hours * 3600 + $minutes * 60 + $seconds;
-		
-			// الممثلين
-			$actors = $this->input->post('actors');
-			$actor_entries = array();
-			$number_of_entries = sizeof($actors);
-			for ($i = 0; $i < $number_of_entries ; $i++) {
-				array_push($actor_entries, $actors[$i]);
+		// البيانات الأساسية
+		$data['title']               = $this->input->post('title');
+		$data['description_short']   = $this->input->post('description_short');
+		$data['description_long']    = $this->input->post('description_long');
+		$data['year']                = $this->input->post('year');
+		$data['rating']              = $this->input->post('rating');
+		$data['featured']            = $this->input->post('featured');
+		$data['trailer_url']         = $this->input->post('trailer_url');
+	
+		// تحويل مدة الفيلم إلى ثواني
+		$duration = $this->input->post('duration');
+		$duration = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $duration);
+		sscanf($duration, "%d:%d:%d", $hours, $minutes, $seconds);
+		$data['duration'] = $hours * 3600 + $minutes * 60 + $seconds;
+	
+		// معالجة النوع (Genre)
+		$genre_id = $this->input->post('genre_id');
+		if (!$genre_id && $this->input->post('genre_name')) {
+			$genre_name = trim($this->input->post('genre_name'));
+			$genre = $this->db->get_where('genre', ['name' => $genre_name])->row_array();
+			if ($genre) {
+				$data['genre_id'] = $genre['genre_id'];
 			}
-			$data['actors'] = json_encode($actor_entries);
-		
-			// إدخال الفيلم في قاعدة البيانات
-			$this->db->insert('movie', $data);
-			$movie_id = $this->db->insert_id();
-		
-			// رفع الصورة المصغرة
-			if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0) {
-				move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/movie_thumb/' . $movie_id . '.jpg');
+		} else {
+			$data['genre_id'] = $genre_id;
+		}
+	
+		// معالجة الدولة (Country)
+		$country_id = $this->input->post('country_id');
+		if (!$country_id && $this->input->post('country_name')) {
+			$country_name = trim($this->input->post('country_name'));
+			$country = $this->db->get_where('country', ['name' => $country_name])->row_array();
+			if ($country) {
+				$data['country_id'] = $country['country_id'];
 			}
-		
-			// رفع الصورة البوستر
-			if (isset($_FILES['poster']) && $_FILES['poster']['error'] == 0) {
-				move_uploaded_file($_FILES['poster']['tmp_name'], 'assets/global/movie_poster/' . $movie_id . '.jpg');
-			}
-
-					// رفع الاعلان (واستخدام اسم الملف الأصلي)
-if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
-	$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
-	$video_path = 'assets/global/movie_viedo/' . $video_name;
-
-	// رفع الملف إلى المجلد المحدد
-	move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
-
-	// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-	$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
-} else {
-	echo "Error uploading movie trailer.";
-	return;
-}
-		
-			// رفع الفيديو (واستخدام اسم الملف الأصلي)
-			if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
-				$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
-				$video_path = 'assets/global/movie_video/' . $video_name;
-		
-				// رفع الملف إلى المجلد المحدد
-				move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
-		
-				// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-				$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
-			} else {
-				echo "Error uploading movie video.";
-				return;
+		} else {
+			$data['country_id'] = $country_id;
+		}
+	
+		// معالجة الممثلين (Actors)
+		$actors = $this->input->post('actors');
+		$actor_ids = [];
+	
+		if (!empty($actors)) {
+			$actor_ids = $actors;
+		} elseif ($this->input->post('actor_names')) {
+			foreach ($this->input->post('actor_names') as $actor_name) {
+				$actor = $this->db->get_where('actor', ['name' => $actor_name])->row_array();
+				if ($actor) {
+					$actor_ids[] = $actor['actor_id'];
+				}
 			}
 		}
-		
+	
+		$data['actors'] = json_encode($actor_ids);
+	
+		// إضافة الفيلم في قاعدة البيانات
+		$this->db->insert('movie', $data);
+		$movie_id = $this->db->insert_id();
+	
+		// رفع الصورة المصغرة (thumb)
+		$poster_url = $this->input->post('poster_url');
+if (!empty($poster_url)) {
+    $poster_data = @file_get_contents($poster_url);
+    if ($poster_data !== false) {
+        // تخزينها كـ Poster
+        file_put_contents('assets/global/movie_poster/' . $movie_id . '.jpg', $poster_data);
+        // وتخزينها كـ Thumbnail أيضًا
+        file_put_contents('assets/global/movie_thumb/' . $movie_id . '.jpg', $poster_data);
+    }
+}
+	
+		// رفع فيديو الإعلان trailer
+		if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
+			$trailer_name = $_FILES['trailer_url']['name'];
+			$trailer_path = 'assets/global/movie_trailer/' . $trailer_name;
+			move_uploaded_file($_FILES['trailer_url']['tmp_name'], $trailer_path);
+			$this->db->update('movie', ['trailer_url' => $trailer_name], ['movie_id' => $movie_id]);
+		}
+	
+		// رفع الفيلم الرئيسي url
+		if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+			$video_name = $_FILES['url']['name'];
+			$video_path = 'assets/global/movie_video/' . $video_name;
+			move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
+			$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
+		}
+	}
+	
 	
 	
 

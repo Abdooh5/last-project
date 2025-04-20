@@ -32,7 +32,80 @@ class Admin extends CI_Controller {
 		$page_data['page_title']	=	'Manage Genre';
 		$this->load->view('backend/index', $page_data);
 	}
-
+	public function fetch_movie_data() {
+		$title = $this->input->post('title');
+		$api_key = 'your_api_key'; // استخدم مفتاحك الحقيقي هنا
+		$url = "https://www.omdbapi.com/?apikey={$api_key}&t=" . urlencode($title);
+	
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$response = curl_exec($ch);
+		curl_close($ch);
+	
+		echo $response; // سيتم استدعاؤها من الجافاسكربت
+	}
+	public function fetch_omdb_data() {
+		$title = $this->input->post('title');
+		$url = 'https://www.omdbapi.com/?apikey=c5334055&t=' . urlencode($title);
+		
+		// استخدام cURL أكثر أمانًا من file_get_contents في بعض السيرفرات
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$output = curl_exec($ch);
+		curl_close($ch);
+	
+		echo $output;
+	}
+	public function upload_poster_from_url() {
+		$image_url = $this->input->post('image_url');
+	
+		if (!$image_url || filter_var($image_url, FILTER_VALIDATE_URL) === false) {
+			echo json_encode(['error' => 'Invalid URL']);
+			return;
+		}
+	
+		$image_data = file_get_contents($image_url);
+		if (!$image_data) {
+			echo json_encode(['error' => 'Failed to download image']);
+			return;
+		}
+	
+		$filename = uniqid('poster_') . '.jpg';
+		$upload_path = 'uploads/posters/';
+		if (!file_exists($upload_path)) {
+			mkdir($upload_path, 0755, true); // إنشاء المجلد إذا لم يكن موجود
+		}
+	
+		file_put_contents($upload_path . $filename, $image_data);
+	
+		// إرجاع المسار ليتم حفظه لاحقًا
+		echo base_url($upload_path . $filename);
+	}
+		
+	private function get_or_create_id($table, $column, $value)
+	{
+		$this->db->where($column, $value);
+		$query = $this->db->get($table);
+		if ($query->num_rows() > 0) {
+			return $query->row()->{$table . '_id'};
+		} else {
+			$this->db->insert($table, [$column => $value]);
+			return $this->db->insert_id();
+		}
+	}	public function fetch_movie_info() {
+		$title = $this->input->post('title');
+		$apiKey = 'c5334055';
+		$url = "https://www.omdbapi.com/?apikey=" . $apiKey . "&t=" . urlencode($title);
+	
+		// جلب المحتوى
+		$response = file_get_contents($url);
+	
+		// إعادة النتيجة إلى الجافاسكريبت
+		echo $response;
+	}
+	
 	// CREATE A NEW GENRE
 	function genre_create()
 	{
