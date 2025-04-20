@@ -211,7 +211,15 @@ $(document).ready(function() {
                         // عرض البوستر ورفعه تلقائيًا
 						if (data.Poster && data.Poster !== "N/A") {
     let posterURL = data.Poster;
-    $('#video_player_div').html(`<img src="${posterURL}" class="img-fluid" style="max-height:300px;">`);
+    
+    // تحقق إذا كانت الصورة دقة منخفضة وتعديل الرابط لدقة أعلى إذا كان ذلك متاحًا
+    if (posterURL.includes("300x450")) {
+        posterURL = posterURL.replace("300x450", "1000x1500");  // استبدال بحجم أكبر (يمكنك تعديل الأبعاد حسب الحاجة)
+    }
+
+    // عرض الصورة في الـ div
+    $('#video_player_div').html(`<img src="${posterURL}" class="img-fluid" style="max-height:500px;">`);
+    
     // حفظ الرابط لاستخدامه لاحقًا في السيرفر
     if ($('[name="poster_url"]').length === 0) {
         $('<input type="hidden" name="poster_url" value="'+posterURL+'">').appendTo('form');
@@ -219,6 +227,7 @@ $(document).ready(function() {
         $('[name="poster_url"]').val(posterURL);
     }
 }
+
 
                     } else {
                         alert('فيلم غير موجود أو حدث خطأ في جلب البيانات');
