@@ -357,13 +357,13 @@ class Crud_model extends CI_Model {
         if (file_exists('assets/global/user_thumb/'.$user_id.'_'.$user_number.'.jpg')) {
             return base_url('assets/global/user_thumb/'.$user_id.'_'.$user_number.'.jpg');
         }
-        else{
+         else{
             $user_exploded = explode('user', $user_number);
             if (file_exists('assets/global/thumb'.$user_exploded[1].'.png')) {
                 return base_url('assets/global/thumb'.$user_exploded[1].'.png');
             }else{
-                return base_url('assets/global/thumb1.png');
-            }
+                return base_url('assets/global/thumb3.png');
+           }
         }
     }
 
@@ -423,16 +423,40 @@ class Crud_model extends CI_Model {
 		$this->db->limit($limit, $offset);
 		return $this->db->get('movie')->result_array();
 	}
-
+	function download_image($url, $save_path) {
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // مهم لعدم التحقق من شهادة SSL
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		$data = curl_exec($ch);
+		$error = curl_error($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+	
+		if ($http_code == 200 && !empty($data)) {
+			$saved = file_put_contents($save_path, $data);
+			if ($saved === false) {
+				echo "❌ فشل حفظ الصورة في $save_path<br>";
+			}
+			return true;
+		} else {
+			echo "❌ فشل تحميل الصورة من الرابط: $url<br>";
+			echo "كود HTTP: $http_code<br>";
+			echo "خطأ cURL: $error<br>";
+			return false;
+		}
+	}
+	
 	function create_movie() {
 		// البيانات الأساسية
-		$data['title']               = $this->input->post('title');
-		$data['description_short']   = $this->input->post('description_short');
-		$data['description_long']    = $this->input->post('description_long');
-		$data['year']                = $this->input->post('year');
-		$data['rating']              = $this->input->post('rating');
-		$data['featured']            = $this->input->post('featured');
-		$data['trailer_url']         = $this->input->post('trailer_url');
+		$data['title']             = $this->input->post('title');
+		$data['description_short'] = $this->input->post('description_short');
+		$data['description_long']  = $this->input->post('description_long');
+		$data['year']              = $this->input->post('year');
+		$data['rating']            = $this->input->post('rating');
+		$data['featured']          = $this->input->post('featured');
+		$data['trailer_url']       = $this->input->post('trailer_url');
 	
 		// تحويل مدة الفيلم إلى ثواني
 		$duration = $this->input->post('duration');
@@ -440,7 +464,7 @@ class Crud_model extends CI_Model {
 		sscanf($duration, "%d:%d:%d", $hours, $minutes, $seconds);
 		$data['duration'] = $hours * 3600 + $minutes * 60 + $seconds;
 	
-		// معالجة النوع (Genre)
+		// معالجة النوع
 		$genre_id = $this->input->post('genre_id');
 		if (!$genre_id && $this->input->post('genre_name')) {
 			$genre_name = trim($this->input->post('genre_name'));
@@ -452,7 +476,7 @@ class Crud_model extends CI_Model {
 			$data['genre_id'] = $genre_id;
 		}
 	
-		// معالجة الدولة (Country)
+		// معالجة الدولة
 		$country_id = $this->input->post('country_id');
 		if (!$country_id && $this->input->post('country_name')) {
 			$country_name = trim($this->input->post('country_name'));
@@ -464,7 +488,7 @@ class Crud_model extends CI_Model {
 			$data['country_id'] = $country_id;
 		}
 	
-		// معالجة الممثلين (Actors)
+		// الممثلين
 		$actors = $this->input->post('actors');
 		$actor_ids = [];
 	
@@ -481,21 +505,38 @@ class Crud_model extends CI_Model {
 	
 		$data['actors'] = json_encode($actor_ids);
 	
-		// إضافة الفيلم في قاعدة البيانات
+		// إدخال الفيلم
 		$this->db->insert('movie', $data);
 		$movie_id = $this->db->insert_id();
 	
-		// رفع الصورة المصغرة (thumb)
+		// ✅ تحميل البوستر باستخدام cURL
 		$poster_url = $this->input->post('poster_url');
-if (!empty($poster_url)) {
-    $poster_data = @file_get_contents($poster_url);
-    if ($poster_data !== false) {
-        // تخزينها كـ Poster
-        file_put_contents('assets/global/movie_poster/' . $movie_id . '.jpg', $poster_data);
-        // وتخزينها كـ Thumbnail أيضًا
-        file_put_contents('assets/global/movie_thumb/' . $movie_id . '.jpg', $poster_data);
-    }
-}
+
+		if (!empty($poster_url)) {
+			log_message('error', '🔍 رابط الصورة المستلم: ' . $poster_url);
+		
+			$ch = curl_init($poster_url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		
+			$poster_data = curl_exec($ch);
+			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+		
+			log_message('error', '🧾 كود HTTP: ' . $http_code);
+			log_message('error', '📦 حجم الصورة المستلمة: ' . strlen($poster_data));
+		
+			if ($poster_data !== false && $http_code == 200) {
+				file_put_contents('assets/global/movie_poster/' . $movie_id . '.jpg', $poster_data);
+				file_put_contents('assets/global/movie_thumb/' . $movie_id . '.jpg', $poster_data);
+				log_message('error', '✅ تم حفظ الصورة بنجاح');
+			} else {
+				log_message('error', "❌ فشل تحميل الصورة عبر cURL. HTTP Code: $http_code");
+			}
+		}
+		
+		
 	
 		// رفع فيديو الإعلان trailer
 		if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
@@ -513,6 +554,7 @@ if (!empty($poster_url)) {
 			$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
 		}
 	}
+	
 	
 	
 	

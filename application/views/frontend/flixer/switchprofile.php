@@ -26,7 +26,7 @@
 					<?php echo $this->crud_model->get_username_of_user('user1');?>
 					</a>
 				</td>
-				<?php
+				<!-- <?php
 					if ($current_plan_id == 2 || $current_plan_id == 3):
 					?>
 				<td>
@@ -58,7 +58,7 @@
 					<?php echo $this->crud_model->get_username_of_user('user4');?>
 					</a>
 				</td>
-				<?php endif;?>
+				<?php endif;?> -->
 			</tr>
 		</table>
 		<br>

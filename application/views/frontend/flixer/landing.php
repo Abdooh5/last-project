@@ -39,4 +39,4 @@
 		<a href="<?php echo base_url();?>index.php?home/signin" class="btn btn-danger btn-lg" ><?php echo get_phrase('SIGN_IN');?></a>
 	</div>
 </div>
-<!-- MIDDLE TAB SECTION -->
+

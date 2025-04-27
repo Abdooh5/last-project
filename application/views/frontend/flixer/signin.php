@@ -3,7 +3,7 @@
 <?php endif; ?>
 
 <!-- TOP LANDING SECTION -->
-<div style="height:93vh;width:100%; clear: both; background-image: url(<?php echo base_url().'assets/frontend/'.$selected_theme;?>/images/login_bg.jpg)">
+<div style="height:93vh;width:100%; clear: both; background-image: url(<?php echo base_url().'assets/frontend/'.$selected_theme;?>/images/login_pg.jpg)">
 	<!-- logo -->
 	<div style="float: left;">
 		<a href="<?php echo base_url();?>index.php?home">

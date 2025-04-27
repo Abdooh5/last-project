@@ -1123,5 +1123,8 @@
     "الأسئلة_الشائعة": "الأسئلة الشائعة",
     "أسال_الادارة": "أسال الادارة",
     "30": "30",
-    "delete_from_my_list": "Delete from my list"
+    "delete_from_my_list": "Delete from my list",
+    "short_description": "Short description",
+    "long_description": "Long description",
+    "overview": "Overview"
 }

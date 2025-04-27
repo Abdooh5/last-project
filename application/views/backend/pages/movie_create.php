@@ -150,7 +150,7 @@
 		</div>
 	</div>
 </div>
-<script>
+<!-- <script>
 $(document).ready(function() {
 
     function selectMatchingOption(selector, valueFromApi) {
@@ -213,9 +213,7 @@ $(document).ready(function() {
     let posterURL = data.Poster;
     
     // تحقق إذا كانت الصورة دقة منخفضة وتعديل الرابط لدقة أعلى إذا كان ذلك متاحًا
-    if (posterURL.includes("300x450")) {
-        posterURL = posterURL.replace("300x450", "1000x1500");  // استبدال بحجم أكبر (يمكنك تعديل الأبعاد حسب الحاجة)
-    }
+   
 
     // عرض الصورة في الـ div
     $('#video_player_div').html(`<img src="${posterURL}" class="img-fluid" style="max-height:500px;">`);
@@ -241,10 +239,112 @@ $(document).ready(function() {
     });
 
 });
+
+</script> -->
+<script>
+$(document).ready(function () {
+
+	function selectMatchingOption(selector, valueFromApi) {
+		let found = false;
+		let cleanApiValue = valueFromApi.trim().toLowerCase();
+
+		$(selector + ' option').each(function () {
+			let optionText = $(this).text().trim().toLowerCase();
+			if (optionText.includes(cleanApiValue) || cleanApiValue.includes(optionText)) {
+				$(this).prop('selected', true);
+				found = true;
+				return false;
+			}
+		});
+
+		if (found) {
+			$(selector).trigger('change');
+		} else {
+			console.log(`❌ لم يتم العثور على تطابق لـ: ${valueFromApi} داخل ${selector}`);
+		}
+	}
+
+	$('#simpleinput1').on('blur', function () {
+		let title = $(this).val();
+
+		if (title.length > 0) {
+			$.ajax({
+				url: '<?php echo base_url(); ?>index.php?admin/fetch_tmdb_data',
+				method: 'POST',
+				data: { title: title },
+				success: function (response) {
+					try {
+						let data = JSON.parse(response);
+
+						if (data.error) {
+							alert(data.error);
+							return;
+						}
+						$('#duration').val(data.runtime);
+						// تعبئة البيانات
+						$('#description_long').val(data.overview);
+						$('#description_short').val(data.overview);
+
+						if (data.release_date) {
+							let year = data.release_date.split('-')[0];
+							$('[name="year"]').val(year);
+						}
+
+						if (data.vote_average) {
+							let rating = Math.round(data.vote_average / 2);
+							$('[name="rating"]').val(rating);
+						}
+
+						// النوع
+						if (Array.isArray(data.genres)) {
+							selectMatchingOption('#genre_id', data.genres[0]);
+						}
+
+						// الممثلين
+						if (Array.isArray(data.actors)) {
+							$('#actors option').each(function () {
+								let optionText = $(this).text().trim().toLowerCase();
+								data.actors.forEach(function (actor) {
+									if (optionText.includes(actor.trim().toLowerCase())) {
+										$(this).prop('selected', true);
+									}
+								}.bind(this));
+							});
+							$('#actors').trigger('change');
+						}
+// الدول
+if (Array.isArray(data.countries)) {
+	selectMatchingOption('#country_id', data.countries[0]);
+}
+						
+					// البوستر
+					if (data.poster_path) {
+    let posterURL = 'https://image.tmdb.org/t/p/w500' + data.poster_path;
+
+    // عرض البوستر
+    $('#video_player_div').html(`<img src="${posterURL}" class="img-fluid" style="max-height:500px;">`);
+
+    // إرسال الرابط للسيرفر
+    if ($('[name="poster_url"]').length === 0) {
+        $('<input type="hidden" name="poster_url" value="' + posterURL + '">').appendTo('form');
+    } else {
+        $('[name="poster_url"]').val(posterURL);
+    }
+}
+
+					} catch (e) {
+						console.error("⚠️ خطأ في التحليل:", e, response);
+						alert('حدث خطأ أثناء معالجة البيانات.');
+					}
+				},
+				error: function () {
+					alert('❌ خطأ في الاتصال بالسيرفر.');
+				}
+			});
+		}
+	});
+});
 </script>
-
-
-
 
 
 

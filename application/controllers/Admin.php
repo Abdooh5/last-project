@@ -45,6 +45,160 @@ class Admin extends CI_Controller {
 	
 		echo $response; // سيتم استدعاؤها من الجافاسكربت
 	}
+	function searchMovie($movieTitle) {
+		$apiKey = '550cd509e7933045659e6f893e844d64'; // تأكد أن المفتاح صالح
+		$url = 'https://api.themoviedb.org/3/search/movie?api_key=' . $apiKey . '&query=' . urlencode($movieTitle) . '&language=ar';
+	
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	
+		$response = curl_exec($ch);
+	
+		// التحقق من وجود خطأ في الاتصال
+		if (curl_errno($ch)) {
+			echo '❌ خطأ في cURL: ' . curl_error($ch) . "<br>";
+			curl_close($ch);
+			return;
+		}
+	
+		curl_close($ch);
+	
+		// محاولة تحويل البيانات إلى JSON
+		$output = json_decode($response, true);
+	
+		// طباعة الاستجابة الخام (لتشخيص المشكلة)
+		echo "<h3>📦 الاستجابة من API:</h3>";
+		echo "<pre>";
+		print_r($output);
+		echo "</pre>";
+	
+		// التحقق من وجود خطأ في البيانات
+		if (isset($output['success']) && $output['success'] === false) {
+			echo "❗ خطأ في الطلب: " . ($output['status_message'] ?? 'غير معروف');
+			return;
+		}
+	
+		if (!isset($output['results']) || empty($output['results'])) {
+			echo "⚠️ لا توجد نتائج لهذا العنوان: <strong>$movieTitle</strong>";
+			return;
+		}
+	
+		// عرض أول نتيجة كمثال
+		$firstResult = $output['results'][0];
+		echo "<h3>🎬 أول نتيجة:</h3>";
+		echo "العنوان: " . ($firstResult['title'] ?? 'غير متوفر') . "<br>";
+		echo "التاريخ: " . ($firstResult['release_date'] ?? 'غير متوفر') . "<br>";
+		echo "الملخص: " . ($firstResult['overview'] ?? 'غير متوفر') . "<br>";
+	}
+	
+	public function fetch_tmdb_data() {
+		$title = $this->input->post('title');
+		$apiKey = '550cd509e7933045659e6f893e844d64';
+	
+		if (empty($title)) {
+			echo json_encode(['error' => 'لم يتم إدخال عنوان الفيلم']);
+			return;
+		}
+	
+		// دالة مساعدة لعمل cURL
+		function curl_get($url) {
+			$ch = curl_init();
+			curl_setopt_array($ch, [
+				CURLOPT_URL => $url,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_SSL_VERIFYHOST => false,
+			]);
+			$response = curl_exec($ch);
+			curl_close($ch);
+			return $response;
+		}
+	
+		// دالة لإدخال السجلات إذا لم تكن موجودة
+		function insert_if_not_exists($table, $name) {
+			$ci = &get_instance();
+			$ci->db->where('name', $name);
+			$query = $ci->db->get($table);
+			if ($query->num_rows() == 0) {
+				$ci->db->insert($table, ['name' => $name]);
+			}
+		}
+	
+		// Step 1: البحث
+		$searchUrl = "https://api.themoviedb.org/3/search/movie?api_key={$apiKey}&query=" . urlencode($title) . "&language=ar";
+		$searchResponse = curl_get($searchUrl);
+		$searchData = json_decode($searchResponse, true);
+	
+		if (!isset($searchData['results'][0])) {
+			echo json_encode(['error' => '❌ لم يتم العثور على نتائج']);
+			return;
+		}
+	
+		$movie = $searchData['results'][0];
+		$movieId = $movie['id'];
+	
+		// Step 2: تفاصيل الفيلم
+		$detailsUrl = "https://api.themoviedb.org/3/movie/{$movieId}?api_key={$apiKey}&language=ar";
+		$details = json_decode(curl_get($detailsUrl), true);
+	
+		// Step 3: الكاست
+		$creditsUrl = "https://api.themoviedb.org/3/movie/{$movieId}/credits?api_key={$apiKey}&language=ar";
+		$credits = json_decode(curl_get($creditsUrl), true);
+		$actors = [];
+		if (isset($credits['cast'])) {
+			foreach (array_slice($credits['cast'], 0, 5) as $actor) {
+				$actors[] = $actor['name'];
+				insert_if_not_exists('actor', $actor['name']);
+			}
+		}
+	
+		// Step 4: الأنواع
+		$genreNames = [];
+		if (isset($details['genres'])) {
+			foreach ($details['genres'] as $g) {
+				$genreNames[] = $g['name'];
+				insert_if_not_exists('genre', $g['name']);
+			}
+		}
+	
+		// Step 5: الدول
+		$countries = [];
+		if (isset($details['production_countries'])) {
+			foreach ($details['production_countries'] as $c) {
+				$countries[] = $c['name'];
+				insert_if_not_exists('country', $c['name']);
+			}
+		}
+	
+		// النتيجة النهائية
+		$result = [
+			'title' => $movie['title'],
+			'overview' => $movie['overview'],
+			'release_date' => $movie['release_date'],
+			'vote_average' => $movie['vote_average'],
+			'poster_path' => $movie['poster_path'],
+			'actors' => $actors,
+			'genres' => $genreNames,
+			'countries' => $countries,
+			'runtime' => $movie['runtime']
+		];
+	
+		echo json_encode($result);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public function fetch_omdb_data() {
 		$title = $this->input->post('title');
 		$url = 'https://www.omdbapi.com/?apikey=c5334055&t=' . urlencode($title);
