@@ -114,16 +114,63 @@ class Admin extends CI_Controller {
 			curl_close($ch);
 			return $response;
 		}
-	
+		function download_image($url, $path) {
+			$ch = curl_init($url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			$data = curl_exec($ch);
+			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+		
+			if ($http_code == 200 && $data !== false) {
+				file_put_contents($path, $data);
+				return true;
+			}
+			return false;
+		}
+		
+		
 		// دالة لإدخال السجلات إذا لم تكن موجودة
-		function insert_if_not_exists($table, $name) {
+		function insert_if_not_exists($table, $name, $profile_image_url = null) {
 			$ci = &get_instance();
 			$ci->db->where('name', $name);
 			$query = $ci->db->get($table);
+		
 			if ($query->num_rows() == 0) {
-				$ci->db->insert($table, ['name' => $name]);
+				// إضافة السجل للحصول على ID
+				$data = ['name' => $name];
+				$ci->db->insert($table, $data);
+				$insert_id = $ci->db->insert_id();
+		
+				if ($profile_image_url) {
+					// إنشاء مجلد الصور إذا لم يكن موجود
+					$image_directory = 'assets/global/actor/'; // هذا هو التصحيح الصحيح
+					if (!is_dir($image_directory)) {
+						mkdir($image_directory, 0777, true);
+					}
+					
+		
+					// استخراج امتداد الصورة
+					$image_ext = pathinfo(parse_url($profile_image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
+					if (!$image_ext) $image_ext = 'jpg'; // افتراضيًا JPG
+		
+					$local_filename = $insert_id . '.' . strtolower($image_ext);
+					$local_path = $image_directory . $local_filename;
+		
+					// تحميل الصورة
+					$image_data = file_get_contents($profile_image_url);
+					if ($image_data !== false) {
+						file_put_contents($local_path, $image_data);
+						// تحديث السجل مع مسار الصورة
+						// $ci->db->where('id', $insert_id);
+						// $ci->db->update($table, ['profile_image' => $local_path]);
+					}
+				}
 			}
 		}
+		
+		
+		
 	
 		// Step 1: البحث
 		$searchUrl = "https://api.themoviedb.org/3/search/movie?api_key={$apiKey}&query=" . urlencode($title) . "&language=ar";
@@ -142,16 +189,22 @@ class Admin extends CI_Controller {
 		$detailsUrl = "https://api.themoviedb.org/3/movie/{$movieId}?api_key={$apiKey}&language=ar";
 		$details = json_decode(curl_get($detailsUrl), true);
 	
-		// Step 3: الكاست
-		$creditsUrl = "https://api.themoviedb.org/3/movie/{$movieId}/credits?api_key={$apiKey}&language=ar";
-		$credits = json_decode(curl_get($creditsUrl), true);
-		$actors = [];
-		if (isset($credits['cast'])) {
-			foreach (array_slice($credits['cast'], 0, 5) as $actor) {
-				$actors[] = $actor['name'];
-				insert_if_not_exists('actor', $actor['name']);
-			}
-		}
+	// Step 3: الكاست
+$creditsUrl = "https://api.themoviedb.org/3/movie/{$movieId}/credits?api_key={$apiKey}&language=ar";
+$credits = json_decode(curl_get($creditsUrl), true);
+$actors = [];
+if (isset($credits['cast'])) {
+	foreach (array_slice($credits['cast'], 0, 5) as $actor) {
+		$actors[] = $actor['name'];
+		
+		// جلب صورة الممثل (إذا كانت موجودة)
+		$profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
+		
+		// حفظ الممثل مع صورته على الخادم
+		insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+	}
+}
+
 	
 		// Step 4: الأنواع
 		$genreNames = [];
