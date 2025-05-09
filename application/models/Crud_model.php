@@ -451,7 +451,7 @@ class Crud_model extends CI_Model {
 	function create_movie() {
 		// البيانات الأساسية
 		$data['title']             = $this->input->post('title');
-		$data['description_short'] = $this->input->post('description_short');
+		//$data['description_short'] = $this->input->post('description_short');
 		$data['description_long']  = $this->input->post('description_long');
 		$data['year']              = $this->input->post('year');
 		$data['rating']            = $this->input->post('rating');
@@ -465,16 +465,22 @@ class Crud_model extends CI_Model {
 		$data['duration'] = $hours * 3600 + $minutes * 60 + $seconds;
 	
 		// معالجة النوع
-		$genre_id = $this->input->post('genre_id');
-		if (!$genre_id && $this->input->post('genre_name')) {
-			$genre_name = trim($this->input->post('genre_name'));
-			$genre = $this->db->get_where('genre', ['name' => $genre_name])->row_array();
-			if ($genre) {
-				$data['genre_id'] = $genre['genre_id'];
-			}
-		} else {
-			$data['genre_id'] = $genre_id;
+		$genre_ids = $this->input->post('genre_id');
+
+if (!empty($genre_ids)) {
+	$data['genre_id'] = json_encode($genre_ids);
+} elseif ($this->input->post('genre_names')) {
+	$genre_names = $this->input->post('genre_names');
+	$genre_ids = [];
+	foreach ($genre_names as $genre_name) {
+		$genre = $this->db->get_where('genre', ['name' => $genre_name])->row_array();
+		if ($genre) {
+			$genre_ids[] = $genre['genre_id'];
 		}
+	}
+	$data['genre_id'] = json_encode($genre_ids);
+}
+
 	
 		// معالجة الدولة
 		$country_id = $this->input->post('country_id');
@@ -560,6 +566,8 @@ class Crud_model extends CI_Model {
 	
 
 		function update_movie($movie_id = '') {
+		
+
 			// جلب القيم الحالية للفيلم من قاعدة البيانات
 			$current_movie = $this->db->get_where('movie', ['movie_id' => $movie_id])->row_array();
 		
@@ -570,9 +578,9 @@ class Crud_model extends CI_Model {
 				$data['title'] = $this->input->post('title');
 			}
 		
-			if ($this->input->post('description_short')) {
-				$data['description_short'] = $this->input->post('description_short');
-			}
+			// if ($this->input->post('description_short')) {
+			// 	$data['description_short'] = $this->input->post('description_short');
+			// }
 		
 			if ($this->input->post('description_long')) {
 				$data['description_long'] = $this->input->post('description_long');
@@ -591,8 +599,16 @@ class Crud_model extends CI_Model {
 			}
 		
 			if ($this->input->post('genre_id')) {
-				$data['genre_id'] = $this->input->post('genre_id');
-			}
+    $genre_input = $this->input->post('genre_id');
+    if (is_array($genre_input)) {
+        $data['genre_id'] = json_encode($genre_input);
+    } else {
+        // في حال تم إرسالها كسلسلة (سهوًا أو بسبب تعديل جافاسكريبت مثلًا)
+        $data['genre_id'] = json_encode([$genre_input]);
+    }
+}
+
+			
 		
 			if ($this->input->post('featured')) {
 				$data['featured'] = $this->input->post('featured');

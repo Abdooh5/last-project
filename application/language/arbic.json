@@ -1116,5 +1116,9 @@
     "email_changed_successfully.": "Email changed successfully.",
     "password_sent_to_your_email": "Password sent to your email",
     "_نتائج_البحث_عن": " نتائج البحث عن",
-    "category_list": "Category list"
+    "category_list": "Category list",
+    "admin_messages": "Admin messages",
+    "الأسئلة_الشائعة": "الأسئلة الشائعة",
+    "أسال_الادارة": "أسال الادارة",
+    "delete_from_my_list": "Delete from my list"
 }

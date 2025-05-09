@@ -75,41 +75,72 @@
     </ul>
 </li>
 <li class="dropdown">
-    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" style="color: #e50914; font-weight: bold;">
         <?php echo get_phrase('أفلام'); ?> <span class="caret"></span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
-		$category_name=' أفلام';
-		$cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
-
-        $countries = [
-            'تركي' => 'أفلام تركية',    
-            'عربي' => 'أفلام عربية' ,
-			 'أجنبي' => 'أفلام أجنبية',
-            'هندي' => 'أفلام هندية',
-			'أسيوي' => 'أفلام أسيوي',
+        $categories = [
+            'أفلام تركية' => ['Turkey'],
+            'أفلام عربية' => ['Egypt', 'Saudi Arabia', 'United Arab Emirates', 'Lebanon', 'Morocco', 'Algeria', 'Tunisia', 'Jordan', 'Iraq', 'Syria', 'Palestine', 'Qatar', 'Bahrain', 'Oman', 'Kuwait', 'Sudan', 'Libya', 'Yemen'],
+            'أفلام هندية' => ['India'],
+            'أفلام أسيوية' => ['Japan', 'South Korea', 'China', 'Hong Kong', 'Thailand', 'Philippines', 'Malaysia', 'Indonesia', 'Vietnam', 'Singapore', 'Taiwan', 'Mongolia', 'Brunei', 'Cambodia', 'Laos', 'Myanmar', 'Sri Lanka'],
         ];
-        
-        foreach ($countries as $country_name => $display_name) {
-            $country = $this->db->get_where('country', ['name' => $country_name])->row();
-            if ($country) {
-                $count = $this->db->where('country_id', $country->country_id)->count_all_results('movie');
+
+        $all_countries = $this->db->get('country')->result();
+        $assigned_countries = [];
+
+        foreach ($categories as $category_name => $country_list) {
+            $country_ids = [];
+            foreach ($all_countries as $country) {
+                if (in_array($country->name, $country_list)) {
+                    $country_ids[] = $country->country_id;
+                    $assigned_countries[] = $country->country_id;
+                }
+            }
+
+            if (!empty($country_ids)) {
+                // عدّ عدد الأفلام المرتبطة بهذه الدول
+                $this->db->where_in('country_id', $country_ids);
+                $this->db->from('movie');
+                $movie_count = $this->db->count_all_results();
                 ?>
                 <li>
-				
-                    <a href="<?php echo base_url(); ?>index.php?browse/movie_by_country/<?php echo $country->country_id; ?>">
-                        <?php echo $display_name; ?> (<?php echo $count; ?>)
+                    <a href="<?php echo base_url(); ?>index.php?browse/movie_by_multiple_countries/<?php echo implode('-', $country_ids); ?>">
+                        <?php echo $category_name; ?> (<?php echo $movie_count; ?>)
                     </a>
                 </li>
                 <?php
             }
         }
 
-      
+        // الدول غير المصنفة
+        $foreign_country_ids = [];
+        foreach ($all_countries as $country) {
+            if (!in_array($country->country_id, $assigned_countries)) {
+                $foreign_country_ids[] = $country->country_id;
+            }
+        }
+
+        if (!empty($foreign_country_ids)) {
+            // عدّ عدد أفلام الدول غير المصنفة
+            $this->db->where_in('country_id', $foreign_country_ids);
+            $this->db->from('movie');
+            $foreign_movie_count = $this->db->count_all_results();
+            ?>
+            <li>
+                <a href="<?php echo base_url(); ?>index.php?browse/movie_by_multiple_countries/<?php echo implode('-', $foreign_country_ids); ?>">
+                    <?php echo 'أفلام أجنبية'; ?> (<?php echo $foreign_movie_count; ?>)
+                </a>
+            </li>
+            <?php
+        }
         ?>
     </ul>
 </li>
+
+
+
 
 <!-- TV SERIES anmy WISE-->
 <li class="dropdown">

@@ -205,7 +205,8 @@ if (isset($credits['cast'])) {
 	}
 }
 
-	
+
+
 		// Step 4: الأنواع
 		$genreNames = [];
 		if (isset($details['genres'])) {
@@ -234,7 +235,7 @@ if (isset($credits['cast'])) {
 			'actors' => $actors,
 			'genres' => $genreNames,
 			'countries' => $countries,
-			'runtime' => $movie['runtime']
+			'runtime' => isset($details['runtime']) ? $details['runtime'] : null
 		];
 	
 		echo json_encode($result);
@@ -474,7 +475,7 @@ if (isset($credits['cast'])) {
 
 	// EDIT A MOVIE
 	function movie_edit($movie_id = '')
-	{
+	{	//print_r($_POST); exit;
 		if (isset($_POST) && !empty($_POST))
 		{
 			$this->crud_model->update_movie($movie_id);

@@ -72,11 +72,11 @@ $trailer_path=base_url('assets/global/movie_trailer/' . $trailer_name);
 						<label for="description_long">Long description</label>
 						<textarea class="form-control" id="description_long" name="description_long" rows="6"><?php echo $movie_detail->description_long;?></textarea>
 					</div>
-
+<!-- 
 					<div class="form-group mb-3">
 						<label for="description_short">Short description</label>
 						<textarea class="form-control" id="description_short" name="description_short" rows="6"><?php echo $movie_detail->description_short;?></textarea>
-					</div>
+					</div> -->
 
 
 					<div class="form-group mb-3">
@@ -116,18 +116,21 @@ $trailer_path=base_url('assets/global/movie_trailer/' . $trailer_name);
 						</select>
 					</div>
 
-					<div class="form-group mb-3">
+                 <div class="form-group mb-3">
 						<label for="genre_id">Genre</label>
 						<span class="help">- genre must be selected</span>
-						<select class="form-control select2" id="genre_id" name="genre_id">
+						<select class="form-control select2" id="genre_id" name="genre_id[]" multiple >
 							<?php
 								$genres	=	$this->crud_model->get_genres();
+								    $selected_genres = json_decode($movie_detail->genre_id);
+    if (!is_array($selected_genres)) $selected_genres = []; // fallback
 								foreach ($genres as $row2):?>
-							<option
-								<?php if ( $movie_detail->genre_id == $row2['genre_id']) echo 'selected';?>
-								value="<?php echo $row2['genre_id'];?>">
-								<?php echo $row2['name'];?>
-							</option>
+
+<option
+    <?php if (in_array($row2['genre_id'], $selected_genres)) echo 'selected';?>
+    value="<?php echo $row2['genre_id'];?>">
+    <?php echo $row2['name'];?>
+</option>
 							<?php endforeach;?>
 						</select>
 					</div>
@@ -209,3 +212,130 @@ $trailer_path=base_url('assets/global/movie_trailer/' . $trailer_name);
 		</div>
 	</div>
 </div>
+
+<script>
+$(document).ready(function () {
+	
+
+	function selectMatchingOption(selector, valueFromApi) {
+		let found = false;
+		let cleanApiValue = valueFromApi.trim().toLowerCase();
+
+		$(selector + ' option').each(function () {
+			let optionText = $(this).text().trim().toLowerCase();
+			if (optionText.includes(cleanApiValue) || cleanApiValue.includes(optionText)) {
+				$(this).prop('selected', true);
+				found = true;
+				return false;
+			}
+		});
+
+		if (found) {
+			$(selector).trigger('change');
+		} else {
+			console.log(`❌ لم يتم العثور على تطابق لـ: ${valueFromApi} داخل ${selector}`);
+		}
+	}
+
+	$('#simpleinput1').on('blur', function () {
+		let title = $(this).val();
+
+		if (title.length > 0) {
+			$.ajax({
+				url: '<?php echo base_url(); ?>index.php?admin/fetch_tmdb_data',
+				method: 'POST',
+				data: { title: title },
+				success: function (response) {
+					try {
+						let data = JSON.parse(response);
+						console.log(data);
+
+						if (data.error) {
+							alert(data.error);
+							return;
+						}
+						if (data.runtime && !isNaN(data.runtime)) {
+    $('#duration').val(data.runtime + ' دقيقة');
+} else {
+    $('#duration').val('غير متوفرة');
+}
+
+if (data.runtime && !isNaN(data.runtime)) {
+    let totalMinutes = parseInt(data.runtime);
+    let hours = Math.floor(totalMinutes / 60);
+    let minutes = totalMinutes % 60;
+    let formatted = 
+        String(hours).padStart(2, '0') + ':' +
+        String(minutes).padStart(2, '0') + ':00';
+    $('#duration').val(formatted);
+} else {
+    $('#duration').val('00:00:00');
+}
+
+						// تعبئة البيانات
+						$('#description_long').val(data.overview);
+						//$('#description_short').val(data.overview);
+						//$('[name="duration"]').val(data.runtime);
+
+						if (data.release_date) {
+							let year = data.release_date.split('-')[0];
+							$('[name="year"]').val(year);
+						}
+
+						if (data.vote_average) {
+							let rating = Math.round(data.vote_average / 2);
+							$('[name="rating"]').val(rating);
+						}
+
+						// النوع
+						if (Array.isArray(data.genres)) {
+    data.genres.forEach(function (genre) {
+        selectMatchingOption('#genre_id', genre);
+    });
+}
+
+						// الممثلين
+						if (Array.isArray(data.actors)) {
+							$('#actors option').each(function () {
+								let optionText = $(this).text().trim().toLowerCase();
+								data.actors.forEach(function (actor) {
+									if (optionText.includes(actor.trim().toLowerCase())) {
+										$(this).prop('selected', true);
+									}
+								}.bind(this));
+							});
+							$('#actors').trigger('change');
+						}
+// الدول
+if (Array.isArray(data.countries)) {
+	selectMatchingOption('#country_id', data.countries[0]);
+}
+						
+					// البوستر
+					if (data.poster_path) {
+    let posterURL = 'https://image.tmdb.org/t/p/w500' + data.poster_path;
+
+    // عرض البوستر
+    $('#video_player_div').html(`<img src="${posterURL}" class="img-fluid" style="max-height:500px;">`);
+
+    // إرسال الرابط للسيرفر
+    if ($('[name="poster_url"]').length === 0) {
+        $('<input type="hidden" name="poster_url" value="' + posterURL + '">').appendTo('form');
+    } else {
+        $('[name="poster_url"]').val(posterURL);
+    }
+}
+
+					} catch (e) {
+						console.error("⚠️ خطأ في التحليل:", e, response);
+						alert('حدث خطأ أثناء معالجة البيانات.');
+					}
+				},
+				error: function () {
+					alert('❌ خطأ في الاتصال بالسيرفر.');
+				}
+			});
+		}
+	});
+});
+</script>

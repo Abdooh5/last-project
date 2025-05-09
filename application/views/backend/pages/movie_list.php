@@ -62,8 +62,24 @@
                     <td><img src="<?php echo $this->crud_model->get_thumb_url('movie' , $row['movie_id']);?>" style="height: 60px;" /></td>
                     <td style="vertical-align: middle;"><?php echo $row['title'];?></td>
                     <td style="vertical-align: middle;">
-                        <?php echo $this->db->get_where('genre',array('genre_id'=>$row['genre_id']))->row()->name;?>
-                    </td>
+    <?php
+    $genre_names = [];
+    $genre_ids = json_decode($row['genre_id'], true); // تحويل JSON إلى مصفوفة
+
+    if (!empty($genre_ids)) {
+        foreach ($genre_ids as $genre_id) {
+            $genre = $this->db->get_where('genre', array('genre_id' => $genre_id))->row();
+            if ($genre) {
+                $genre_names[] = $genre->name;
+            }
+        }
+        echo implode(', ', $genre_names); // عرض جميع الأنواع مفصولة بفواصل
+    } else {
+        echo '—';
+    }
+    ?>
+</td>
+
                     <td style="vertical-align: middle;">
                         <a href="<?php echo base_url();?>index.php?browse/playmovie/<?php echo $row['movie_id'];?>"
                             target="_blank" class="btn btn-primary">

@@ -38,7 +38,7 @@
 	                <div class="form-group mb-3">
                         <label for="duration">Duration</label>
                         <div class="input-group">
-                            <input type="text" name="duration" class="form-control timepicker" value=" " data-template="dropdown" data-show-seconds="true" data-show-meridian="false" data-minute-step="1" data-second-step="1" placeholder="Hour : Minutes : Seconds"/>
+                            <input type="text" name="duration" id="duration" class="form-control timepicker" value=" " data-template="dropdown" data-show-seconds="true" data-show-meridian="false" data-minute-step="1" data-second-step="1" placeholder="Hour : Minutes : Seconds"/>
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="dripicons-clock"></i></span>
                             </div>
@@ -50,10 +50,10 @@
 						<textarea class="form-control" id="description_long" name="description_long" rows="6"></textarea>
 					</div>
 
-					<div class="form-group mb-3">
+					<!-- <div class="form-group mb-3">
 						<label for="description_short">Short description</label>
 						<textarea class="form-control" id="description_short" name="description_short" rows="6"></textarea>
-					</div>
+					</div> -->
 
 				
 
@@ -87,7 +87,8 @@
 					<div class="form-group mb-3">
 						<label for="genre_id">Genre</label>
 						<span class="help">- genre must be selected</span>
-						<select class="form-control select2" id="genre_id" name="genre_id">
+					<select class="form-control select2" id="genre_id" name="genre_id[]" multiple required>
+
 							<?php
 								$genres	=	$this->crud_model->get_genres();
 								foreach ($genres as $row2):?>
@@ -243,6 +244,7 @@ $(document).ready(function() {
 </script> -->
 <script>
 $(document).ready(function () {
+	
 
 	function selectMatchingOption(selector, valueFromApi) {
 		let found = false;
@@ -275,15 +277,34 @@ $(document).ready(function () {
 				success: function (response) {
 					try {
 						let data = JSON.parse(response);
+						console.log(data);
 
 						if (data.error) {
 							alert(data.error);
 							return;
 						}
-						$('#duration').val(data.runtime);
+						if (data.runtime && !isNaN(data.runtime)) {
+    $('#duration').val(data.runtime + ' دقيقة');
+} else {
+    $('#duration').val('غير متوفرة');
+}
+
+if (data.runtime && !isNaN(data.runtime)) {
+    let totalMinutes = parseInt(data.runtime);
+    let hours = Math.floor(totalMinutes / 60);
+    let minutes = totalMinutes % 60;
+    let formatted = 
+        String(hours).padStart(2, '0') + ':' +
+        String(minutes).padStart(2, '0') + ':00';
+    $('#duration').val(formatted);
+} else {
+    $('#duration').val('00:00:00');
+}
+
 						// تعبئة البيانات
 						$('#description_long').val(data.overview);
 						$('#description_short').val(data.overview);
+						//$('[name="duration"]').val(data.runtime);
 
 						if (data.release_date) {
 							let year = data.release_date.split('-')[0];
@@ -297,8 +318,10 @@ $(document).ready(function () {
 
 						// النوع
 						if (Array.isArray(data.genres)) {
-							selectMatchingOption('#genre_id', data.genres[0]);
-						}
+    data.genres.forEach(function (genre) {
+        selectMatchingOption('#genre_id', genre);
+    });
+}
 
 						// الممثلين
 						if (Array.isArray(data.actors)) {

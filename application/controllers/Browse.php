@@ -184,6 +184,56 @@ class Browse extends CI_Controller {
 
 		$this->load->view('frontend/index', $page_data);
 	}
+	public function movie_by_multiple_countries($country_ids_str = '', $offset = 0)
+	{
+		// تفصيل معرفات الدول إلى مصفوفة
+		$country_ids = explode('-', $country_ids_str);
+		$country_ids = array_filter($country_ids, function($id) {
+			return is_numeric($id);
+		});
+	
+		// إذا لم تكن هناك دول صحيحة، أظهر خطأ 404
+		if (empty($country_ids)) {
+			show_404();
+		}
+	
+		// تحويل الإزاحة إلى رقم صحيح
+		$offset = is_numeric($offset) ? intval($offset) : 0;
+	
+		// رابط الصفحات
+		$url = base_url() . 'index.php?browse/movie_by_multiple_countries/' . $country_ids_str;
+		$per_page = 20;
+	
+		// حساب إجمالي النتائج بعد تطبيق الفلتر
+		$this->db->where_in('country_id', $country_ids);
+		$total_result = $this->db->count_all_results('movie');
+	
+		// إعداد الباجينشن
+		$config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+		$this->pagination->initialize($config);
+	
+		// جلب الأفلام كـ مصفوفة ليتوافق مع view
+		$this->db->where_in('country_id', $country_ids);
+		$this->db->order_by('movie_id', 'desc');
+		$page_data['movies'] = $this->db->get('movie', $per_page, $offset)->result_array();
+	
+		// جلب السنوات لفلتر الواجهة
+		$this->db->distinct();
+		$this->db->select('year');
+		$page_data['years'] = $this->db->get('movie')->result_array();
+	
+		// بيانات الصفحة
+		$page_data['check_movie']  = true;
+		$page_data['page_name']    = 'movie';
+		$page_data['page_title']   = 'أفلام حسب الدول';
+		$page_data['total_result'] = $total_result;
+		$page_data['genre_id']     = null;
+	
+		// عرض الصفحة
+		$this->load->view('frontend/index', $page_data);
+	}
+	
+	
 	public function filter($type = '', $genre_id = '', $actor_id = '',  $category_id= '', $year = '', $country = '') {
 		if (empty($type)) {
 			redirect(base_url().'index.php?browse/home', 'refresh');

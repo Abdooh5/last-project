@@ -43,6 +43,8 @@
 </style>
 
 <?php include 'header_browse.php'; ?>
+<?php $movie_id = $this->uri->segment(3); ?>
+
 <?php $user_id = $this->session->userdata('user_id'); ?>
 <?php $active_user = $this->session->userdata('active_user'); ?>
 <?php
@@ -131,43 +133,82 @@ foreach ($movie_details as $row):
         </div>
 
         <div class="col-lg-4">
-        <a href="<?php echo base_url() . 'assets/global/movie_video/' . $row['url']; ?>" download class="btn btn-danger btn-md" id="download_button" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
-                <i class="fa fa-download"></i> <?php echo get_phrase('Download'); ?>
+    <!-- اسم الفيلم -->
+    <h3 style="margin-top: 0;"><?php echo $row['title']; ?></h3>
+
+    <!-- زر التحميل -->
+    <a href="<?php echo base_url() . 'assets/global/movie_video/' . $row['url']; ?>" download class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
+        <i class="fa fa-download"></i> <?php echo get_phrase('Download'); ?>
+    </a>
+
+    <!-- زر مشاهدة التريلر -->
+    <button class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
+        <i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer'); ?>
+    </button>
+
+    <!-- إضافة/حذف من القائمة -->
+    <div id="mylist_button_holder" style="margin-top:20px;">
+        <span id="mylist_add_button" style="display:none;">
+            <a href="#" class="btn btn-danger btn-md" style="font-size: 16px;" onclick="process_list('movie','add',<?php echo $row['movie_id'];?>)">
+                <i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list'); ?>
             </a>
+        </span>
+        <span id="mylist_delete_button" style="display:none;">
+            <a href="#" class="btn btn-default btn-md" style="font-size: 16px;" onclick="process_list('movie','delete',<?php echo $row['movie_id'];?>)">
+                <i class="fa fa-check"></i> <?php echo get_phrase('Delete_from_My_list'); ?>
+            </a>
+        </span>
+    </div>
 
-            <button class="btn btn-danger btn-md" id="watch_button" style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">
-                <i class="fa fa-eye"></i> <?php echo get_phrase('watch_trailer'); ?>
-            </button>
-            <!-- ADD OR DELETE FROM PLAYLIST -->
-            <div id="mylist_button_holder" style="margin-top:20px;">
-			    <span id="mylist_add_button" style="display:none;">
-			        <a href="#" class="btn btn-danger btn-md" style="font-size: 16px;"
-			           onclick="process_list('movie','add',<?php echo $row['movie_id'];?>)">
-			            <i class="fa fa-plus"></i> <?php echo get_phrase('Add_to_My_list');?>
-			        </a>
-			    </span>
-			    <span id="mylist_delete_button" style="display:none;">
-			        <a href="#" class="btn btn-default btn-md" style="font-size: 16px;"
-			           onclick="process_list('movie','delete',<?php echo $row['movie_id'];?>)">
-			            <i class="fa fa-check"></i> <?php echo get_phrase('Delete_from_My_list');?>
-			        </a>
-			    </span>
-			</div>
-           
-        
-
-            <!-- MOVIE GENRE -->
-            <div style="margin-top: 10px;">
-                <strong><?php echo get_phrase('Genre'); ?></strong> :
-                <a href="<?php echo base_url(); ?>index.php?browse/movie/<?php echo $row['genre_id']; ?>">
-                    <?php echo $this->db->get_where('genre', array('genre_id' => $row['genre_id']))->row()->name; ?>
-                </a>
+    <!-- تفاصيل الفيلم -->
+    <div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card p-4" style="background-color: #1c1c1c; color: #fff; border-radius: 10px;">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <i class="fa fa-tags"></i> <strong> <?php echo get_phrase('Genre'); ?>: </strong>
+                    <?php
+                    $genre_ids = json_decode($row['genre_id'], true);
+                    if (!empty($genre_ids)) {
+                        $genres = [];
+                        foreach ($genre_ids as $genre_id) {
+                            $genre = $this->db->get_where('genre', array('genre_id' => $genre_id))->row();
+                            if ($genre) {
+                                $genres[] = '<a href="' . base_url() . 'index.php?browse/movie/' . $genre_id . '" style="color: #e50914;">' . $genre->name . '</a>';
+                            }
+                        }
+                        echo implode(', ', $genres);
+                    } else {
+                        echo '—';
+                    }
+                    ?>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <i class="fa fa-calendar"></i> <strong> <?php echo get_phrase('Year'); ?>: </strong> <?php echo $row['year']; ?>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <i class="fa fa-globe"></i> <strong> <?php echo get_phrase('Country'); ?>: </strong>
+                    <?php
+                    $country = $this->db->get_where('country', array('country_id' => $row['country_id']))->row();
+                    echo $country ? $country->name : '—';
+                    ?>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <i class="fa fa-clock-o"></i> <strong> <?php echo get_phrase('Duration'); ?>: </strong> <?php echo $row['duration'] > 0 ? $row['duration'] . ' ' . get_phrase('minutes') : '—'; ?>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <i class="fa fa-star"></i> <strong> <?php echo get_phrase('Rating'); ?>: </strong> <?php echo $row['rating'] ?? '—'; ?>
+                </div>
             </div>
-            <!-- MOVIE YEAR -->
-            <div>
-                <strong><?php echo get_phrase('Year'); ?></strong> : <?php echo $row['year']; ?>
+            <div class="mt-3">
+                <strong><i class="fa fa-info-circle"></i> <?php echo get_phrase('Description'); ?>:</strong>
+                <p style="text-align: justify;"><?php echo $row['description_long']; ?></p>
             </div>
         </div>
+    </div>
+</div>
+
+
     </div>
 
     <div class="row" style="margin-top:20px;">
@@ -212,7 +253,7 @@ foreach ($movie_details as $row):
                         </p>
                     </div>
                     <!-- TAB FOR CATEGORY -->
-                    <div class="tab-pane " id="category">
+                    <!-- <div class="tab-pane " id="category">
                         <p>
                             <div style="float: left; text-align:center; color: #fff; font-weight: bold;">
                                 <?php
@@ -223,7 +264,7 @@ foreach ($movie_details as $row):
                                 <?php echo $this->db->get_where('category', array('category_id' => $row['category']))->row()->name; ?>
                             </div>
                         </p>
-                    </div>
+                    </div> -->
                     <!-- TAB FOR SAME CATEGORY MOVIES -->
                     <div class="tab-pane" id="more">
                         <p>
