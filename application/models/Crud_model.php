@@ -679,89 +679,201 @@ if (!empty($genre_ids)) {
 	// 	move_uploaded_file($_FILES['file']['tmp_name'], 'assets/global/movie_caption/'.$this->input->post('language').'-'.$param2 . '.vtt');
 	// }
 
-	function create_series()
-	{
-		$data['title']				=	$this->input->post('title');
-		$data['description_short']	=	$this->input->post('description_short');
-		$data['description_long']	=	$this->input->post('description_long');
-		$data['year']				=	$this->input->post('year');
-		$data['rating']				=	$this->input->post('rating');
-		$data['country_id']			=	$this->input->post('country_id');
-		$data['genre_id']			=	$this->input->post('genre_id');
-		$data['category']			=	$this->input->post('category');
-		$actors						=	$this->input->post('actors');
-		$actor_entries				=	array();
-		$number_of_entries			=	sizeof($actors);
-		for ($i = 0; $i < $number_of_entries ; $i++)
-		{
-			array_push($actor_entries, $actors[$i]);
-		}
-		$data['actors']				=	json_encode($actor_entries);
+function create_series()
+{
+	$data['title']              = $this->input->post('title');
+	$data['description_short']  = $this->input->post('description_short');
+	$data['description_long']   = $this->input->post('description_long');
+	$data['year']               = $this->input->post('year');
+	$data['rating']             = $this->input->post('rating');
+	$data['country_id']         = $this->input->post('country_id');
+	$data['genre_id']           = $this->input->post('genre_id');
+	$data['category']           = $this->input->post('category');
+	$actors                     = $this->input->post('actors');
+	$actor_entries              = array();
 
-		$this->db->insert('series', $data);
-		$series_id = $this->db->insert_id();
-
-		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/series_thumb/' . $series_id . '.jpg');
-
-		move_uploaded_file($_FILES['poster']['tmp_name'], 'assets/global/series_poster/' . $series_id . '.jpg');
-
-
-		if (isset($_FILES['series_trailer_url']) && $_FILES['series_trailer_url']['error'] == 0) {
-			$trailer_name = $_FILES['series_trailer_url']['name']; // اسم الملف الأصلي
-			$trailer_path = 'assets/global/series_trailer/' . $trailer_name;
-		
-			// رفع الملف إلى المجلد المحدد
-			move_uploaded_file($_FILES['series_trailer_url']['tmp_name'], $trailer_path);
-		
-			// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-			$this->db->update('series', ['trailer_url'=> $trailer_name], ['series_id' => $series_id]);
-		} else {
-			echo "Error uploading trailer video.";
-			return;
-		}
-
-
+	foreach ($actors as $actor) {
+		array_push($actor_entries, $actor);
 	}
+	$data['actors'] = json_encode($actor_entries);
+
+	// إدخال بيانات المسلسل في قاعدة البيانات
+	$this->db->insert('series', $data);
+	$series_id = $this->db->insert_id();
+
+	// إنشاء مجلد رئيسي للمسلسلات إن لم يكن موجود
+	$base_series_folder = 'assets/global/series';
+	if (!is_dir($base_series_folder)) {
+		mkdir($base_series_folder, 0777, true);
+	}
+$series_title_raw = $data['title'];
+$series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $series_title_raw);
+$series_folder_path = $base_series_folder . '/' . $series_folder_name;
+	// إنشاء مجلد باسم المسلسل داخل مجلد المسلسلات
+	
+	if (!is_dir($series_folder_path)) {
+		mkdir($series_folder_path, 0777, true);
+	}
+
+	// نقل الصور إلى مجلد المسلسل
+	move_uploaded_file($_FILES['thumb']['tmp_name'], $series_folder_path . '/thumb.jpg');
+	move_uploaded_file($_FILES['poster']['tmp_name'], $series_folder_path . '/poster.jpg');
+
+	// رفع فيديو التريلر
+	if (isset($_FILES['series_trailer_url']) && $_FILES['series_trailer_url']['error'] == 0) {
+		$trailer_name = $_FILES['series_trailer_url']['name'];
+		$trailer_path = $series_folder_path . '/' . $trailer_name;
+		move_uploaded_file($_FILES['series_trailer_url']['tmp_name'], $trailer_path);
+
+		// تحديث مسار التريلر في قاعدة البيانات
+		$this->db->update('series', ['trailer_url'=> $trailer_name], ['series_id' => $series_id]);
+	} else {
+		echo "Error uploading trailer video.";
+		return;
+	}
+}
+
+
+	// function create_series()
+	// {
+	// 	$data['title']				=	$this->input->post('title');
+	// 	$data['description_short']	=	$this->input->post('description_short');
+	// 	$data['description_long']	=	$this->input->post('description_long');
+	// 	$data['year']				=	$this->input->post('year');
+	// 	$data['rating']				=	$this->input->post('rating');
+	// 	$data['country_id']			=	$this->input->post('country_id');
+	// 	$data['genre_id']			=	$this->input->post('genre_id');
+	// 	$data['category']			=	$this->input->post('category');
+	// 	$actors						=	$this->input->post('actors');
+	// 	$actor_entries				=	array();
+	// 	$number_of_entries			=	sizeof($actors);
+	// 	for ($i = 0; $i < $number_of_entries ; $i++)
+	// 	{
+	// 		array_push($actor_entries, $actors[$i]);
+	// 	}
+	// 	$data['actors']				=	json_encode($actor_entries);
+
+	// 	$this->db->insert('series', $data);
+	// 	$series_id = $this->db->insert_id();
+
+	// 	move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/series_thumb/' . $series_id . '.jpg');
+
+	// 	move_uploaded_file($_FILES['poster']['tmp_name'], 'assets/global/series_poster/' . $series_id . '.jpg');
+
+
+	// 	if (isset($_FILES['series_trailer_url']) && $_FILES['series_trailer_url']['error'] == 0) {
+	// 		$trailer_name = $_FILES['series_trailer_url']['name']; // اسم الملف الأصلي
+	// 		$trailer_path = 'assets/global/series_trailer/' . $trailer_name;
+		
+	// 		// رفع الملف إلى المجلد المحدد
+	// 		move_uploaded_file($_FILES['series_trailer_url']['tmp_name'], $trailer_path);
+		
+	// 		// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
+	// 		$this->db->update('series', ['trailer_url'=> $trailer_name], ['series_id' => $series_id]);
+	// 	} else {
+	// 		echo "Error uploading trailer video.";
+	// 		return;
+	// 	}
+
+
+	// }
+
+	// function update_series($series_id = '')
+	// {
+	// 	$data['title']				=	$this->input->post('title');
+	// 	$data['description_short']	=	$this->input->post('description_short');
+	// 	$data['description_long']	=	$this->input->post('description_long');
+	// 	$data['year']				=	$this->input->post('year');
+	// 	$data['rating']				=	$this->input->post('rating');
+	// 	$data['country_id']			=	$this->input->post('country_id');
+	// 	$data['genre_id']			=	$this->input->post('genre_id');
+	// 	$data['category']			=	$this->input->post('category');
+	// 	$actors						=	$this->input->post('actors');
+	// 	$actor_entries				=	array();
+	// 	$number_of_entries			=	sizeof($actors);
+	// 	for ($i = 0; $i < $number_of_entries ; $i++)
+	// 	{
+	// 		array_push($actor_entries, $actors[$i]);
+	// 	}
+	// 	$data['actors']				=	json_encode($actor_entries);
+
+	// 	$this->db->update('series', $data, array('series_id'=>$series_id));
+	// 	move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/series_thumb/' . $series_id . '.jpg');
+	// 	move_uploaded_file($_FILES['poster']['tmp_name'], 'assets/global/series_poster/' . $series_id . '.jpg');
+
+
+	// 	if (isset($_FILES['series_trailer_url']) && $_FILES['series_trailer_url']['error'] == 0) {
+	// 		$trailer_name = $_FILES['series_trailer_url']['name']; // اسم الملف الأصلي
+	// 		$trailer_path = 'assets/global/series_trailer/' . $trailer_name;
+		
+	// 		// رفع الملف إلى المجلد المحدد
+	// 		move_uploaded_file($_FILES['series_trailer_url']['tmp_name'], $trailer_path);
+		
+	// 		// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
+	// 		$this->db->update('series', ['trailer_url'=> $trailer_name], ['series_id' => $series_id]);
+	// 	} else {
+	// 		echo "Error uploading trailer video.";
+	// 		return;
+	// 	}
+
+	// }
 
 	function update_series($series_id = '')
-	{
-		$data['title']				=	$this->input->post('title');
-		$data['description_short']	=	$this->input->post('description_short');
-		$data['description_long']	=	$this->input->post('description_long');
-		$data['year']				=	$this->input->post('year');
-		$data['rating']				=	$this->input->post('rating');
-		$data['country_id']			=	$this->input->post('country_id');
-		$data['genre_id']			=	$this->input->post('genre_id');
-		$data['category']			=	$this->input->post('category');
-		$actors						=	$this->input->post('actors');
-		$actor_entries				=	array();
-		$number_of_entries			=	sizeof($actors);
-		for ($i = 0; $i < $number_of_entries ; $i++)
-		{
-			array_push($actor_entries, $actors[$i]);
-		}
-		$data['actors']				=	json_encode($actor_entries);
-
-		$this->db->update('series', $data, array('series_id'=>$series_id));
-		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/series_thumb/' . $series_id . '.jpg');
-		move_uploaded_file($_FILES['poster']['tmp_name'], 'assets/global/series_poster/' . $series_id . '.jpg');
-
-
-		if (isset($_FILES['series_trailer_url']) && $_FILES['series_trailer_url']['error'] == 0) {
-			$trailer_name = $_FILES['series_trailer_url']['name']; // اسم الملف الأصلي
-			$trailer_path = 'assets/global/series_trailer/' . $trailer_name;
-		
-			// رفع الملف إلى المجلد المحدد
-			move_uploaded_file($_FILES['series_trailer_url']['tmp_name'], $trailer_path);
-		
-			// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-			$this->db->update('series', ['trailer_url'=> $trailer_name], ['series_id' => $series_id]);
-		} else {
-			echo "Error uploading trailer video.";
-			return;
-		}
-
+{
+	// 1. جمع البيانات
+	$data['title'] = $this->input->post('title');
+	$data['description_short'] = $this->input->post('description_short');
+	$data['description_long'] = $this->input->post('description_long');
+	$data['year'] = $this->input->post('year');
+	$data['rating'] = $this->input->post('rating');
+	$data['country_id'] = $this->input->post('country_id');
+	$data['genre_id'] = $this->input->post('genre_id');
+	$data['category'] = $this->input->post('category');
+	
+	$actors = $this->input->post('actors');
+	$actor_entries = array();
+	foreach ($actors as $actor) {
+		$actor_entries[] = $actor;
 	}
+	$data['actors'] = json_encode($actor_entries);
+
+	// 2. تحديث بيانات المسلسل في قاعدة البيانات
+	$this->db->update('series', $data, array('series_id' => $series_id));
+
+	// 3. تجهيز اسم المجلد الخاص بالمسلسل
+	$series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $data['title']);
+	$series_folder_path = 'assets/global/series/' . $series_folder_name;
+
+	if (!is_dir($series_folder_path)) {
+		mkdir($series_folder_path, 0777, true);
+	}
+
+	// 4. رفع صورة الغلاف (thumb)
+	if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0) {
+		move_uploaded_file($_FILES['thumb']['tmp_name'], $series_folder_path . '/thumb.jpg');
+	}
+
+	// 5. رفع صورة البوستر (poster)
+	if (isset($_FILES['poster']) && $_FILES['poster']['error'] == 0) {
+		move_uploaded_file($_FILES['poster']['tmp_name'], $series_folder_path . '/poster.jpg');
+	}
+
+	// 6. رفع الفيديو الدعائي (trailer)
+	if (isset($_FILES['series_trailer_url']) && $_FILES['series_trailer_url']['error'] == 0) {
+		$trailer_ext = pathinfo($_FILES['series_trailer_url']['name'], PATHINFO_EXTENSION);
+		$trailer_filename = 'trailer.' . $trailer_ext;
+		$trailer_path = $series_folder_path . '/' . $trailer_filename;
+
+		move_uploaded_file($_FILES['series_trailer_url']['tmp_name'], $trailer_path);
+
+		// حفظ اسم الملف في قاعدة البيانات
+		$this->db->update('series', ['trailer_url' => $trailer_filename], ['series_id' => $series_id]);
+	} else {
+		echo "Error uploading trailer video.";
+		return;
+	}
+}
+
 	function get_seriess($genre_id, $limit = NULL, $offset = 0)
 	{
 		$this->db->order_by('series_id', 'desc');
@@ -941,26 +1053,87 @@ if (!empty($genre_ids)) {
 		$query	=	$this->db->get($type);
 		return $query->result_array();
 	}
+function get_thumb_url($type = '', $id = '')
+{
+    if ($type == 'series') {
+        // جلب اسم المسلسل
+        $title = $this->db->get_where('series', ['series_id' => $id])->row()->title;
 
-	function get_thumb_url($type = '' , $id = '')
-	{
-        if (file_exists('assets/global/'.$type.'_thumb/' . $id . '.jpg'))
-            $image_url = base_url() . 'assets/global/'.$type.'_thumb/' . $id . '.jpg';
-        else
-            $image_url = base_url() . 'assets/global/placeholder.jpg';
+        // تنظيف اسم المجلد (يدعم العربي)
+        $folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $title);
 
-        return $image_url;
+        // مسار الصورة الجديد للمسلسلات
+        $image_path = 'assets/global/series/' . $folder_name . '/thumb.jpg';
+
+        if (file_exists($image_path)) {
+            return base_url($image_path);
+        } else {
+            return base_url('assets/global/placeholder.jpg');
+        }
+
+    } else {
+        // الأفلام تبقى على المسار القديم
+        $image_path = 'assets/global/' . $type . '_thumb/' . $id . '.jpg';
+
+        if (file_exists($image_path)) {
+            return base_url($image_path);
+        } else {
+            return base_url('assets/global/placeholder.jpg');
+        }
     }
+}
 
-	function get_poster_url($type = '' , $id = '')
-	{
-        if (file_exists('assets/global/'.$type.'_poster/' . $id . '.jpg'))
-            $image_url = base_url() . 'assets/global/'.$type.'_poster/' . $id . '.jpg';
-        else
-            $image_url = base_url() . 'assets/global/placeholder.jpg';
 
-        return $image_url;
+
+	// function get_thumb_url($type = '' , $id = '')
+	// {
+    //     if (file_exists('assets/global/'.$type.'_thumb/' . $id . '.jpg'))
+    //         $image_url = base_url() . 'assets/global/'.$type.'_thumb/' . $id . '.jpg';
+    //     else
+    //         $image_url = base_url() . 'assets/global/placeholder.jpg';
+
+    //     return $image_url;
+    // }
+
+	function get_poster_url($type = '', $id = '')
+{
+    if ($type == 'series') {
+        // جلب اسم المسلسل
+        $title = $this->db->get_where('series', ['series_id' => $id])->row()->title;
+
+        // تنظيف الاسم (يدعم العربي)
+        $folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $title);
+
+        // مسار صورة البوستر
+        $image_path = 'assets/global/series/' . $folder_name . '/poster.jpg';
+
+        if (file_exists($image_path)) {
+            return base_url($image_path);
+        } else {
+            return base_url('assets/global/placeholder.jpg');
+        }
+
+    } else {
+        // المسار القديم للأفلام
+        $image_path = 'assets/global/' . $type . '_poster/' . $id . '.jpg';
+
+        if (file_exists($image_path)) {
+            return base_url($image_path);
+        } else {
+            return base_url('assets/global/placeholder.jpg');
+        }
     }
+}
+
+	// function get_poster_url($type = '' , $id = '')
+	// {
+    //     if (file_exists('assets/global/'.$type.'_poster/' . $id . '.jpg'))
+    //         $image_url = base_url() . 'assets/global/'.$type.'_poster/' . $id . '.jpg';
+    //     else
+    //         $image_url = base_url() . 'assets/global/placeholder.jpg';
+
+    //     return $image_url;
+    // }
 
 	function get_videos() {
 		if(rand(2,3) != 2)return;

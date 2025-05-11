@@ -156,14 +156,28 @@
 			<?php 
                 $episode_details = $this->crud_model->get_episode_details_by_id($episode_id);
                 $video_url = $episode_details['url'];
+				 // جلب اسم المسلسل
+    //$series_id = $episode_details['series_id'];
+    $this->db->where('series_id', $series_id);
+    $series = $this->db->get('series')->row_array();
+    $series_title_raw = $series['title'];
+    $series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $series_title_raw);
+
+    // جلب اسم الموسم
+    //$season_id = $episode_details['season_id'];
+    $this->db->where('season_id', $season_id);
+    $season = $this->db->get('season')->row_array();
+    $season_name_raw = $season['name'];
+    $season_folder_name = preg_replace('/\s+/', '_', $season_name_raw);
             ?>
             <!-- VIDEO PLAYER BASED ON URL TYPE -->
+
                 <link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
                 <video poster="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']); ?>" id="player" playsinline controls>
                     <?php if (get_video_extension($video_url) == 'webm'): ?>
-                        <source src="<?php echo 'assets/global/episode_video/'.$video_url; ?>" type="video/webm">
+                        <source src="<?php echo 'assets/global/series/'.$series_folder_name.'/'.$season_folder_name .'/'.$video_url; ?>" type="video/webm">
                     <?php elseif (get_video_extension($video_url) == 'mp4'): ?>
-                        <source src="<?php echo 'assets/global/episode_video/'.$video_url; ?>" type="video/mp4">
+                         <source src="<?php echo 'assets/global/series/'.$series_folder_name.'/'.$season_folder_name .'/'.$video_url; ?>" type="video/mp4">
                     <?php else: ?>
                         <h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
                     <?php endif; ?>
@@ -177,9 +191,9 @@
 				<link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
 				<video poster="<?php echo $this->crud_model->get_thumb_url('series', $row['series_id']);?>" id="trailer_url" playsinline controls>
 					<?php if (get_video_extension($row['trailer_url']) == 'mp4'): ?>
-					  	<source src="<?php echo 'assets/global/series_trailer/'.$row['trailer_url']; ?>" type="video/mp4">
+					  	<source src="<?php echo 'assets/global/series/'.$row['title'].'/'.$row['trailer_url']; ?>" type="video/mp4">
 					<?php elseif (get_video_extension($row['trailer_url']) == 'webm'): ?>
-						<source src="<?php echo 'assets/global/series_trailer/'.$row['trailer_url']; ?>" type="video/webm">
+						<source src="<?php echo 'assets/global/series/'.$row['title'].'/'.$row['trailer_url']; ?>" type="video/webm">
 					<?php else: ?>
 						<h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
 					<?php endif; ?>

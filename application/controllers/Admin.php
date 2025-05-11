@@ -538,37 +538,111 @@ if (isset($credits['cast'])) {
 	}
 
 	// CREATE A NEW SEASON
+	// function season_create($series_id = '')
+	// {
+	// 	$this->db->where('series_id' , $series_id);
+	// 	$this->db->from('season');
+    //     $number_of_season 	=	$this->db->count_all_results();
+
+	// 	$data['series_id']	=	$series_id;
+	// 	$data['name']		=	'Season ' . ($number_of_season + 1);
+	// 	$this->db->insert('season', $data);
+	// 	redirect(base_url().'index.php?admin/series_edit/'.$series_id , 'refresh');
+
+	// }
 	function season_create($series_id = '')
-	{
-		$this->db->where('series_id' , $series_id);
-		$this->db->from('season');
-        $number_of_season 	=	$this->db->count_all_results();
+{
+	// 1. عدّ عدد المواسم الحالية
+	$this->db->where('series_id', $series_id);
+	$this->db->from('season');
+	$number_of_season = $this->db->count_all_results();
 
-		$data['series_id']	=	$series_id;
-		$data['name']		=	'Season ' . ($number_of_season + 1);
-		$this->db->insert('season', $data);
-		redirect(base_url().'index.php?admin/series_edit/'.$series_id , 'refresh');
+	// 2. إنشاء الموسم الجديد في قاعدة البيانات
+	$data['series_id'] = $series_id;
+	$data['name'] = 'Season ' . ($number_of_season + 1);
+	$this->db->insert('season', $data);
 
+	// 3. جلب عنوان المسلسل من قاعدة البيانات
+	$this->db->where('series_id', $series_id);
+	$series = $this->db->get('series')->row_array();
+	$series_title_raw = $series['title'];
+
+	// 4. تحويل اسم المسلسل لمجلد صالح
+	$series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $series_title_raw);
+	$series_base_path = 'assets/global/series/' . $series_folder_name;
+
+	// 5. إنشاء مجلد الموسم داخل مجلد المسلسل
+	$season_folder_name = 'Season_' . ($number_of_season + 1);
+	$season_folder_path = $series_base_path . '/' . $season_folder_name;
+
+	if (!is_dir($season_folder_path)) {
+		mkdir($season_folder_path, 0777, true);
 	}
+
+	// 6. الرجوع لصفحة تحرير المسلسل
+	redirect(base_url().'index.php?admin/series_edit/'.$series_id, 'refresh');
+}
+
 
 	// EDIT A SEASON
-	function season_edit($series_id = '', $season_id = '')
+	// function season_edit($series_id = '', $season_id = '')
+	// {
+	// 	if (isset($_POST) && !empty($_POST))
+	// 	{
+	// 		$data['title']			=	$this->input->post('title');
+	// 		$this->db->update('series', $data,  array('series_id' => $series_id));
+	// 		redirect(base_url().'index.php?admin/series_edit/'.$series_id , 'refresh');
+	// 	}
+	// 	$series_name				=	$this->db->get_where('series', array('series_id'=>$series_id))->row()->title;
+	// 	$season_name				=	$this->db->get_where('season', array('season_id'=>$season_id))->row()->name;
+	// 	$page_data['page_title']	=	'Manage episodes of ' . $season_name . ' : ' . $series_name;
+	// 	$page_data['season_name']	=	$this->db->get_where('season', array('season_id'=>$season_id))->row()->name;
+	// 	$page_data['series_id']		=	$series_id;
+	// 	$page_data['season_id']		=	$season_id;
+	// 	$page_data['page_name']		=	'season_edit';
+	// 	$this->load->view('backend/index', $page_data);
+	// }
+function season_edit($series_id = '', $season_id = '')
+{
+	if (isset($_POST) && !empty($_POST))
 	{
-		if (isset($_POST) && !empty($_POST))
-		{
-			$data['title']			=	$this->input->post('title');
-			$this->db->update('series', $data,  array('series_id' => $series_id));
-			redirect(base_url().'index.php?admin/series_edit/'.$series_id , 'refresh');
+		// 1. الحصول على اسم المسلسل الحالي (قبل التحديث)
+		$old_series = $this->db->get_where('series', array('series_id' => $series_id))->row_array();
+		$old_title = $old_series['title'];
+		$old_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $old_title);
+		$old_folder_path = 'assets/global/series/' . $old_folder_name;
+
+		// 2. الحصول على العنوان الجديد من النموذج
+		$new_title = $this->input->post('title');
+		$data['title'] = $new_title;
+
+		// 3. تحديث قاعدة البيانات
+		$this->db->update('series', $data, array('series_id' => $series_id));
+
+		// 4. تحديث اسم مجلد المسلسل إذا تغيّر العنوان
+		$new_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $new_title);
+		$new_folder_path = 'assets/global/series/' . $new_folder_name;
+
+		if ($old_folder_path !== $new_folder_path && is_dir($old_folder_path)) {
+			rename($old_folder_path, $new_folder_path);
 		}
-		$series_name				=	$this->db->get_where('series', array('series_id'=>$series_id))->row()->title;
-		$season_name				=	$this->db->get_where('season', array('season_id'=>$season_id))->row()->name;
-		$page_data['page_title']	=	'Manage episodes of ' . $season_name . ' : ' . $series_name;
-		$page_data['season_name']	=	$this->db->get_where('season', array('season_id'=>$season_id))->row()->name;
-		$page_data['series_id']		=	$series_id;
-		$page_data['season_id']		=	$season_id;
-		$page_data['page_name']		=	'season_edit';
-		$this->load->view('backend/index', $page_data);
+
+		// 5. إعادة التوجيه
+		redirect(base_url() . 'index.php?admin/series_edit/' . $series_id, 'refresh');
 	}
+
+	// 6. إعداد البيانات للعرض
+	$series_name = $this->db->get_where('series', array('series_id' => $series_id))->row()->title;
+	$season_name = $this->db->get_where('season', array('season_id' => $season_id))->row()->name;
+
+	$page_data['page_title'] = 'Manage episodes of ' . $season_name . ' : ' . $series_name;
+	$page_data['season_name'] = $season_name;
+	$page_data['series_id'] = $series_id;
+	$page_data['season_id'] = $season_id;
+	$page_data['page_name'] = 'season_edit';
+
+	$this->load->view('backend/index', $page_data);
+}
 
 	// DELETE A SEASON
 	function season_delete($series_id = '', $season_id = '')
@@ -578,68 +652,214 @@ if (isset($credits['cast'])) {
 	}
 
 	// CREATE A NEW EPISODE
-	function episode_create($series_id = '', $season_id = '')
-	{
+	// function episode_create($series_id = '', $season_id = '')
+	// {
 		
 		
-			$data['title']			=	$this->input->post('title');
-			//$data['url']			=	$this->input->post('url');
-			$data['season_id']		=	$season_id;
-			$this->db->insert('episode', $data);
-			$episode_id = $this->db->insert_id();
-			if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
-				$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
-				$video_path = 'assets/global/episode_video/' . $video_name;
+	// 		$data['title']			=	$this->input->post('title');
+	// 		//$data['url']			=	$this->input->post('url');
+	// 		$data['season_id']		=	$season_id;
+	// 		$this->db->insert('episode', $data);
+	// 		$episode_id = $this->db->insert_id();
+	// 		if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+	// 			$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
+	// 			$video_path = 'assets/global/episode_video/' . $video_name;
 		
-				// رفع الملف إلى المجلد المحدد
-				move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
+	// 			// رفع الملف إلى المجلد المحدد
+	// 			move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
 		
-				// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-				$this->db->update('episode', ['url' => $video_name], ['episode_id' => $episode_id]);
-			} else {
-				echo "Error uploading episode video.";
-				return;
-			}
-			if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0){
-			move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/episode_thumb/' . $episode_id . '.jpg');}
+	// 			// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
+	// 			$this->db->update('episode', ['url' => $video_name], ['episode_id' => $episode_id]);
+	// 		} else {
+	// 			echo "Error uploading episode video.";
+	// 			return;
+	// 		}
+	// 		if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0){
+	// 		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/episode_thumb/' . $episode_id . '.jpg');}
 			
-			redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
+	// 		redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
 		
-	}
+	// }
 
 	// CREATE A NEW EPISODE
-	function episode_edit($series_id = '', $season_id = '', $episode_id = '')
-	{
-		if (isset($_POST) && !empty($_POST))
-		{
-			$data['title']			=	$this->input->post('title');
-			//$data['url']			=	$this->input->post('url');
-			$data['season_id']		=	$season_id;
-			$this->db->update('episode', $data, array('episode_id'=>$episode_id));
-			if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
-				$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
-				$video_path = 'assets/global/episode_video/' . $video_name;
-		
-				// رفع الملف إلى المجلد المحدد
-				move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
-		
-				// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
-				$this->db->update('episode', ['url' => $video_name], ['episode_id' => $episode_id]);
-			} else {
-				echo "Error uploading episode video.";
-				return;
-			}
-			move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/episode_thumb/' . $episode_id . '.jpg');
-			redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
-		}
+	function episode_create($series_id = '', $season_id = '')
+{
+	// 1. إدخال بيانات الحلقة إلى قاعدة البيانات
+	$data['title'] = $this->input->post('title');
+	$data['season_id'] = $season_id;
+	$this->db->insert('episode', $data);
+	$episode_id = $this->db->insert_id();
+
+	// 2. جلب اسم المسلسل
+	$this->db->where('series_id', $series_id);
+	$series = $this->db->get('series')->row_array();
+	$series_title_raw = $series['title'];
+	$series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $series_title_raw);
+
+	// 3. جلب اسم الموسم
+	$this->db->where('season_id', $season_id);
+	$season = $this->db->get('season')->row_array();
+	$season_name_raw = $season['name'];
+	$season_folder_name = preg_replace('/\s+/', '_', $season_name_raw);
+
+	// 4. إعداد المسار الكامل للمجلد
+	$folder_path = 'assets/global/series/' . $series_folder_name . '/' . $season_folder_name;
+
+	// 5. إنشاء المجلد إذا لم يكن موجودًا
+	if (!is_dir($folder_path)) {
+		mkdir($folder_path, 0777, true);
 	}
 
-	// DELETE AN EPISODE
-	function episode_delete($series_id = '', $season_id = '', $episode_id = '')
-	{
-		$this->db->delete('episode',  array('episode_id' => $episode_id));
-		redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
+	// 6. حفظ ملف الفيديو باسم مأخوذ من عنوان الحلقة
+	if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+		$episode_title = $data['title'];
+		$clean_filename = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $episode_title) . '.mp4';
+		$video_path = $folder_path . '/' . $clean_filename;
+
+		move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
+
+		// تحديث اسم الملف في قاعدة البيانات
+		$this->db->update('episode', ['url' => $clean_filename], ['episode_id' => $episode_id]);
+	} else {
+		echo "Error uploading episode video.";
+		return;
 	}
+
+	// 7. رفع صورة الحلقة داخل نفس المجلد
+	// if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0) {
+	// 	$thumb_path = $folder_path . '/thumb_' . $episode_id . '.jpg';
+	// 	move_uploaded_file($_FILES['thumb']['tmp_name'], $thumb_path);
+	// }
+
+	// 8. إعادة التوجيه
+	redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
+}
+// edit existing episode
+	// function episode_edit($series_id = '', $season_id = '', $episode_id = '')
+	// {
+	// 	if (isset($_POST) && !empty($_POST))
+	// 	{
+	// 		$data['title']			=	$this->input->post('title');
+	// 		//$data['url']			=	$this->input->post('url');
+	// 		$data['season_id']		=	$season_id;
+	// 		$this->db->update('episode', $data, array('episode_id'=>$episode_id));
+	// 		if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+	// 			$video_name = $_FILES['url']['name']; // اسم الملف الأصلي
+	// 			$video_path = 'assets/global/episode_video/' . $video_name;
+		
+	// 			// رفع الملف إلى المجلد المحدد
+	// 			move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
+		
+	// 			// الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
+	// 			$this->db->update('episode', ['url' => $video_name], ['episode_id' => $episode_id]);
+	// 		} else {
+	// 			echo "Error uploading episode video.";
+	// 			return;
+	// 		}
+	// 		move_uploaded_file($_FILES['thumb']['tmp_name'], 'assets/global/episode_thumb/' . $episode_id . '.jpg');
+	// 		redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
+	// 	}
+	// }
+
+
+function episode_edit($series_id = '', $season_id = '', $episode_id = '')
+{
+    if (isset($_POST) && !empty($_POST)) {
+        // 1. جمع البيانات من النموذج
+        $data['title'] = $this->input->post('title');
+        $data['season_id'] = $season_id;
+
+        // 2. تحديث بيانات الحلقة في قاعدة البيانات
+        $this->db->update('episode', $data, array('episode_id' => $episode_id));
+
+        // 3. تجهيز اسم المسلسل والموسم
+        $series_title = $this->db->get_where('series', ['series_id' => $series_id])->row()->title;
+        $season_name = $this->db->get_where('season', ['season_id' => $season_id])->row()->name;
+
+        // 4. تجهيز مسار مجلد المسلسل والموسم
+        $series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $series_title);
+        $season_folder_name = preg_replace('/\s+/', '_', $season_name);
+
+        $series_folder_path = 'assets/global/series/' . $series_folder_name;
+        $season_folder_path = $series_folder_path . '/' . $season_folder_name;
+
+        // 5. إنشاء مجلد الموسم إذا لم يكن موجودًا
+        if (!is_dir($season_folder_path)) {
+            mkdir($season_folder_path, 0777, true);
+        }
+
+        // 6. رفع الفيديو الخاص بالحلقات
+        if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
+            // استخدام عنوان الحلقة كاسم للملف
+            $video_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $data['title']) . '.mp4';
+            $video_path = $season_folder_path . '/' . $video_name;
+
+            // رفع الملف إلى المجلد المحدد
+            move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
+
+            // الآن نقوم بتحديث قاعدة البيانات باستخدام اسم الملف الأصلي
+            $this->db->update('episode', ['url' => $video_name], ['episode_id' => $episode_id]);
+        } else {
+            echo "Error uploading episode video.";
+            return;
+        }
+
+        // 7. رفع صورة الـ thumb الخاصة بالحلقات
+        if (isset($_FILES['thumb']) && $_FILES['thumb']['error'] == 0) {
+            $thumb_path = $season_folder_path . '/' . preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $data['title']) . '.jpg';
+            move_uploaded_file($_FILES['thumb']['tmp_name'], $thumb_path);
+        }
+
+        // 8. إعادة التوجيه إلى صفحة تعديل الموسم
+        redirect(base_url() . 'index.php?admin/season_edit/' . $series_id . '/' . $season_id, 'refresh');
+    }
+}
+
+
+	// DELETE AN EPISODE
+	// function episode_delete($series_id = '', $season_id = '', $episode_id = '')
+	// {
+	// 	$this->db->delete('episode',  array('episode_id' => $episode_id));
+	// 	redirect(base_url().'index.php?admin/season_edit/'.$series_id.'/'.$season_id , 'refresh');
+	// }
+	function episode_delete($series_id = '', $season_id = '', $episode_id = '')
+{
+    // 1. الحصول على تفاصيل الحلقة (العنوان) للتأكد من المسارات
+    $episode = $this->db->get_where('episode', array('episode_id' => $episode_id))->row();
+
+    // 2. تجهيز مسار المجلد الخاص بالمسلسل والموسم
+    $series_title = $this->db->get_where('series', ['series_id' => $series_id])->row()->title;
+    $season_name = $this->db->get_where('season', ['season_id' => $season_id])->row()->name;
+
+    // تجهيز مسار مجلد المسلسل والموسم
+    $series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $series_title);
+    $season_folder_name = preg_replace('/\s+/', '_', $season_name);
+
+    $series_folder_path = 'assets/global/series/' . $series_folder_name;
+    $season_folder_path = $series_folder_path . '/' . $season_folder_name;
+
+    // 3. تحديد مسار الفيديو والصورة الخاصة بالحلقة
+    $video_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $episode->title) . '.mp4';
+    $thumb_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $episode->title) . '.jpg';
+
+    $video_path = $season_folder_path . '/' . $video_name;
+    $thumb_path = $season_folder_path . '/' . $thumb_name;
+
+    // 4. حذف الفيديو والصورة إذا كانا موجودين
+    if (file_exists($video_path)) {
+        unlink($video_path);
+    }
+    if (file_exists($thumb_path)) {
+        unlink($thumb_path);
+    }
+
+    // 5. حذف الحلقة من قاعدة البيانات
+    $this->db->delete('episode', array('episode_id' => $episode_id));
+
+    // 6. إعادة التوجيه إلى صفحة تعديل الموسم
+    redirect(base_url() . 'index.php?admin/season_edit/' . $series_id . '/' . $season_id, 'refresh');
+}
+
 
 	// WATCH LIST OF ACTORS, MANAGE THEM
 	function actor_list()

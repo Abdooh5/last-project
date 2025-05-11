@@ -303,7 +303,7 @@ if (data.runtime && !isNaN(data.runtime)) {
 
 						// تعبئة البيانات
 						$('#description_long').val(data.overview);
-						$('#description_short').val(data.overview);
+						//$('#description_short').val(data.overview);
 						//$('[name="duration"]').val(data.runtime);
 
 						if (data.release_date) {
