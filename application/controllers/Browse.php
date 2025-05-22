@@ -348,6 +348,47 @@ class Browse extends CI_Controller {
     // تحميل الصفحة
     $this->load->view('frontend/index', $page_data);
 }
+public function series_by_multiple_countries($country_ids = '', $category_id = '', $offset = '')
+{
+    $page_data['page_name']  = 'series';
+    $page_data['page_title'] = 'Watch TV Series by Multiple Countries and Category';
+    $page_data['country_ids'] = $country_ids;
+    $page_data['category_id'] = $category_id;
+
+    // تحويل سلسلة IDs إلى مصفوفة
+    $country_id_array = explode('-', $country_ids);
+    
+    // تكوين رابط التصفح
+    $url = base_url() . 'index.php?browse/series_by_multiple_countries/' . $country_ids . '/' . $category_id;
+    $per_page = 20;
+
+    // احسب إجمالي النتائج
+    $this->db->from('series');
+    if (!empty($country_id_array)) {
+        $this->db->where_in('country_id', $country_id_array);
+    }
+    if (!empty($category_id)) {
+        $this->db->where('category', $category_id);
+    }
+    $total_result = $this->db->count_all_results();
+
+    // التصفح (pagination)
+    $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+    $this->pagination->initialize($config);
+
+    // جلب السنوات (اختياري)
+    $this->db->distinct();
+    $this->db->select('year');
+    $page_data['years'] = $this->db->get('series')->result_array();
+
+    // جلب المسلسلات
+    $page_data['series'] = $this->crud_model->get_series_by_multiple_countries($country_id_array, $category_id, $per_page, $offset);
+    $page_data['total_result'] = $total_result;
+
+    // تحميل العرض
+    $this->load->view('frontend/index', $page_data);
+}
+
 
 	function series_by_country($country_id = '', $category_id = '', $offset = '')
 	{

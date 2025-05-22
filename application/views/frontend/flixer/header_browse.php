@@ -37,43 +37,119 @@
 
 <!-- TV Programs GENRE WISE (Static Categories) -->
 <li class="dropdown">
-    <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" style="color: #e50914; font-weight: bold;">
         <?php echo get_phrase('مسلسلات'); ?> <span class="caret"></span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="themes">
         <?php 
-		$category_name='مسلسلات';
-		$cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
+        $category_name = 'مسلسلات';
+        $cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
 
-        $countries = [
-            'تركي' => 'مسلسلات تركية',
-            'مصري' => 'مسلسلات مصرية',
-            'خليجي' => 'مسلسلات خليجية',
-            'شامي' => 'مسلسلات شامية' ,
-			 'أجنبي' => 'مسلسلات أجنبية',
-            'هندي' => 'مسلسلات هندية',
-			'أسيوي' => 'مسلسلات أسيوي',
-        ];
-        
-        foreach ($countries as $country_name => $display_name) {
-            $country = $this->db->get_where('country', ['name' => $country_name])->row();
-            if ($country) {
-                $this->db->where('country_id', $country->country_id);
-				$count= $this->db->where('category', $cate_id)->count_all_results('series');
+        // التصنيفات الرئيسية مع الدول باللغة الإنجليزية
+       $series_categories = [
+    'مسلسلات تركية' => [
+        'Turkey'
+    ],
+    'مسلسلات هندية' => [
+        'India'
+    ],
+    'مسلسلات أسيوية' => [
+        'Japan',
+        'South Korea',
+        'China',
+        'Hong Kong',
+        'Thailand',
+        'Philippines',
+        'Malaysia',
+        'Indonesia',
+        'Vietnam',
+        'Singapore',
+        'Taiwan',
+        'Mongolia',
+        'Brunei Darussalam',
+        'Cambodia',
+        'Lao People\'s Democratic Republic',
+        'Myanmar',
+        'Sri Lanka'
+    ],
+    'مسلسلات عربية' => [
+        'Egypt',
+        'Saudi Arabia',
+        'United Arab Emirates',           
+        'Morocco',
+        'Algeria',
+        'Tunisia',
+        'Iraq',
+        'Palestinian Territory',
+        'Qatar',
+        'Bahrain',
+        'Oman',
+        'Kuwait',
+        'Sudan',
+        'Libyan Arab Jamahiriya',
+        'Yemen'
+    ],
+    'مسلسلات شامية' => [
+        'Syrian Arab Republic',
+        'Lebanon',
+        'Jordan',
+        'Palestinian Territory'
+    ]
+];
+
+
+        $all_countries = $this->db->get('country')->result();
+        $assigned_country_ids = [];
+
+        foreach ($series_categories as $label => $country_names) {
+            $country_ids = [];
+            foreach ($all_countries as $country) {
+                if (in_array($country->name, $country_names)) {
+                    $country_ids[] = $country->country_id;
+                    $assigned_country_ids[] = $country->country_id;
+                }
+            }
+
+            if (!empty($country_ids)) {
+                $this->db->where_in('country_id', $country_ids);
+                $this->db->where('category', $cate_id);
+                $this->db->from('series');
+                $series_count = $this->db->count_all_results();
                 ?>
                 <li>
-                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_country/<?php echo $country->country_id; ?>/<?php echo $cate_id ?>">
-                        <?php echo $display_name; ?> (<?php echo $count; ?>)
+                    <a href="<?php echo base_url(); ?>index.php?browse/series_by_multiple_countries/<?php echo implode('-', $country_ids); ?>/<?php echo $cate_id ?>">
+                        <?php echo $label; ?> (<?php echo $series_count; ?>)
                     </a>
                 </li>
                 <?php
             }
         }
 
-      
+        // الدول غير المصنفة (تُعتبر أجنبية)
+        $foreign_country_ids = [];
+        foreach ($all_countries as $country) {
+            if (!in_array($country->country_id, $assigned_country_ids)) {
+                $foreign_country_ids[] = $country->country_id;
+            }
+        }
+
+        if (!empty($foreign_country_ids)) {
+            $this->db->where_in('country_id', $foreign_country_ids);
+            $this->db->where('category', $cate_id);
+            $this->db->from('series');
+            $foreign_series_count = $this->db->count_all_results();
+            ?>
+            <li>
+                <a href="<?php echo base_url(); ?>index.php?browse/series_by_multiple_countries/<?php echo implode('-', $foreign_country_ids); ?>/<?php echo $cate_id ?>">
+                    <?php echo 'مسلسلات أجنبية'; ?> (<?php echo $foreign_series_count; ?>)
+                </a>
+            </li>
+            <?php
+        }
         ?>
     </ul>
 </li>
+
 <li class="dropdown">
     <a class="dropdown-toggle" data-toggle="dropdown" href="#" style="color: #e50914; font-weight: bold;">
         <?php echo get_phrase('أفلام'); ?> <span class="caret"></span>

@@ -10,7 +10,6 @@
 			</ul>
 
 
-			<p>Made by <a href="http://creativeitem.com/" rel="nofollow">Creativeitem</a>. <a href="http://support.creativeitem.com/" target="_blank">Get support</a>.</p>
-		</div>
+			</div>
 	</div>
 </footer>

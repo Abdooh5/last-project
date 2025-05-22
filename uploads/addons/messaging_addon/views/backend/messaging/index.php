@@ -1,1 +1,0 @@
-<h2>Welcome to Messaging Addon</h2>

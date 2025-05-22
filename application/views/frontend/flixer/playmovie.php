@@ -17,7 +17,24 @@
             width: 100%;
         }
     }
+    
+    .detail-column {
+        min-width: 200px;
+        flex: 1;
+        margin: 5px;
+        border-radius: 10px;
+        background-color: #1c1c1c;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        color: #fff;
+    }
 
+    .detail-column strong {
+        color: #fff;
+    }
+
+    .detail-column a {
+        text-decoration: none;
+    }
     .video_cover {
         position: relative;
         padding-bottom: 30px;
@@ -134,7 +151,7 @@ foreach ($movie_details as $row):
 
         <div class="col-lg-4">
     <!-- اسم الفيلم -->
-    <h3 style="margin-top: 0;"><?php echo $row['title']; ?></h3>
+    <!-- <h3 style="margin-top: 0;"><?php echo $row['title']; ?></h3> -->
 
     <!-- زر التحميل -->
     <a href="<?php echo base_url() . 'assets/global/movie_video/' . $row['url']; ?>" download class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
@@ -159,14 +176,22 @@ foreach ($movie_details as $row):
             </a>
         </span>
     </div>
+<br>
+</div>
 
-    <!-- تفاصيل الفيلم -->
-    <div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card p-4" style="background-color: #1c1c1c; color: #fff; border-radius: 10px;">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <i class="fa fa-tags"></i> <strong> <?php echo get_phrase('Genre'); ?>: </strong>
+</div>
+
+
+<!-- تفاصيل الفيلم -->
+<div class="container-fluid p-4" style="background-color: #111; color: #fff; font-size: 20px">
+    <div class="d-flex flex-wrap justify-content-between align-items-start text-white">
+
+        <!-- النوع -->
+        <div class="detail-column p-3" style="min-width: 200px;">
+            <div style="direction: rtl;">
+                <i class="fa fa-film text-danger"></i> 
+                <strong><?php echo get_phrase('Genre'); ?>:</strong>
+                <span style="direction: ltr; display: inline-block;">
                     <?php
                     $genre_ids = json_decode($row['genre_id'], true);
                     if (!empty($genre_ids)) {
@@ -174,7 +199,8 @@ foreach ($movie_details as $row):
                         foreach ($genre_ids as $genre_id) {
                             $genre = $this->db->get_where('genre', array('genre_id' => $genre_id))->row();
                             if ($genre) {
-                                $genres[] = '<a href="' . base_url() . 'index.php?browse/movie/' . $genre_id . '" style="color: #e50914;">' . $genre->name . '</a>';
+                             
+                                $genres[] = '<span style="color: #e50914;">' . $genre->name . '</span>';
                             }
                         }
                         echo implode(', ', $genres);
@@ -182,42 +208,64 @@ foreach ($movie_details as $row):
                         echo '—';
                     }
                     ?>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <i class="fa fa-calendar"></i> <strong> <?php echo get_phrase('Year'); ?>: </strong> <?php echo $row['year']; ?>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <i class="fa fa-globe"></i> <strong> <?php echo get_phrase('Country'); ?>: </strong>
+                </span>
+            </div>
+        </div>
+
+
+        <!-- السنة -->
+        <div class="detail-column p-3" style="min-width: 200px;">
+            <div style="direction: rtl;">
+                <i class="fa fa-calendar text-primary"></i>
+                <strong><?php echo get_phrase('Year'); ?>:</strong>
+                <span style="direction: ltr;"><?php echo $row['year']; ?></span>
+            </div>
+        </div>
+  
+
+        <!-- الدولة -->
+        <div class="detail-column p-3" style="min-width: 200px;">
+            <div style="direction: rtl;">
+                <i class="fa fa-globe text-success"></i>
+                <strong><?php echo get_phrase('Country'); ?>:</strong>
+                <span style="direction: ltr;">
                     <?php
                     $country = $this->db->get_where('country', array('country_id' => $row['country_id']))->row();
                     echo $country ? $country->name : '—';
                     ?>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <i class="fa fa-clock-o"></i> <strong> <?php echo get_phrase('Duration'); ?>: </strong> <?php echo $row['duration'] > 0 ? $row['duration'] . ' ' . get_phrase('minutes') : '—'; ?>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <i class="fa fa-star"></i> <strong> <?php echo get_phrase('Rating'); ?>: </strong> <?php echo $row['rating'] ?? '—'; ?>
-                </div>
-            </div>
-            <div class="mt-3">
-                <strong><i class="fa fa-info-circle"></i> <?php echo get_phrase('Description'); ?>:</strong>
-                <p style="text-align: justify;"><?php echo $row['description_long']; ?></p>
+                </span>
             </div>
         </div>
+
+        <!-- التقييم -->
+        <div class="detail-column p-3" style="min-width: 200px;">
+            <div style="direction: rtl;">
+                <i class="fa fa-star text-warning"></i>
+                <strong><?php echo get_phrase('Rating'); ?>:</strong>
+                <span style="direction: ltr;"><?php echo $row['rating'] ?? '—'; ?></span>
+            </div>
+        </div>
+
+        <!-- الوصف -->
+        <div class="detail-column p-3 mt-3" style="flex: 1 1 100%; direction: rtl;">
+            <i class="fa fa-info-circle text-info"></i>
+            <strong><?php echo get_phrase('Description'); ?>:</strong>
+            <p class="mt-2" style="direction: rtl; text-align: justify;"><?php echo $row['description_long']; ?></p>
+        </div>
+
     </div>
 </div>
 
 
-    </div>
+    
 
     <div class="row" style="margin-top:20px;">
         <div class="col-lg-12">
             <div class="bs-component">
                 <ul class="nav nav-tabs">
-                    <li class="active" style="width:25%;">
+                    <!-- <li class="active" style="width:25%;">
                         <a href="#about" data-toggle="tab"><?php echo get_phrase('About'); ?></a>
-                    </li>
+                    </li> -->
                     <li style="width:25%;">
                         <a href="#cast" data-toggle="tab"><?php echo get_phrase('Cast'); ?></a>
                     </li>
@@ -230,9 +278,9 @@ foreach ($movie_details as $row):
                 </ul>
                 <div id="myTabContent" class="tab-content">
                     <!-- TAB FOR TITLE -->
-                    <div class="tab-pane active in" id="about">
+                    <!-- <div class="tab-pane active in" id="about">
                         <p><?php echo $row['description_long']; ?></p>
-                    </div>
+                    </div> -->
                     <!-- TAB FOR ACTORS -->
                     <div class="tab-pane " id="cast">
                         <p>

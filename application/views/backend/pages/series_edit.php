@@ -102,16 +102,19 @@
 					<div class="form-group mb-3">
 						<label for="genre_id">Genre</label>
 						<span class="help">- genre must be selected</span>
-						<select class="form-control select2" id="genre_id" name="genre_id">
+						<select class="form-control select2" id="genre_id" name="genre_id[]" multiple>
 							<?php
-								$genres	=	$this->crud_model->get_genres();
-								foreach ($genres as $row2):?>
-							<option
-								<?php if ( $series_detail->genre_id == $row2['genre_id']) echo 'selected';?>
-								value="<?php echo $row2['genre_id'];?>">
-								<?php echo $row2['name'];?>
-							</option>
-							<?php endforeach;?>
+							$genres	=	$this->crud_model->get_genres();
+							$selected_genres = json_decode($series_detail->genre_id);
+							if (!is_array($selected_genres)) $selected_genres = []; // fallback
+							foreach ($genres as $row2): ?>
+
+								<option
+									<?php if (in_array($row2['genre_id'], $selected_genres)) echo 'selected'; ?>
+									value="<?php echo $row2['genre_id']; ?>">
+									<?php echo $row2['name']; ?>
+								</option>
+							<?php endforeach; ?>
 						</select>
 					</div>
 

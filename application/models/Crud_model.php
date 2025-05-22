@@ -682,20 +682,47 @@ if (!empty($genre_ids)) {
 function create_series()
 {
 	$data['title']              = $this->input->post('title');
-	$data['description_short']  = $this->input->post('description_short');
-	$data['description_long']   = $this->input->post('description_long');
-	$data['year']               = $this->input->post('year');
-	$data['rating']             = $this->input->post('rating');
-	$data['country_id']         = $this->input->post('country_id');
-	$data['genre_id']           = $this->input->post('genre_id');
-	$data['category']           = $this->input->post('category');
-	$actors                     = $this->input->post('actors');
-	$actor_entries              = array();
+$data['description_short']  = $this->input->post('description_short');
+$data['description_long']   = $this->input->post('description_long');
+$data['year']               = $this->input->post('year');
+$data['rating']             = $this->input->post('rating');
+$data['category']           = $this->input->post('category');
+$country_ids = $this->input->post('country_id');
+$data['country_id'] = is_array($country_ids) ? $country_ids[0] : $country_ids;
 
-	foreach ($actors as $actor) {
-		array_push($actor_entries, $actor);
-	}
-	$data['actors'] = json_encode($actor_entries);
+
+// معالجة الممثلين
+$actors = $this->input->post('actors');
+$actor_entries = array();
+if (!empty($actors)) {
+    if (!is_array($actors)) {
+        $actors = [$actors];
+    }
+    foreach ($actors as $actor) {
+        $actor_entries[] = $actor;
+    }
+}
+$data['actors'] = json_encode($actor_entries);
+
+// معالجة النوع
+$genre_ids = $this->input->post('genre_id');
+if (!empty($genre_ids)) {
+    if (!is_array($genre_ids)) {
+        $genre_ids = [$genre_ids];
+    }
+    $data['genre_id'] = json_encode($genre_ids);
+} elseif (is_array($this->input->post('genre_names'))) {
+    $genre_names = $this->input->post('genre_names');
+    $genre_ids = [];
+    foreach ($genre_names as $genre_name) {
+        $genre = $this->db->get_where('genre', ['name' => $genre_name])->row_array();
+        if ($genre) {
+            $genre_ids[] = $genre['genre_id'];
+        }
+    }
+    $data['genre_id'] = json_encode($genre_ids);
+}
+
 
 	// إدخال بيانات المسلسل في قاعدة البيانات
 	$this->db->insert('series', $data);
@@ -714,19 +741,49 @@ $series_folder_path = $base_series_folder . '/' . $series_folder_name;
 	if (!is_dir($series_folder_path)) {
 		mkdir($series_folder_path, 0777, true);
 	}
-
+// ✅ تحميل البوستر باستخدام cURL
+		$poster_url = $this->input->post('poster_url');
+// echo "<pre>";
+// print_r($poster_url);
+// echo "</pre>";
+// die();
+		if (!empty($poster_url)) {
+			log_message('error', '🔍 رابط الصورة المستلم: ' . $poster_url);
+		
+			$ch = curl_init($poster_url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		
+			$poster_data = curl_exec($ch);
+			$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+		
+			log_message('error', '🧾 كود HTTP: ' . $http_code);
+			log_message('error', '📦 حجم الصورة المستلمة: ' . strlen($poster_data));
+		
+			if ($poster_data !== false && $http_code == 200) {
+				file_put_contents($series_folder_path . '/poster.jpg', $poster_data);
+				file_put_contents($series_folder_path . '/thumb.jpg', $poster_data);
+				log_message('error', '✅ تم حفظ الصورة بنجاح');
+			} else {
+				log_message('error', "❌ فشل تحميل الصورة عبر cURL. HTTP Code: $http_code");
+			}
+		}
 	// نقل الصور إلى مجلد المسلسل
 	move_uploaded_file($_FILES['thumb']['tmp_name'], $series_folder_path . '/thumb.jpg');
 	move_uploaded_file($_FILES['poster']['tmp_name'], $series_folder_path . '/poster.jpg');
 
 	// رفع فيديو التريلر
 	if (isset($_FILES['series_trailer_url']) && $_FILES['series_trailer_url']['error'] == 0) {
-		$trailer_name = $_FILES['series_trailer_url']['name'];
-		$trailer_path = $series_folder_path . '/' . $trailer_name;
+		$trailer_ext = pathinfo($_FILES['series_trailer_url']['name'], PATHINFO_EXTENSION);
+		$trailer_filename = 'trailer.' . $trailer_ext;
+		$trailer_path = $series_folder_path . '/' . $trailer_filename;
+
 		move_uploaded_file($_FILES['series_trailer_url']['tmp_name'], $trailer_path);
 
-		// تحديث مسار التريلر في قاعدة البيانات
-		$this->db->update('series', ['trailer_url'=> $trailer_name], ['series_id' => $series_id]);
+		// حفظ اسم الملف في قاعدة البيانات
+		$this->db->update('series', ['trailer_url' => $trailer_filename], ['series_id' => $series_id]);
 	} else {
 		echo "Error uploading trailer video.";
 		return;
@@ -827,7 +884,7 @@ $series_folder_path = $base_series_folder . '/' . $series_folder_name;
 	$data['year'] = $this->input->post('year');
 	$data['rating'] = $this->input->post('rating');
 	$data['country_id'] = $this->input->post('country_id');
-	$data['genre_id'] = $this->input->post('genre_id');
+	//$data['genre_id'] = $this->input->post('genre_id');
 	$data['category'] = $this->input->post('category');
 	
 	$actors = $this->input->post('actors');
@@ -836,6 +893,16 @@ $series_folder_path = $base_series_folder . '/' . $series_folder_name;
 		$actor_entries[] = $actor;
 	}
 	$data['actors'] = json_encode($actor_entries);
+
+if ($this->input->post('genre_id')) {
+    $genre_input = $this->input->post('genre_id');
+    if (is_array($genre_input)) {
+        $data['genre_id'] = json_encode($genre_input);
+    } else {
+        // في حال تم إرسالها كسلسلة (سهوًا أو بسبب تعديل جافاسكريبت مثلًا)
+        $data['genre_id'] = json_encode([$genre_input]);
+    }
+}
 
 	// 2. تحديث بيانات المسلسل في قاعدة البيانات
 	$this->db->update('series', $data, array('series_id' => $series_id));
@@ -920,6 +987,18 @@ $series_folder_path = $base_series_folder . '/' . $series_folder_name;
 		$this->db->limit($limit, $offset);
 		return $this->db->get()->result_array();
 	}
+public function get_series_by_multiple_countries($country_ids = array(), $category_id = '', $limit = 20, $offset = 0)
+{
+    if (empty($country_ids) || empty($category_id)) return [];
+
+    $this->db->where_in('country_id', $country_ids);
+    $this->db->where('category', $category_id);
+    $this->db->order_by('series_id', 'DESC');
+    $this->db->limit($limit, $offset);
+    return $this->db->get('series')->result_array();
+}
+
+
 	public function get_series_by_country($country_id, $category_id, $limit = 20, $offset = 0)
 	{
 		$this->db->from('series');  // تحديد الجدول الأساسي

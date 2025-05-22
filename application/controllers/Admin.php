@@ -531,11 +531,53 @@ if (isset($credits['cast'])) {
 	}
 
 	// DELETE A SERIES
-	function series_delete($series_id = '')
-	{
-		$this->db->delete('series',  array('series_id' => $series_id));
-		redirect(base_url().'index.php?admin/series_list' , 'refresh');
-	}
+	function series_delete($series_id = '') {
+    // دالة لحذف المجلد وكل محتوياته
+    function delete_directory($dir) {
+        // تحقق إذا كان المجلد موجودًا
+        if (is_dir($dir)) {
+            // الحصول على كافة الملفات والمجلدات في المجلد
+            $files = array_diff(scandir($dir), array('.', '..'));
+            
+            foreach ($files as $file) {
+                // بناء المسار الكامل للملف أو المجلد
+                $filePath = $dir . DIRECTORY_SEPARATOR . $file;
+                
+                // إذا كان ملفًا، احذفه
+                if (is_file($filePath)) {
+                    unlink($filePath);
+                } 
+                // إذا كان مجلدًا، استدعاء الدالة لحذف المجلدات
+                else {
+                    delete_directory($filePath);
+                }
+            }
+            // أخيرًا، احذف المجلد نفسه
+            rmdir($dir);
+        }
+    }
+
+    // استعلام للحصول على بيانات المسلسل قبل حذفه من قاعدة البيانات
+    $query = $this->db->get_where('series', array('series_id' => $series_id));
+    $series = $query->row();
+
+    if ($series) {
+        // تحديد مسار المجلد الخاص بالمسلسل بناءً على العنوان
+        $base_series_folder = 'assets/global/series';
+        $series_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $series->title);
+        $series_folder_path = $base_series_folder . '/' . $series_folder_name;
+
+        // حذف المجلد المرتبط بالمسلسل
+        delete_directory($series_folder_path);
+
+        // حذف السلسلة من قاعدة البيانات
+        $this->db->delete('series', array('series_id' => $series_id));
+    }
+
+    // إعادة التوجيه إلى قائمة المسلسلات
+    redirect(base_url() . 'index.php?admin/series_list', 'refresh');
+}
+
 
 	// CREATE A NEW SEASON
 	// function season_create($series_id = '')
@@ -1455,5 +1497,142 @@ function episode_edit($series_id = '', $season_id = '', $episode_id = '')
     $page_data['page_title'] = get_phrase('available_addon');
     $this->load->view('backend/index', $page_data);
   }
+
+public function fetch_tmdb_series_data() {
+	$title = $this->input->post('title');
+	$apiKey = '550cd509e7933045659e6f893e844d64';
+
+	if (empty($title)) {
+		echo json_encode(['error' => 'لم يتم إدخال عنوان المسلسل']);
+		return;
+	}
+
+	function curl_get($url) {
+		$ch = curl_init();
+		curl_setopt_array($ch, [
+			CURLOPT_URL => $url,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_SSL_VERIFYHOST => false,
+		]);
+		$response = curl_exec($ch);
+		curl_close($ch);
+		return $response;
+	}
+
+	function insert_if_not_exists($table, $name, $profile_image_url = null) {
+		$ci = &get_instance();
+		$ci->db->where('name', $name);
+		$query = $ci->db->get($table);
+
+		if ($query->num_rows() == 0) {
+			$data = ['name' => $name];
+			$ci->db->insert($table, $data);
+			$insert_id = $ci->db->insert_id();
+
+			if ($profile_image_url) {
+				$image_directory = 'assets/global/actor/';
+				if (!is_dir($image_directory)) {
+					mkdir($image_directory, 0777, true);
+				}
+
+				$image_ext = pathinfo(parse_url($profile_image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
+				if (!$image_ext) $image_ext = 'jpg';
+
+				$local_filename = $insert_id . '.' . strtolower($image_ext);
+				$local_path = $image_directory . $local_filename;
+
+				$image_data = file_get_contents($profile_image_url);
+				if ($image_data !== false) {
+					file_put_contents($local_path, $image_data);
+				}
+			}
+		}
+	}
+
+	// Step 1: البحث عن المسلسل
+	$searchUrl = "https://api.themoviedb.org/3/search/tv?api_key={$apiKey}&query=" . urlencode($title) . "&language=ar";
+	$searchResponse = curl_get($searchUrl);
+	$searchData = json_decode($searchResponse, true);
+
+	if (!isset($searchData['results'][0])) {
+		echo json_encode(['error' => '❌ لم يتم العثور على نتائج للمسلسل']);
+		return;
+	}
+
+	$series = $searchData['results'][0];
+	$seriesId = $series['id'];
+
+	// Step 2: تفاصيل المسلسل
+	$detailsUrl = "https://api.themoviedb.org/3/tv/{$seriesId}?api_key={$apiKey}&language=ar";
+	$details = json_decode(curl_get($detailsUrl), true);
+
+	// Step 3: الممثلين
+	$creditsUrl = "https://api.themoviedb.org/3/tv/{$seriesId}/credits?api_key={$apiKey}&language=ar";
+	$credits = json_decode(curl_get($creditsUrl), true);
+
+	$actors = [];
+	if (isset($credits['cast'])) {
+		foreach (array_slice($credits['cast'], 0, 5) as $actor) {
+			$actors[] = $actor['name'];
+			$profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
+			insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+		}
+	}
+
+	// Step 4: الأنواع
+	$genreNames = [];
+	if (isset($details['genres'])) {
+		foreach ($details['genres'] as $g) {
+			$genreNames[] = $g['name'];
+			insert_if_not_exists('genre', $g['name']);
+		}
+	}
+
+	// Step 5: الدول
+	$countries = [];
+
+	// جلب قائمة الدول من TMDB
+	$countryApiUrl = "https://api.themoviedb.org/3/configuration/countries?api_key={$apiKey}";
+	$countryList = json_decode(curl_get($countryApiUrl), true);
+
+	$countryMap = [];
+	if (is_array($countryList)) {
+		foreach ($countryList as $countryItem) {
+			$countryMap[$countryItem['iso_3166_1']] = $countryItem['english_name'];
+		}
+	}
+
+	if (isset($details['origin_country'])) {
+		foreach ($details['origin_country'] as $c_code) {
+			if (isset($countryMap[$c_code])) {
+				$country_name = $countryMap[$c_code];
+				$countries[] = $country_name;
+				insert_if_not_exists('country', $country_name);
+			} else {
+				$countries[] = $c_code; // fallback
+				insert_if_not_exists('country', $c_code);
+			}
+		}
+	}
+
+	// النتيجة النهائية
+	$result = [
+		'title' => $details['name'],
+		'overview' => $details['overview'],
+		'release_date' => $details['first_air_date'],
+		'vote_average' => $details['vote_average'],
+		'poster_path' => $details['poster_path'],
+		'backdrop_path' => $details['backdrop_path'],
+		'actors' => $actors,
+		'genres' => $genreNames,
+		'countries' => $countries,
+		
+	];
+
+	echo json_encode($result);
+}
+
+
 
 }
