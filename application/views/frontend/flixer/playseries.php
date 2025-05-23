@@ -257,8 +257,9 @@
 		<!-- أزرار التحميل ومشاهدة التريلر تظهر دائمًا هنا -->
 		<div class="col-lg-4">
 			<div id="video_controls">
-			    <a href="<?php echo base_url().'assets/global/episode_video/'.$video_url; ?>" download 
+			    <a href="<?php echo base_url().'assets/global/series/'.$series_folder_name.'/'.$season_folder_name .'/'.$video_url;?>" download 
 			       class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px;">
+				  
 			        <i class="fa fa-download"></i> <?php echo get_phrase('Download');?>
 			    </a>
 			    <button class="btn btn-danger btn-md" id="watch_button" style="font-size: 16px; margin-top: 20px;" onclick="divToggle()">

@@ -514,9 +514,24 @@ if (!empty($genre_ids)) {
 		// إدخال الفيلم
 		$this->db->insert('movie', $data);
 		$movie_id = $this->db->insert_id();
+		$base_series_folder = 'assets/global/movies';
+	if (!is_dir($base_series_folder)) {
+		mkdir($base_series_folder, 0777, true);
+	}
+$movie_title_raw = $data['title'];
+$movie_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $movie_title_raw);
+$movie_folder_path = $base_series_folder . '/' . $movie_folder_name;
+	// إنشاء مجلد باسم المسلسل داخل مجلد المسلسلات
+	
+	if (!is_dir($movie_folder_path)) {
+		mkdir($movie_folder_path, 0777, true);
+	}
 	
 		// ✅ تحميل البوستر باستخدام cURL
 		$poster_url = $this->input->post('poster_url');
+// نقل الصور إلى مجلد المسلسل
+	move_uploaded_file($_FILES['thumb']['tmp_name'], $movie_folder_path . '/thumb.jpg');
+	move_uploaded_file($_FILES['poster']['tmp_name'], $movie_folder_path . '/poster.jpg');
 
 		if (!empty($poster_url)) {
 			log_message('error', '🔍 رابط الصورة المستلم: ' . $poster_url);
@@ -534,8 +549,8 @@ if (!empty($genre_ids)) {
 			log_message('error', '📦 حجم الصورة المستلمة: ' . strlen($poster_data));
 		
 			if ($poster_data !== false && $http_code == 200) {
-				file_put_contents('assets/global/movie_poster/' . $movie_id . '.jpg', $poster_data);
-				file_put_contents('assets/global/movie_thumb/' . $movie_id . '.jpg', $poster_data);
+				file_put_contents($movie_folder_path . '/poster.jpg', $poster_data);
+				file_put_contents($movie_folder_path . '/thumb.jpg', $poster_data);
 				log_message('error', '✅ تم حفظ الصورة بنجاح');
 			} else {
 				log_message('error', "❌ فشل تحميل الصورة عبر cURL. HTTP Code: $http_code");
@@ -546,16 +561,20 @@ if (!empty($genre_ids)) {
 	
 		// رفع فيديو الإعلان trailer
 		if (isset($_FILES['trailer_url']) && $_FILES['trailer_url']['error'] == 0) {
-			$trailer_name = $_FILES['trailer_url']['name'];
-			$trailer_path = 'assets/global/movie_trailer/' . $trailer_name;
-			move_uploaded_file($_FILES['trailer_url']['tmp_name'], $trailer_path);
-			$this->db->update('movie', ['trailer_url' => $trailer_name], ['movie_id' => $movie_id]);
+		$trailer_ext = pathinfo($_FILES['trailer_url']['name'], PATHINFO_EXTENSION);
+		$trailer_filename = 'trailer.' . $trailer_ext;
+		$trailer_path = $movie_folder_path . '/' . $trailer_filename;
+
+		move_uploaded_file($_FILES['trailer_url']['tmp_name'], $trailer_path);
+
+		// حفظ اسم الملف في قاعدة البيانات
+		$this->db->update('movie', ['trailer_url' => $trailer_filename], ['movie_id' => $movie_id]);
 		}
-	
+
 		// رفع الفيلم الرئيسي url
 		if (isset($_FILES['url']) && $_FILES['url']['error'] == 0) {
 			$video_name = $_FILES['url']['name'];
-			$video_path = 'assets/global/movie_video/' . $video_name;
+			$video_path = $movie_folder_path.'/' . $video_name;
 			move_uploaded_file($_FILES['url']['tmp_name'], $video_path);
 			$this->db->update('movie', ['url' => $video_name], ['movie_id' => $movie_id]);
 		}
@@ -1151,8 +1170,15 @@ function get_thumb_url($type = '', $id = '')
         }
 
     } else {
+		 $title = $this->db->get_where('movie', ['movie_id' => $id])->row()->title;
+
+        // تنظيف اسم المجلد (يدعم العربي)
+        $folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $title);
+
+        // مسار الصورة الجديد للمسلسلات
+        $image_path = 'assets/global/movies/' . $folder_name . '/thumb.jpg';
         // الأفلام تبقى على المسار القديم
-        $image_path = 'assets/global/' . $type . '_thumb/' . $id . '.jpg';
+        //$image_path = 'assets/global/' . $type . '_thumb/' . $id . '.jpg';
 
         if (file_exists($image_path)) {
             return base_url($image_path);
@@ -1194,8 +1220,13 @@ function get_thumb_url($type = '', $id = '')
 
     } else {
         // المسار القديم للأفلام
-        $image_path = 'assets/global/' . $type . '_poster/' . $id . '.jpg';
+        $title = $this->db->get_where('movie', ['movie_id' => $id])->row()->title;
 
+        // تنظيف اسم المجلد (يدعم العربي)
+        $folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $title);
+
+        // مسار الصورة الجديد للمسلسلات
+        $image_path = 'assets/global/movies/' . $folder_name . '/poster.jpg';
         if (file_exists($image_path)) {
             return base_url($image_path);
         } else {

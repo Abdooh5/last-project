@@ -79,15 +79,13 @@ foreach ($movie_details as $row):
 			<div class="col-lg-12" id="series_div">
 			
                 <!-- VIDEO PLAYER BASED ON URL TYPE -->
-
-					
                 
                     <link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
                     <video poster="<?php echo$this->crud_model->get_thumb_url('movie' , $row['movie_id']); ?>" id="player" playsinline controls>
                         <?php if (get_video_extension($row['url']) == 'webm'): ?>
-                            <source src="<?php echo 'assets/global/movie_video/'. $row['url']; ?>" type="video/webm">
+                            <source src="<?php echo 'assets/global/movies/'. $row['title'].'/'.$row['url']; ?>" type="video/webm">
                         <?php elseif (get_video_extension( $row['url']) == 'mp4'): ?>
-                            <source src="<?php echo 'assets/global/movie_video/'.$row['url']; ?>" type="video/mp4">
+                            <source src="<?php echo 'assets/global/movies/'. $row['title'].'/'.$row['url']; ?>" type="video/mp4">
                         <?php else: ?>
                             <h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
                         <?php endif; ?>
@@ -98,18 +96,14 @@ foreach ($movie_details as $row):
             </div>
 
 			<div class="col-lg-12 hidden" id="trailer_div">
-
-
-
-
 				<!-- Video player generator starts -->
 				
 					<link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
 					<video poster="<?php echo $this->crud_model->get_thumb_url('movie' , $row['movie_id']);?>" id="trailer_url" playsinline controls>
 					<?php if (get_video_extension($row['trailer_url']) == 'mp4'): ?>
-				      	<source src="<?php echo 'assets/global/movie_trailer/'.$row['trailer_url']; ?>" type="video/mp4">
+				      	<source src="<?php echo 'assets/global/movies/'. $row['title'].'/trailer.mp4'; ?>" type="video/mp4">
 					<?php elseif (get_video_extension($row['trailer_url']) == 'webm'): ?>
-						<source src="<?php echo 'assets/global/movie_trailer/'.$row['trailer_url']; ?>" type="video/webm">
+						<source src="<?php echo 'assets/global/movies/'. $row['title'].'/trailer.mp4'; ?>" type="video/webm">
 					<?php else: ?>
 						<h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
 					<?php endif; ?>
@@ -154,7 +148,7 @@ foreach ($movie_details as $row):
     <!-- <h3 style="margin-top: 0;"><?php echo $row['title']; ?></h3> -->
 
     <!-- زر التحميل -->
-    <a href="<?php echo base_url() . 'assets/global/movie_video/' . $row['url']; ?>" download class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
+    <a href="<?php echo base_url() . 'assets/global/movies/'. $row['title'].'/'.$row['url']; ?>" download class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
         <i class="fa fa-download"></i> <?php echo get_phrase('Download'); ?>
     </a>
 
@@ -348,16 +342,15 @@ foreach ($movie_details as $row):
 		if ($('#trailer_div').hasClass('hidden')) {
 			$('#trailer_div').removeClass('hidden');
 			$('#series_div').addClass('hidden');
-			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_movie') ?>');
+			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_series'); ?>');
 			player.pause();
-		}else {
+		} else {
 			$('#series_div').removeClass('hidden');
 			$('#trailer_div').addClass('hidden');
-			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_trailer') ?>');
+			$('#watch_button').html('<?php echo '<i class="fa fa-eye"></i> '.get_phrase('watch_trailer'); ?>');
 			trailer_url.pause();
 		}
 		$("html, body").animate({scrollTop: 0}, 500);
-
 	}
     function process_list(type, task, id) {
 	$.ajax({
