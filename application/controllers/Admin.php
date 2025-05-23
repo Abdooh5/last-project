@@ -490,7 +490,45 @@ if (isset($credits['cast'])) {
 	// DELETE A MOVIE
 	function movie_delete($movie_id = '')
 	{
+		 function delete_directory($dir) {
+        // تحقق إذا كان المجلد موجودًا
+        if (is_dir($dir)) {
+            // الحصول على كافة الملفات والمجلدات في المجلد
+            $files = array_diff(scandir($dir), array('.', '..'));
+            
+            foreach ($files as $file) {
+                // بناء المسار الكامل للملف أو المجلد
+                $filePath = $dir . DIRECTORY_SEPARATOR . $file;
+                
+                // إذا كان ملفًا، احذفه
+                if (is_file($filePath)) {
+                    unlink($filePath);
+                } 
+                // إذا كان مجلدًا، استدعاء الدالة لحذف المجلدات
+                else {
+                    delete_directory($filePath);
+                }
+            }
+            // أخيرًا، احذف المجلد نفسه
+            rmdir($dir);
+        }
+    }
+
+    // استعلام للحصول على بيانات الفيلم قبل حذفه من قاعدة البيانات
+    $query = $this->db->get_where('movie', array('movie_id' => $movie_id));
+    $movies = $query->row();
+
+    if ($movies) {
+        // تحديد مسار المجلد الخاص بالفيلم بناءً على العنوان
+        $base_movies_folder = 'assets/global/movies';
+        $movie_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $movies->title);
+        $movie_folder_path = $base_movies_folder . '/' . $movie_folder_name;
+
+        // حذف المجلد المرتبط بالفيلم
+        delete_directory($movie_folder_path);
+		//حذف الفيلم من قاعدة البيانات
 		$this->db->delete('movie',  array('movie_id' => $movie_id));
+	}
 		redirect(base_url().'index.php?admin/movie_list' , 'refresh');
 	}
 
