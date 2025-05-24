@@ -306,9 +306,13 @@ class Browse extends CI_Controller {
 	}
 	public function latest_series()
 	{
+		$category = $this->db->get_where('category', ['name' => 'مسلسلات'])->row();
+		$this->db->where('category', $category->category_id); // شرط الفئة
 		$this->db->order_by('series_id', 'DESC'); // ترتيب تنازلي لجلب الأحدث
 		$this->db->limit(50); // عدد النتائج الظاهرة (يمكنك تغييره)
+		
 		$page_data['series'] = $this->db->get('series')->result_array();
+
 		
 		$page_data['page_name']  = 'latest_series';
 		$page_data['page_title'] = "أحدث السلاسل المضافة";
@@ -459,6 +463,41 @@ public function series_by_multiple_countries($country_ids = '', $category_id = '
 
     // استرجاع المسلسلات حسب السنة والفئة
     $page_data['series'] = $this->crud_model->get_series_by_year($year, $category_id, $per_page, $offset);
+    $page_data['total_result'] = $total_result;
+
+    // تحميل الصفحة
+    $this->load->view('frontend/index', $page_data);
+}
+function series_by_category( $category_id = '', $offset = '')
+{ 
+    $page_data['page_name']  = 'series';
+    $page_data['page_title'] = 'Watch TV Series by Year and Category';
+    
+    $page_data['category_id']    = $category_id;
+
+    // إعداد رابط التصفح
+    $url = base_url() . 'index.php?browse/series_by_category/' . $category_id;
+    $per_page = 20;
+
+    // تصفية الاستعلام ليشمل السنة والفئة
+    $this->db->from('series');
+    
+    if (!empty($category_id)) {
+        $this->db->where('category', $category_id); // ✅ استخدم '' للمطابقة مع الفئة
+    }
+    $total_result = $this->db->count_all_results();
+
+    // تهيئة التصفح (pagination)
+    $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
+    $this->pagination->initialize($config);
+
+    // تحديد السنوات المتاحة
+    $this->db->distinct();
+    $this->db->select('year');
+    $page_data['years'] = $this->db->get('series')->result_array();
+
+    // استرجاع المسلسلات حسب السنة والفئة
+    $page_data['series'] = $this->crud_model->get_series_by_category( $category_id, $per_page, $offset);
     $page_data['total_result'] = $total_result;
 
     // تحميل الصفحة

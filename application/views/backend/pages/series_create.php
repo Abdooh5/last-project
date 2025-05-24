@@ -28,10 +28,10 @@
 	                    <input type="file" class="form-control" name="poster">
 	                </div>
 
-					<div class="form-group mb-3">
+					<!-- <div class="form-group mb-3">
 						<label for="description_short">Short description</label>
 						<textarea class="form-control" id="description_short" name="description_short" rows="6"></textarea>
-					</div>
+					</div> -->
 
 					<div class="form-group mb-3">
 						<label for="description_long">Long description</label>
@@ -98,7 +98,7 @@
 						<label for="year">Publishing Year</label>
 						<span class="help">- year of publishing time</span>
 						<select class="form-control" id="year" name="year">
-							<?php for ($i = date("Y"); $i > 2000 ; $i--): ?>
+							<?php for ($i = date("Y"); $i > 1900 ; $i--): ?>
 							<option value="<?php echo $i; ?>">
 								<?php echo $i; ?>
 							</option>
@@ -138,6 +138,15 @@
         </div>
     </div>
 </div>
+<script>
+	const categoryMap = <?php
+		$catMap = [];
+		foreach ($categories as $cat) {
+			$catMap[$cat['name']] = $cat['category_id'];
+		}
+		echo json_encode($catMap, JSON_UNESCAPED_UNICODE);
+	?>;
+</script>
 
 <!-- JavaScript لملء الحقول تلقائيًا -->
 <script>
@@ -179,6 +188,17 @@ $(document).ready(function () {
                             alert(data.error);
                             return;
                         }
+						//console.log(data.anime_categories);
+						if (data.anime_categories && data.anime_categories.length > 0) {
+    const animeCategoryName = data.anime_categories; // مثل "أنمي مستمر"
+    const categoryId = categoryMap[animeCategoryName];
+
+    if (categoryId) {
+        $('#category').val(categoryId).trigger('change');
+    } else {
+        console.warn('التصنيف غير موجود في القائمة:', animeCategoryName);
+    }
+}
 
                         $('#description_long').val(data.overview);
 
@@ -226,6 +246,14 @@ $(document).ready(function () {
                                 $('[name="poster_url"]').val(posterURL);
                             }
                         }
+					// 	 if ($('#title').next('.alert').length === 0) {
+                    //     $('#title').after('<div class="alert alert-info mt-2">🔄 يتم تجهيز الصفحة، يرجى الانتظار لحظة...</div>');
+                    // }
+
+                    // setTimeout(function () {
+                    //     location.reload();
+                    // }, 2000);
+
 
                     } catch (e) {
                         console.error("⚠️ خطأ في التحليل:", e, response);

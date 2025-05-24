@@ -701,7 +701,7 @@ $movie_folder_path = $base_series_folder . '/' . $movie_folder_name;
 function create_series()
 {
 	$data['title']              = $this->input->post('title');
-$data['description_short']  = $this->input->post('description_short');
+//$data['description_short']  = $this->input->post('description_short');
 $data['description_long']   = $this->input->post('description_long');
 $data['year']               = $this->input->post('year');
 $data['rating']             = $this->input->post('rating');
@@ -898,7 +898,7 @@ $series_folder_path = $base_series_folder . '/' . $series_folder_name;
 {
 	// 1. جمع البيانات
 	$data['title'] = $this->input->post('title');
-	$data['description_short'] = $this->input->post('description_short');
+	//$data['description_short'] = $this->input->post('description_short');
 	$data['description_long'] = $this->input->post('description_long');
 	$data['year'] = $this->input->post('year');
 	$data['rating'] = $this->input->post('rating');
@@ -992,15 +992,24 @@ if ($this->input->post('genre_id')) {
 
     return $query->result_array();
 }
-
-
-	function get_series_by_year($year, $category_id, $limit = 20, $offset = 0)
+function get_series_by_year($year, $category_id, $limit = 20, $offset = 0)
 	{
 		$this->db->from('series');
 		if (!empty($year)) {
 			$this->db->where('year', $year);
 		}
 		if (!empty($cate_id)) {
+			$this->db->where('category', $category_id);
+		}
+		$this->db->limit($limit, $offset);
+		return $this->db->get()->result_array();
+	}
+
+	function get_series_by_category( $category_id, $limit = 20, $offset = 0)
+	{
+		$this->db->from('series');
+		
+		if (!empty($category_id)) {
 			$this->db->where('category', $category_id);
 		}
 		$this->db->limit($limit, $offset);

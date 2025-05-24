@@ -218,39 +218,43 @@
 
 
 
-<!-- TV SERIES anmy WISE-->
+<!-- TV SERIES Anime Wise -->
 <li class="dropdown">
 <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">
-        <?php echo get_phrase('أنمي'); ?> <span class="caret"></span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="themes">
+    <?php echo get_phrase('أنمي'); ?> <span class="caret"></span>
+</a>
+<ul class="dropdown-menu" aria-labelledby="themes">
 <?php 
-	$category_name='أنمي';
-	$cate_id = $this->db->select('category_id')->get_where('category', ['name' => trim($category_name)])->row()->category_id ?? null;
-	
-$genres = [
-	'كرتون' => 'كرتون',
-    'أنمي' => 'أنمي',
-	'أنمي عربي قديم' => ' أنميات عربية قديمة'
-];
+    $anime_subcategories = [
+        'أنمي قديم',
+        'أنمي جديد',
+        'أنمي مستمر',
+        'أنمي مكتمل',
+        
+    ];
 
-foreach ($genres as $genre_name => $display_name) {
-	$genre = $this->db->get_where('genre', ['name' => $genre_name])->row();
-	if ($genre) {
-		$this->db->where('category', $cate_id);
-		$count = $this->db->where('genre_id', $genre->genre_id)->count_all_results('series');
-		?>
-		<li>
-			<a href="<?php echo base_url(); ?>index.php?browse/series/<?php echo $genre->genre_id; ?>/<?php echo $cate_id; ?>">
-				<?php echo $display_name; ?> (<?php echo $count; ?>)
-			</a>
-		</li>
-		<?php
-	}
-}
+    foreach ($anime_subcategories as $subcat_name) {
+        // Get genre record by name
+        $category = $this->db->get_where('category', ['name' => $subcat_name])->row();
+
+        if ($category) {
+        $category_id = $category->category_id;
+
+        // حساب عدد المسلسلات المرتبطة بهذه الفئة
+        $count = $this->db->where('category', $category_id)->count_all_results('series');
+            ?>
+            <li>
+                <a href="<?php echo base_url(); ?>index.php?browse/series_by_category/<?php echo $category_id; ?>">
+                    <?php echo $subcat_name; ?> (<?php echo $count; ?>)
+                </a>
+            </li>
+            <?php
+        }
+    }
 ?>
 </ul>
 </li>
+
 
 <li class="dropdown">
     <a class="dropdown-toggle" data-toggle="dropdown" href="" style="color: #e50914; font-weight: bold;">

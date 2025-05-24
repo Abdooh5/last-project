@@ -32,10 +32,10 @@
 	                    <input type="file" class="form-control" name="poster">
 	                </div>
 
-					<div class="form-group mb-3">
+					<!-- <div class="form-group mb-3">
 						<label for="description_short">Short description</label>
 						<textarea class="form-control" id="description_short" name="description_short" rows="6"><?php echo $series_detail->description_short;?></textarea>
-					</div>
+					</div> -->
 
 					<div class="form-group mb-3">
 						<label for="description_long">Long description</label>

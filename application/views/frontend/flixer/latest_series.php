@@ -58,29 +58,10 @@
     </div>
 </div>
 
-<!-- تضمين مكتبة jQuery و Slick.js محليًا -->
-<script src="assets/js/jquery-3.6.0.min.js"></script>
-<script src="assets/js/slick.min.js"></script>
-<script>
-$(document).ready(function(){
-    $('.slider').slick({
-        slidesToShow: 5,  // عدد العناصر الظاهرة
-        slidesToScroll: 1,
-        autoplay: true,  // التمرير التلقائي
-        autoplaySpeed: 3000, // كل 3 ثواني
-        arrows: false,  // إخفاء الأسهم
-        dots: false,  // إخفاء النقاط
-        infinite: true, // التكرار (التكرار الدوري للشرائح)
-        pauseOnHover: false, // إيقاف التمرير التلقائي عند مرور الماوس
-        responsive: [
-            { breakpoint: 1024, settings: { slidesToShow: 3 } },  // لو كان العرض أقل من 1024px
-            { breakpoint: 768, settings: { slidesToShow: 2 } },   // لو كان العرض أقل من 768px
-            { breakpoint: 480, settings: { slidesToShow: 1 } }    // لو كان العرض أقل من 480px
-        ]
-    });
-});
 
-</script>
+
+
+
 <?php  $movies = $this->db->order_by('movie_id', 'DESC')->limit(20)->get('movie')->result_array();  ?>
 <!-- عرض أحدث الأفلام مع سلايدر متحرك -->
 <div class="row" style="margin:20px 60px;">
@@ -105,3 +86,75 @@ $(document).ready(function(){
         </div>
     </div>
 </div>
+<!-- عرض أحدث الأنميات مع سلايدر متحرك -->
+<?php
+// تحديد الفئات الفرعية لأنمي
+$anime_subcategories = [
+    'أنمي قديم',
+    'أنمي جديد',
+    'أنمي مستمر',
+    'أنمي مكتمل',
+    'أنمي'
+];
+
+// استخراج جميع معرفات الفئات المطابقة للاسم من القائمة
+$this->db->where_in('name', $anime_subcategories);
+$subcategories = $this->db->get('category')->result_array();
+
+$subcategory_ids = array_column($subcategories, 'category_id');
+
+if (!empty($subcategory_ids)) 
+    $anmies= $this->db->where_in('category', $subcategory_ids)->order_by('series_id', 'DESC')->limit(50)->get('series')->result_array();
+//     $this->db->order_by('series_id', 'DESC');
+//     $this->db->limit(50);
+//     $anmies = $this->db->get('series')->result_array();}
+// ?>
+
+<div class="row" style="margin:20px 60px;">
+    <h4 style="text-transform: capitalize; color: #e50914; font-weight: bold;">
+        <?php echo get_phrase('آخر الأنميات المضافة'); ?> (<?php echo count($anmies); ?>)
+    </h4>
+    <div class="content">
+        <div class="slider">
+ <?php
+
+            foreach ($anmies as $row): ?>
+                <?php
+                    $title = $row['title'];
+                    $link  = base_url() . 'index.php?browse/playseries/' . $row['series_id'];
+                    $thumb = $this->crud_model->get_thumb_url('series', $row['series_id']);
+                ?>
+                <div class="thumb-container">
+                    <a href="<?php echo $link; ?>">
+                        <img src="<?php echo $thumb; ?>" alt="<?php echo $title; ?>" class="thumb-img">
+                    </a>
+                    <div class="thumb-title"><?php echo $title; ?></div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
+<!-- تضمين مكتبة jQuery و Slick.js محليًا -->
+<script src="assets/js/jquery-3.6.0.min.js"></script>
+<script src="assets/js/slick.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.slider').slick({
+        slidesToShow: 5,  // عدد العناصر الظاهرة
+        slidesToScroll: 1,
+        autoplay: true,  // التمرير التلقائي
+        autoplaySpeed: 3000, // كل 3 ثواني
+        arrows: false,  // إخفاء الأسهم
+        dots: false,  // إخفاء النقاط
+        infinite: true, // التكرار (التكرار الدوري للشرائح)
+        pauseOnHover: false, // إيقاف التمرير التلقائي عند مرور الماوس
+        responsive: [
+            { breakpoint: 1024, settings: { slidesToShow: 3 } },  // لو كان العرض أقل من 1024px
+            { breakpoint: 768, settings: { slidesToShow: 2 } },   // لو كان العرض أقل من 768px
+            { breakpoint: 480, settings: { slidesToShow: 1 } }    // لو كان العرض أقل من 480px
+        ]
+    });
+});
+
+</script>

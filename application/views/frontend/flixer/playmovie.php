@@ -65,6 +65,11 @@
 <?php $user_id = $this->session->userdata('user_id'); ?>
 <?php $active_user = $this->session->userdata('active_user'); ?>
 <?php
+    $this->db->where('movie_id', $movie_id);
+    $movie = $this->db->get('movie')->row_array();
+    $movies_title_raw = $movie['title'];
+    $movies_folder_name = preg_replace('/[^\p{Arabic}a-zA-Z0-9_\-]/u', '_', $movies_title_raw);
+print($movies_folder_name);
 $movie_details = $this->db->get_where('movie', array('movie_id' => $movie_id))->result_array();
 foreach ($movie_details as $row):
 ?>
@@ -83,9 +88,9 @@ foreach ($movie_details as $row):
                     <link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
                     <video poster="<?php echo$this->crud_model->get_thumb_url('movie' , $row['movie_id']); ?>" id="player" playsinline controls>
                         <?php if (get_video_extension($row['url']) == 'webm'): ?>
-                            <source src="<?php echo 'assets/global/movies/'. $row['title'].'/'.$row['url']; ?>" type="video/webm">
+                            <source src="<?php echo 'assets/global/movies/'. $movies_folder_name.'/'.$row['url']; ?>" type="video/webm">
                         <?php elseif (get_video_extension( $row['url']) == 'mp4'): ?>
-                            <source src="<?php echo 'assets/global/movies/'. $row['title'].'/'.$row['url']; ?>" type="video/mp4">
+                            <source src="<?php echo 'assets/global/movies/'. $movies_folder_name.'/'.$row['url']; ?>" type="video/mp4">
                         <?php else: ?>
                             <h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
                         <?php endif; ?>
@@ -101,9 +106,9 @@ foreach ($movie_details as $row):
 					<link rel="stylesheet" href="<?php echo base_url();?>assets/global/plyr/plyr.css">
 					<video poster="<?php echo $this->crud_model->get_thumb_url('movie' , $row['movie_id']);?>" id="trailer_url" playsinline controls>
 					<?php if (get_video_extension($row['trailer_url']) == 'mp4'): ?>
-				      	<source src="<?php echo 'assets/global/movies/'. $row['title'].'/trailer.mp4'; ?>" type="video/mp4">
+				      	<source src="<?php echo 'assets/global/movies/'. $movies_folder_name.'/trailer.mp4'; ?>" type="video/mp4">
 					<?php elseif (get_video_extension($row['trailer_url']) == 'webm'): ?>
-						<source src="<?php echo 'assets/global/movies/'. $row['title'].'/trailer.mp4'; ?>" type="video/webm">
+						<source src="<?php echo 'assets/global/movies/'. $movies_folder_name.'/trailer.mp4'; ?>" type="video/webm">
 					<?php else: ?>
 						<h4><?php get_phrase('video_url_is_not_supported'); ?></h4>
 					<?php endif; ?>
@@ -148,7 +153,7 @@ foreach ($movie_details as $row):
     <!-- <h3 style="margin-top: 0;"><?php echo $row['title']; ?></h3> -->
 
     <!-- زر التحميل -->
-    <a href="<?php echo base_url() . 'assets/global/movies/'. $row['title'].'/'.$row['url']; ?>" download class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
+    <a href="<?php echo base_url() . 'assets/global/movies/'. $movies_folder_name.'/'.$row['url']; ?>" download class="btn btn-danger btn-md" style="font-size: 16px; margin-top: 20px; margin-left: 10px;">
         <i class="fa fa-download"></i> <?php echo get_phrase('Download'); ?>
     </a>
 

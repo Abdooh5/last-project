@@ -1653,6 +1653,59 @@ public function fetch_tmdb_series_data() {
 			}
 		}
 	}
+// Step 6: تصنيف أنمي واحد فقط
+$anime_categories = null;
+
+$is_anime = false;
+
+// التحقق من النوع Animation (genre id = 16)
+if (isset($details['genres']) && is_array($details['genres'])) {
+    foreach ($details['genres'] as $genre) {
+        if (isset($genre['id']) && $genre['id'] == 16) {
+            $is_anime = true;
+            break;
+        }
+    }
+}
+
+// fallback: التحقق من بلد المنشأ
+if (!$is_anime && isset($details['origin_country']) && in_array('JP', $details['origin_country'])) {
+    $is_anime = true;
+}
+
+if ($is_anime) {
+    $year = !empty($details['first_air_date']) ? (int)substr($details['first_air_date'], 0, 4) : null;
+    $current_year = (int)date('Y');
+
+    // ترتيب الأولويات:
+    // if (isset($details['type']) && strtolower($details['type']) === 'movie') {
+    //     $anime_categories = 'أفلام أنمي';
+	// 	insert_if_not_exists('category', $anime_categories);
+    // }  
+	 if ($year !== null && $year == $current_year) {
+        $anime_categories = 'أنمي جديد';
+		insert_if_not_exists('category', $anime_categories);
+    }
+	 elseif ($year !== null && $year < 2000) {
+        $anime_categories = 'أنمي قديم';
+		insert_if_not_exists('category', $anime_categories);
+    }elseif (
+        (!empty($details['status']) && $details['status'] === 'Returning Series') ||
+        (!empty($details['in_production']) && $details['in_production'])
+    ) {
+        $anime_categories = 'أنمي مستمر';
+		insert_if_not_exists('category', $anime_categories);
+    }
+	elseif (!empty($details['status']) && $details['status'] === 'Ended') {
+        $anime_categories = 'أنمي مكتمل';
+		insert_if_not_exists('category', $anime_categories);
+    }
+}
+
+
+
+
+
 
 	// النتيجة النهائية
 	$result = [
@@ -1665,7 +1718,8 @@ public function fetch_tmdb_series_data() {
 		'actors' => $actors,
 		'genres' => $genreNames,
 		'countries' => $countries,
-		
+		'anime_categories'=> $anime_categories
+
 	];
 
 	echo json_encode($result);
