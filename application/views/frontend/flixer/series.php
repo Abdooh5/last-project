@@ -98,8 +98,12 @@
 <!-- TV SERIES LISTING IN GRID FORMAT -->
 <div class="row" style="margin:20px 60px;">
     <h4 style="text-transform: capitalize;">
-        <?php echo $this->db->get_where('category', array('category_id' => $category_id))->row()->name;?>
-        <?php echo $this->db->get_where('country', array('country_id' => $country_id))->row()->name;?> (<?php echo $total_result;?>)
+        <?php echo $this->db->get_where('category', array('category_id' => $category_ids))->row()->name;?>
+         
+        <!-- <?php echo $this->db->get_where('country', array('country_id' => $country_ids[2]))->row()->name;?>  -->
+
+         	<!-- <?php echo $country_ids[0] ?> -->
+        (<?php echo $total_result;?>)
         
     </h4>
     <div class="content">

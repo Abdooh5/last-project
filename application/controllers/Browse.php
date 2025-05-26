@@ -135,6 +135,53 @@ class Browse extends CI_Controller {
 		$page_data['page_title']	=	'Home';
 		$this->load->view('frontend/index', $page_data);
 	}
+	public function movie_anmie($offset = 0)
+{
+    // إعداد بيانات الصفحة
+    $page_data['check_movie'] = true;
+    $page_data['page_name']   = 'movie';
+    $page_data['page_title']  = 'أفلام أنمي ورسوم متحركة';
+	
+
+    // 1) اجلب معرّفات الأنواع من جدول genre
+    $genre_names = ['أنمي', 'رسوم متحركة', 'فانتازيا'];
+    $genre_ids   = [];
+
+    foreach ($genre_names as $name) {
+        $g = $this->db->get_where('genre', ['name' => $name])->row();
+        if ($g) {
+            $genre_ids[] = $g->genre_id;
+        }
+    }
+
+    // 2) استعلام الأفلام التي تحتوي عمود genre_id (JSON) على أيٍّ من هذه القيم
+    $movies = [];
+    if (!empty($genre_ids)) {
+        $this->db->select('*')
+                 ->from('movie')
+                 // نفتح قوسًا لمجموعة الـ OR
+                 ->group_start();
+        foreach ($genre_ids as $id) {
+            // نبحث عن '"{id}"' داخل حقل genre_id
+            $this->db->or_like('genre_id', '"' . $id . '"');
+        }
+        // نغلق القوس
+        $this->db->group_end();
+
+        $movies = $this->db->get()->result_array();
+	    $total_result = $this->db->count_all_results('movie');
+		
+    }
+
+    // 3) مرّر النتائج إلى الواجهة
+    $page_data['movies'] = $movies;	
+    $page_data['total_result'] = $total_result;
+
+    // حمّل الـ view
+    $this->load->view('frontend/index', $page_data);
+}
+
+
 
 	function movie($genre_id = '', $offset = '')
 	{
@@ -225,7 +272,7 @@ class Browse extends CI_Controller {
 		// بيانات الصفحة
 		$page_data['check_movie']  = true;
 		$page_data['page_name']    = 'movie';
-		$page_data['page_title']   = 'أفلام حسب الدول';
+		$page_data['page_title']   = 'أفلام ';
 		$page_data['total_result'] = $total_result;
 		$page_data['genre_id']     = null;
 	
@@ -323,41 +370,40 @@ class Browse extends CI_Controller {
     $page_data['page_name']    = 'series';
     $page_data['page_title']   = 'Watch Tv Series';
     $page_data['genre_id']     = $genre_id;
-    $page_data['category_id']     = $category_id;
+    $page_data['category_ids'] = $category_id;
 
-    // تكوين رابط التصفح (pagination)
     $url = base_url() . 'index.php?browse/series/' . $genre_id . '/' . $category_id;
     $per_page = 20;
 
-    // تعديل الاستعلام ليشمل النوع والمخرج فقط
-    $this->db->from('series');  // تحديد الجدول الأساسي
+    $this->db->from('series');
+
     if (!empty($genre_id) && $genre_id !== 'all') {
-        $this->db->where('genre_id', $genre_id);  // شرط النوع
-    }
-    if (!empty($category_id) && $category_id !== 'all') {
-        $this->db->where('category', $category_id);  // شرط المخرج
+        // البحث داخل النص JSON باستخدام LIKE مع علامات الاقتباس
+        $this->db->like('genre_id', '"' . $genre_id . '"');
     }
 
-    // حساب العدد الكلي للنتائج
+    if (!empty($category_id) && $category_id !== 'all') {
+        $this->db->where('category', $category_id);
+    }
+
     $total_result = $this->db->count_all_results();
 
-    // تهيئة التصفح (pagination)
     $config = $this->crud_model->paginate($url, $total_result, $per_page, 4);
     $this->pagination->initialize($config);
 
-    // جلب المسلسلات بناءً على النوع والمخرج
     $page_data['series'] = $this->crud_model->get_series($genre_id, $category_id, $per_page, $offset);
     $page_data['total_result'] = $total_result;
 
-    // تحميل الصفحة
     $this->load->view('frontend/index', $page_data);
 }
+
 public function series_by_multiple_countries($country_ids = '', $category_id = '', $offset = '')
 {
     $page_data['page_name']  = 'series';
     $page_data['page_title'] = 'Watch TV Series by Multiple Countries and Category';
-    $page_data['country_ids'] = $country_ids;
-    $page_data['category_id'] = $category_id;
+    $page_data['country_ids'] = $country_ids[0];
+    $page_data['category_ids'] = $category_id;
+
 
     // تحويل سلسلة IDs إلى مصفوفة
     $country_id_array = explode('-', $country_ids);
@@ -399,7 +445,7 @@ public function series_by_multiple_countries($country_ids = '', $category_id = '
 		$page_data['page_name']  = 'series';
 		$page_data['page_title'] = 'Watch TV Series by Country and category';
 		$page_data['country_id'] = $country_id;
-		$page_data['category_id']    = $category_id;
+		$page_data['category_ids']    = $category_id;
 	
 		// تكوين رابط التصفح (pagination)
 		$url = base_url() . 'index.php?browse/series_by_country/' . $country_id . '/' . $category_id;
@@ -473,7 +519,7 @@ function series_by_category( $category_id = '', $offset = '')
     $page_data['page_name']  = 'series';
     $page_data['page_title'] = 'Watch TV Series by Year and Category';
     
-    $page_data['category_id']    = $category_id;
+    $page_data['category_ids']    = $category_id;
 
     // إعداد رابط التصفح
     $url = base_url() . 'index.php?browse/series_by_category/' . $category_id;

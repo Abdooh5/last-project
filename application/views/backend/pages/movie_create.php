@@ -103,7 +103,7 @@
 						<label for="year">Publishing Year</label>
 						<span class="help">- year of publishing time</span>
 						<select class="form-control" id="year" name="year" required>
-							<?php for ($i = date("Y"); $i > 1980 ; $i--):?>
+							<?php for ($i = date("Y"); $i > 1900 ; $i--):?>
 							<option value="<?php echo $i;?>">
 								<?php echo $i;?>
 							</option>
@@ -242,28 +242,61 @@ $(document).ready(function() {
 });
 
 </script> -->
+
+
+
+<script>
+	const categoryMap = <?php
+		$catMap = [];
+		foreach ($categories as $cat) {
+			$catMap[$cat['category_id']] = $cat['name'];
+		}
+		echo json_encode($catMap, JSON_UNESCAPED_UNICODE);
+	?>;
+
+	const genreMap = <?php
+		$gMap = [];
+		foreach ($genres as $g) {
+			$gMap[$g['genre_id']] = $g['name'];
+		}
+		echo json_encode($gMap, JSON_UNESCAPED_UNICODE);
+	?>;
+
+	const actorMap = <?php
+		$aMap = [];
+		foreach ($actors as $a) {
+			$aMap[$a['actor_id']] = $a['name'];
+		}
+		echo json_encode($aMap, JSON_UNESCAPED_UNICODE);
+	?>;
+
+	const countryMap = <?php
+		$cMap = [];
+		foreach ($countries as $c) {
+			$cMap[$c['country_id']] = $c['name'];
+		}
+		echo json_encode($cMap, JSON_UNESCAPED_UNICODE);
+	?>;
+</script>
+
+
+
 <script>
 $(document).ready(function () {
 	
 
-	function selectMatchingOption(selector, valueFromApi) {
-		let found = false;
-		let cleanApiValue = valueFromApi.trim().toLowerCase();
+ function selectOptionById(selector, id, nameMap, fallbackName = null) {
+		let optionName = nameMap?.[id] || fallbackName || `ID ${id}`;
+		const select = $(selector);
+		const optionExists = select.find(`option[value="${id}"]`).length > 0;
 
-		$(selector + ' option').each(function () {
-			let optionText = $(this).text().trim().toLowerCase();
-			if (optionText.includes(cleanApiValue) || cleanApiValue.includes(optionText)) {
-				$(this).prop('selected', true);
-				found = true;
-				return false;
-			}
-		});
-
-		if (found) {
-			$(selector).trigger('change');
+		if (!optionExists) {
+			select.append(`<option selected value="${id}">${optionName}</option>`);
 		} else {
-			console.log(`❌ لم يتم العثور على تطابق لـ: ${valueFromApi} داخل ${selector}`);
+			select.find(`option[value="${id}"]`).prop('selected', true);
 		}
+
+		select.trigger('change');
 	}
 
 	$('#simpleinput1').on('blur', function () {
@@ -317,29 +350,30 @@ if (data.runtime && !isNaN(data.runtime)) {
 							$('[name="rating"]').val(rating);
 						}
 
-						// النوع
+	                    // الأنواع
 						if (Array.isArray(data.genres)) {
-    data.genres.forEach(function (genre) {
-        selectMatchingOption('#genre_id', genre);
-    });
-}
+							data.genres.forEach(function (genreId, index) {
+                                const genreName = data.created?.genres?.[index] || genreMap[genreId];
+								selectOptionById('#genre_id', genreId,genreMap,genreName);
+							});
+						}
 
 						// الممثلين
+				 
+                      
 						if (Array.isArray(data.actors)) {
-							$('#actors option').each(function () {
-								let optionText = $(this).text().trim().toLowerCase();
-								data.actors.forEach(function (actor) {
-									if (optionText.includes(actor.trim().toLowerCase())) {
-										$(this).prop('selected', true);
-									}
-								}.bind(this));
+							data.actors.forEach(function (actorId, index) {
+								const actorName = data.created?.actors?.[index] || actorMap[actorId];
+								selectOptionById('#actors', actorId, actorMap, actorName);
 							});
-							$('#actors').trigger('change');
 						}
-// الدول
-if (Array.isArray(data.countries)) {
-	selectMatchingOption('#country_id', data.countries[0]);
-}
+						// الدول
+						if (Array.isArray(data.countries)) {
+							data.countries.forEach(function (countryId, index) {
+								const countryName = data.created?.countries?.[index] || countryMap[countryId];
+								selectOptionById('#country_id', countryId, countryMap, countryName);
+							});
+						}
 						
 					// البوستر
 					if (data.poster_path) {

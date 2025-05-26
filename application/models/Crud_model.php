@@ -976,8 +976,9 @@ if ($this->input->post('genre_id')) {
     $this->db->order_by('series_id', 'desc');
 
     // تطبيق شرط النوع إذا كانت القيمة موجودة وليست "all"
-    if (!empty($genre_id) && $genre_id !== 'all') {
-        $this->db->where('genre_id', $genre_id);
+   if (!empty($genre_id) && $genre_id !== 'all') {
+        // البحث داخل النص JSON باستخدام LIKE مع علامات الاقتباس
+        $this->db->like('genre_id', '"' . $genre_id . '"');
     }
 
     // تطبيق شرط المخرج إذا كانت القيمة موجودة وليست "all"

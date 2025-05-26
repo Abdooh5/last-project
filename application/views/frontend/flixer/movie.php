@@ -61,7 +61,7 @@
 <div class="row" style="margin:20px 60px;">
 	<h4 style="text-transform: capitalize;">
 		
-		<?php echo get_phrase('movies'); ?>
+		<?php echo $page_title ?>
 		(<?php echo $total_result;?>)
 	</h4>
 	<div class="content">

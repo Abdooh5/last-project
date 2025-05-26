@@ -142,14 +142,164 @@
 	const categoryMap = <?php
 		$catMap = [];
 		foreach ($categories as $cat) {
-			$catMap[$cat['name']] = $cat['category_id'];
+			$catMap[$cat['category_id']] = $cat['name'];
 		}
 		echo json_encode($catMap, JSON_UNESCAPED_UNICODE);
 	?>;
+
+	const genreMap = <?php
+		$gMap = [];
+		foreach ($genres as $g) {
+			$gMap[$g['genre_id']] = $g['name'];
+		}
+		echo json_encode($gMap, JSON_UNESCAPED_UNICODE);
+	?>;
+
+	const actorMap = <?php
+		$aMap = [];
+		foreach ($actors as $a) {
+			$aMap[$a['actor_id']] = $a['name'];
+		}
+		echo json_encode($aMap, JSON_UNESCAPED_UNICODE);
+	?>;
+
+	const countryMap = <?php
+		$cMap = [];
+		foreach ($countries as $c) {
+			$cMap[$c['country_id']] = $c['name'];
+		}
+		echo json_encode($cMap, JSON_UNESCAPED_UNICODE);
+	?>;
 </script>
 
-<!-- JavaScript لملء الحقول تلقائيًا -->
 <script>
+$(document).ready(function () {
+
+	function selectOptionById(selector, id, nameMap, fallbackName = null) {
+		let optionName = nameMap?.[id] || fallbackName || `ID ${id}`;
+		const select = $(selector);
+		const optionExists = select.find(`option[value="${id}"]`).length > 0;
+
+		if (!optionExists) {
+			select.append(`<option selected value="${id}">${optionName}</option>`);
+		} else {
+			select.find(`option[value="${id}"]`).prop('selected', true);
+		}
+
+		select.trigger('change');
+	}
+
+	$('#title').on('blur', function () {
+		let title = $(this).val();
+
+		if (title.length > 0) {
+			$.ajax({
+				url: '<?php echo base_url(); ?>index.php?admin/fetch_tmdb_series_data',
+				method: 'POST',
+				data: { title: title },
+				success: function (response) {
+					try {
+						let data = JSON.parse(response);
+						console.log(data);
+
+						if (data.error) {
+							alert(data.error);
+							return;
+						}
+
+						$('#description_long').val(data.overview);
+
+						if (data.release_date) {
+							let year = data.release_date.split('-')[0];
+							$('[name="year"]').val(year);
+						}
+
+						if (data.vote_average) {
+							let rating = Math.round(data.vote_average / 2);
+							$('[name="rating"]').val(rating);
+						}
+
+						// الأنواع
+						if (Array.isArray(data.genres)) {
+							data.genres.forEach(function (genreId, index) {
+                                const genreName = data.created?.genres?.[index] || genreMap[genreId];
+								selectOptionById('#genre_id', genreId,genreMap,genreName);
+							});
+						}
+
+						// الممثلين
+						if (Array.isArray(data.actors)) {
+							data.actors.forEach(function (actorId, index) {
+								const actorName = data.created?.actors?.[index] || actorMap[actorId];
+								selectOptionById('#actors', actorId, actorMap, actorName);
+							});
+						}
+
+						// الدول
+						if (Array.isArray(data.countries)) {
+							data.countries.forEach(function (countryId, index) {
+								const countryName = data.created?.countries?.[index] || countryMap[countryId];
+								selectOptionById('#country_id', countryId, countryMap, countryName);
+							});
+						}
+
+						// تصنيف الأنمي
+						// تصنيف الأنمي (نص وليس معرف)
+if (data.anime_categories) {
+    const categoryName = data.anime_categories; // النص مباشرة
+
+    // ابحث في القائمة إذا يوجد خيار بنفس الاسم (case insensitive)
+    let foundOption = false;
+    $('#category option').each(function() {
+        if ($(this).text().trim().toLowerCase() === categoryName.trim().toLowerCase()) {
+            $(this).prop('selected', true);
+            foundOption = true;
+            return false; // اكسر اللوب
+        }
+    });
+
+    // إذا لم يوجد الخيار، أضفه وحدده
+    if (!foundOption) {
+        $('#category').append(`<option selected value="${categoryName}">${categoryName}</option>`);
+    }
+
+    $('#category').trigger('change');
+}
+
+
+						// عرض البوستر
+						if (data.poster_path) {
+							let posterURL = 'https://image.tmdb.org/t/p/w500' + data.poster_path;
+							$('#video_player_div img').attr('src', posterURL).show();
+
+							if ($('[name="poster_url"]').length === 0) {
+								$('<input type="hidden" name="poster_url" value="' + posterURL + '">').appendTo('form');
+							} else {
+								$('[name="poster_url"]').val(posterURL);
+							}
+						}
+
+					} catch (e) {
+						console.error("⚠️ خطأ في التحليل:", e, response);
+						alert('حدث خطأ أثناء معالجة بيانات المسلسل.');
+					}
+				},
+				error: function () {
+					alert('❌ خطأ في الاتصال بالسيرفر.');
+				}
+			});
+		}
+	});
+});
+</script>
+
+
+
+
+
+
+<!-- JavaScript لملء الحقول تلقائيًا -->
+<!-- <script>
 $(document).ready(function () {
     function selectMatchingOption(selector, valueFromApi) {
         let found = false;
@@ -164,11 +314,12 @@ $(document).ready(function () {
             }
         });
 
-        if (found) {
-            $(selector).trigger('change');
-        } else {
-            console.log(`❌ لم يتم العثور على تطابق لـ: ${valueFromApi} داخل ${selector}`);
+        if (!found) {
+            // أضف الخيار الجديد إن لم يكن موجودًا
+            $(selector).append(`<option selected value="${valueFromApi}">${valueFromApi}</option>`);
         }
+
+        $(selector).trigger('change');
     }
 
     $('#title').on('blur', function () {
@@ -188,17 +339,6 @@ $(document).ready(function () {
                             alert(data.error);
                             return;
                         }
-						//console.log(data.anime_categories);
-						if (data.anime_categories && data.anime_categories.length > 0) {
-    const animeCategoryName = data.anime_categories; // مثل "أنمي مستمر"
-    const categoryId = categoryMap[animeCategoryName];
-
-    if (categoryId) {
-        $('#category').val(categoryId).trigger('change');
-    } else {
-        console.warn('التصنيف غير موجود في القائمة:', animeCategoryName);
-    }
-}
 
                         $('#description_long').val(data.overview);
 
@@ -212,30 +352,33 @@ $(document).ready(function () {
                             $('[name="rating"]').val(rating);
                         }
 
+                        // إضافة الأنواع
                         if (Array.isArray(data.genres)) {
                             data.genres.forEach(function (genre) {
                                 selectMatchingOption('#genre_id', genre);
                             });
                         }
 
+                        // إضافة الممثلين
                         if (Array.isArray(data.actors)) {
-                            $('#actors option').each(function () {
-                                let optionText = $(this).text().trim().toLowerCase();
-                                data.actors.forEach(function (actor) {
-                                    if (optionText.includes(actor.trim().toLowerCase())) {
-                                        $(this).prop('selected', true);
-                                    }
-                                }.bind(this));
+                            data.actors.forEach(function (actor) {
+                                selectMatchingOption('#actors', actor);
                             });
-                            $('#actors').trigger('change');
                         }
-                    console.log(data.countries[0]); // طباعة القيمة للتأكد
-                    if (Array.isArray(data.countries)) {
+
+                        // إضافة الدول
+                        if (Array.isArray(data.countries)) {
                             data.countries.forEach(function (country) {
                                 selectMatchingOption('#country_id', country);
                             });
                         }
 
+                        // إضافة التصنيف الأنمي
+                        if (data.anime_categories) {
+                            selectMatchingOption('#category', data.anime_categories);
+                        }
+
+                        // عرض الملصق
                         if (data.poster_path) {
                             let posterURL = 'https://image.tmdb.org/t/p/w500' + data.poster_path;
                             $('#video_player_div img').attr('src', posterURL).show();
@@ -246,14 +389,6 @@ $(document).ready(function () {
                                 $('[name="poster_url"]').val(posterURL);
                             }
                         }
-					// 	 if ($('#title').next('.alert').length === 0) {
-                    //     $('#title').after('<div class="alert alert-info mt-2">🔄 يتم تجهيز الصفحة، يرجى الانتظار لحظة...</div>');
-                    // }
-
-                    // setTimeout(function () {
-                    //     location.reload();
-                    // }, 2000);
-
 
                     } catch (e) {
                         console.error("⚠️ خطأ في التحليل:", e, response);
@@ -267,4 +402,5 @@ $(document).ready(function () {
         }
     });
 });
-</script>
+</script> -->
+

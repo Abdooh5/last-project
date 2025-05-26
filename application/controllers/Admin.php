@@ -97,7 +97,7 @@ class Admin extends CI_Controller {
 		$apiKey = '550cd509e7933045659e6f893e844d64';
 	
 		if (empty($title)) {
-			echo json_encode(['error' => 'لم يتم إدخال عنوان الفيلم']);
+			echo json_encode(['error' => 'لم يتم إدخال عنوان الفيلم'], JSON_UNESCAPED_UNICODE);
 			return;
 		}
 	
@@ -131,43 +131,35 @@ class Admin extends CI_Controller {
 		
 		
 		// دالة لإدخال السجلات إذا لم تكن موجودة
-		function insert_if_not_exists($table, $name, $profile_image_url = null) {
-			$ci = &get_instance();
-			$ci->db->where('name', $name);
-			$query = $ci->db->get($table);
-		
-			if ($query->num_rows() == 0) {
-				// إضافة السجل للحصول على ID
-				$data = ['name' => $name];
-				$ci->db->insert($table, $data);
-				$insert_id = $ci->db->insert_id();
-		
-				if ($profile_image_url) {
-					// إنشاء مجلد الصور إذا لم يكن موجود
-					$image_directory = 'assets/global/actor/'; // هذا هو التصحيح الصحيح
-					if (!is_dir($image_directory)) {
-						mkdir($image_directory, 0777, true);
-					}
-					
-		
-					// استخراج امتداد الصورة
-					$image_ext = pathinfo(parse_url($profile_image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
-					if (!$image_ext) $image_ext = 'jpg'; // افتراضيًا JPG
-		
-					$local_filename = $insert_id . '.' . strtolower($image_ext);
-					$local_path = $image_directory . $local_filename;
-		
-					// تحميل الصورة
-					$image_data = file_get_contents($profile_image_url);
-					if ($image_data !== false) {
-						file_put_contents($local_path, $image_data);
-						// تحديث السجل مع مسار الصورة
-						// $ci->db->where('id', $insert_id);
-						// $ci->db->update($table, ['profile_image' => $local_path]);
-					}
-				}
-			}
-		}
+		 function insert_if_not_exists($table, $name, $profile_image_url = null) {
+        $ci = &get_instance();
+        $ci->db->where('name', $name);
+        $query = $ci->db->get($table);
+
+        if ($query->num_rows() > 0) {
+            return ['id' => $query->row()->{$table . '_id'}, 'name' => $name];
+        }
+
+        $data = ['name' => $name];
+        $ci->db->insert($table, $data);
+        $insert_id = $ci->db->insert_id();
+
+        if ($profile_image_url) {
+            $image_directory = 'assets/global/actor/';
+            if (!is_dir($image_directory)) mkdir($image_directory, 0777, true);
+
+            $image_ext = pathinfo(parse_url($profile_image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
+            if (!$image_ext) $image_ext = 'jpg';
+
+            $local_filename = $insert_id . '.' . strtolower($image_ext);
+            $local_path = $image_directory . $local_filename;
+
+            $image_data = @file_get_contents($profile_image_url);
+            if ($image_data !== false) file_put_contents($local_path, $image_data);
+        }
+
+        return ['id' => $insert_id, 'name' => $name];
+    }
 		
 		
 		
@@ -178,7 +170,7 @@ class Admin extends CI_Controller {
 		$searchData = json_decode($searchResponse, true);
 	
 		if (!isset($searchData['results'][0])) {
-			echo json_encode(['error' => '❌ لم يتم العثور على نتائج']);
+			echo json_encode(['error' => '❌ لم يتم العثور على نتائج'], JSON_UNESCAPED_UNICODE);
 			return;
 		}
 	
@@ -193,6 +185,8 @@ class Admin extends CI_Controller {
 $creditsUrl = "https://api.themoviedb.org/3/movie/{$movieId}/credits?api_key={$apiKey}&language=ar";
 $credits = json_decode(curl_get($creditsUrl), true);
 $actors = [];
+$actor_ids=[] ;
+$created_actors = [];
 if (isset($credits['cast'])) {
 	foreach (array_slice($credits['cast'], 0, 5) as $actor) {
 		$actors[] = $actor['name'];
@@ -201,30 +195,77 @@ if (isset($credits['cast'])) {
 		$profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
 		
 		// حفظ الممثل مع صورته على الخادم
-		insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+		 $inserted = insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+            if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+                $actor_ids[] = (int)$inserted['id'];
+                $created_actors[] = $inserted['name'];
+            }
 	}
 }
 
-
+    // $actor_ids = [];
+    // $created_actors = [];
+    // if (isset($credits['cast'])) {
+    //     foreach (array_slice($credits['cast'], 0, 5) as $actor) {
+    //         $profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
+    //         $inserted = insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+    //         if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+    //             $actor_ids[] = (int)$inserted['id'];
+    //             $created_actors[] = $inserted['name'];
+    //         }
+    //     }
+    // }
 
 		// Step 4: الأنواع
-		$genreNames = [];
-		if (isset($details['genres'])) {
-			foreach ($details['genres'] as $g) {
-				$genreNames[] = $g['name'];
-				insert_if_not_exists('genre', $g['name']);
-			}
-		}
+		// $genreNames = [];
+		// $created_genres = [];
+		// if (isset($details['genres'])) {
+		// 	foreach ($details['genres'] as $g) {
+		// 		$genreNames[] = $g['name'];
+		// 		$inserted = insert_if_not_exists('genre', $g['name']);
+		// 	if ($inserted) {
+		// 		$created_genres[] = $inserted['name'];
+		// 	}
+		// }
+
+
+
+		$genre_ids = [];
+    $created_genres = [];
+    if (isset($details['genres'])) {
+        foreach ($details['genres'] as $g) {
+            $inserted = insert_if_not_exists('genre', $g['name']);
+            if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+                $genre_ids[] = (int)$inserted['id'];
+                $created_genres[] = $inserted['name'];
+            }
+        }
+    }
 	
 		// Step 5: الدول
-		$countries = [];
-		if (isset($details['production_countries'])) {
-			foreach ($details['production_countries'] as $c) {
-				$countries[] = $c['name'];
-				insert_if_not_exists('country', $c['name']);
-			}
-		}
-	
+	 $country_ids = [];
+    $created_countries = [];
+
+    $countryMap = [];
+    $countryList = json_decode(curl_get("https://api.themoviedb.org/3/configuration/countries?api_key={$apiKey}"), true);
+    if (is_array($countryList)) {
+        foreach ($countryList as $c) {
+            $countryMap[$c['iso_3166_1']] = $c['english_name'];
+        }
+    }
+
+    if (isset($details['origin_country'])) {
+        foreach ($details['origin_country'] as $c_code) {
+            $country_name = $countryMap[$c_code] ?? $c_code;
+            $inserted = insert_if_not_exists('country', $country_name);
+            if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+                $countries[] = $country_name;
+                $country_ids[] = (int)$inserted['id'];
+                $created_countries[] = $inserted['name'];
+            }
+        }
+    }
+	//country_ids
 		// النتيجة النهائية
 		$result = [
 			'title' => $movie['title'],
@@ -232,14 +273,20 @@ if (isset($credits['cast'])) {
 			'release_date' => $movie['release_date'],
 			'vote_average' => $movie['vote_average'],
 			'poster_path' => $movie['poster_path'],
-			'actors' => $actors,
-			'genres' => $genreNames,
-			'countries' => $countries,
+			'actors' => $actor_ids ,
+			'genres' => $genre_ids,
+			'countries' => $country_ids,
+			'created' => [
+			'actors' => $created_actors,
+			'genres' => $created_genres,
+			'countries' => $created_countries,
+			],
 			'runtime' => isset($details['runtime']) ? $details['runtime'] : null
 		];
 	
-		echo json_encode($result);
+		echo json_encode($result, JSON_UNESCAPED_UNICODE);
 	}
+
 	
 	
 	
@@ -270,13 +317,13 @@ if (isset($credits['cast'])) {
 		$image_url = $this->input->post('image_url');
 	
 		if (!$image_url || filter_var($image_url, FILTER_VALIDATE_URL) === false) {
-			echo json_encode(['error' => 'Invalid URL']);
+			echo json_encode(['error' => 'Invalid URL'], JSON_UNESCAPED_UNICODE);
 			return;
 		}
 	
 		$image_data = file_get_contents($image_url);
 		if (!$image_data) {
-			echo json_encode(['error' => 'Failed to download image']);
+			echo json_encode(['error' => 'Failed to download image'], JSON_UNESCAPED_UNICODE);
 			return;
 		}
 	
@@ -1536,193 +1583,393 @@ function episode_edit($series_id = '', $season_id = '', $episode_id = '')
     $this->load->view('backend/index', $page_data);
   }
 
+// public function fetch_tmdb_series_data() {
+// 	$title = $this->input->post('title');
+// 	$apiKey = '550cd509e7933045659e6f893e844d64';
+
+// 	if (empty($title)) {
+// 		echo json_encode(['error' => 'لم يتم إدخال عنوان المسلسل']);
+// 		return;
+// 	}
+
+// 	function curl_get($url) {
+// 		$ch = curl_init();
+// 		curl_setopt_array($ch, [
+// 			CURLOPT_URL => $url,
+// 			CURLOPT_RETURNTRANSFER => true,
+// 			CURLOPT_SSL_VERIFYPEER => false,
+// 			CURLOPT_SSL_VERIFYHOST => false,
+// 		]);
+// 		$response = curl_exec($ch);
+// 		curl_close($ch);
+// 		return $response;
+// 	}
+
+// 	function insert_if_not_exists($table, $name, $profile_image_url = null) {
+// 		$ci = &get_instance();
+// 		$ci->db->where('name', $name);
+// 		$query = $ci->db->get($table);
+
+// 		if ($query->num_rows() == 0) {
+// 			$data = ['name' => $name];
+// 			$ci->db->insert($table, $data);
+// 			$insert_id = $ci->db->insert_id();
+
+// 			if ($profile_image_url) {
+// 				$image_directory = 'assets/global/actor/';
+// 				if (!is_dir($image_directory)) {
+// 					mkdir($image_directory, 0777, true);
+// 				}
+
+// 				$image_ext = pathinfo(parse_url($profile_image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
+// 				if (!$image_ext) $image_ext = 'jpg';
+
+// 				$local_filename = $insert_id . '.' . strtolower($image_ext);
+// 				$local_path = $image_directory . $local_filename;
+
+// 				$image_data = file_get_contents($profile_image_url);
+// 				if ($image_data !== false) {
+// 					file_put_contents($local_path, $image_data);
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	// Step 1: البحث عن المسلسل
+// 	$searchUrl = "https://api.themoviedb.org/3/search/tv?api_key={$apiKey}&query=" . urlencode($title) . "&language=ar";
+// 	$searchResponse = curl_get($searchUrl);
+// 	$searchData = json_decode($searchResponse, true);
+
+// 	if (!isset($searchData['results'][0])) {
+// 		echo json_encode(['error' => '❌ لم يتم العثور على نتائج للمسلسل']);
+// 		return;
+// 	}
+
+// 	$series = $searchData['results'][0];
+// 	$seriesId = $series['id'];
+
+// 	// Step 2: تفاصيل المسلسل
+// 	$detailsUrl = "https://api.themoviedb.org/3/tv/{$seriesId}?api_key={$apiKey}&language=ar";
+// 	$details = json_decode(curl_get($detailsUrl), true);
+
+// 	// Step 3: الممثلين
+// 	$creditsUrl = "https://api.themoviedb.org/3/tv/{$seriesId}/credits?api_key={$apiKey}&language=ar";
+// 	$credits = json_decode(curl_get($creditsUrl), true);
+
+// 	$actors = [];
+// 	if (isset($credits['cast'])) {
+// 		foreach (array_slice($credits['cast'], 0, 5) as $actor) {
+// 			$actors[] = $actor['name'];
+// 			$profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
+// 			insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+// 		}
+// 	}
+
+// 	// Step 4: الأنواع
+// 	$genreNames = [];
+// 	if (isset($details['genres'])) {
+// 		foreach ($details['genres'] as $g) {
+// 			$genreNames[] = $g['name'];
+// 			insert_if_not_exists('genre', $g['name']);
+// 		}
+// 	}
+
+// 	// Step 5: الدول
+// 	$countries = [];
+
+// 	// جلب قائمة الدول من TMDB
+// 	$countryApiUrl = "https://api.themoviedb.org/3/configuration/countries?api_key={$apiKey}";
+// 	$countryList = json_decode(curl_get($countryApiUrl), true);
+
+// 	$countryMap = [];
+// 	if (is_array($countryList)) {
+// 		foreach ($countryList as $countryItem) {
+// 			$countryMap[$countryItem['iso_3166_1']] = $countryItem['english_name'];
+// 		}
+// 	}
+
+// 	if (isset($details['origin_country'])) {
+// 		foreach ($details['origin_country'] as $c_code) {
+// 			if (isset($countryMap[$c_code])) {
+// 				$country_name = $countryMap[$c_code];
+// 				$countries[] = $country_name;
+// 				insert_if_not_exists('country', $country_name);
+// 			} else {
+// 				$countries[] = $c_code; // fallback
+// 				insert_if_not_exists('country', $c_code);
+// 			}
+// 		}
+// 	}
+// // Step 6: تصنيف أنمي واحد فقط
+// $anime_categories = null;
+
+// $is_anime = false;
+
+// // التحقق من النوع Animation (genre id = 16)
+// if (isset($details['genres']) && is_array($details['genres'])) {
+//     foreach ($details['genres'] as $genre) {
+//         if (isset($genre['id']) && $genre['id'] == 16) {
+//             $is_anime = true;
+//             break;
+//         }
+//     }
+// }
+
+// // fallback: التحقق من بلد المنشأ
+// if (!$is_anime && isset($details['origin_country']) && in_array('JP', $details['origin_country'])) {
+//     $is_anime = true;
+// }
+
+// if ($is_anime) {
+//     $year = !empty($details['first_air_date']) ? (int)substr($details['first_air_date'], 0, 4) : null;
+//     $current_year = (int)date('Y');
+
+//     // ترتيب الأولويات:
+//     // if (isset($details['type']) && strtolower($details['type']) === 'movie') {
+//     //     $anime_categories = 'أفلام أنمي';
+// 	// 	insert_if_not_exists('category', $anime_categories);
+//     // }  
+// 	 if ($year !== null && $year == $current_year) {
+//         $anime_categories = 'أنمي جديد';
+// 		insert_if_not_exists('category', $anime_categories);
+//     }
+// 	 elseif ($year !== null && $year < 2000) {
+//         $anime_categories = 'أنمي قديم';
+// 		insert_if_not_exists('category', $anime_categories);
+//     }elseif (
+//         (!empty($details['status']) && $details['status'] === 'Returning Series') ||
+//         (!empty($details['in_production']) && $details['in_production'])
+//     ) {
+//         $anime_categories = 'أنمي مستمر';
+// 		insert_if_not_exists('category', $anime_categories);
+//     }
+// 	elseif (!empty($details['status']) && $details['status'] === 'Ended') {
+//         $anime_categories = 'أنمي مكتمل';
+// 		insert_if_not_exists('category', $anime_categories);
+//     }
+// }
+
+
+
+
+
+
+// 	// النتيجة النهائية
+// 	$result = [
+// 		'title' => $details['name'],
+// 		'overview' => $details['overview'],
+// 		'release_date' => $details['first_air_date'],
+// 		'vote_average' => $details['vote_average'],
+// 		'poster_path' => $details['poster_path'],
+// 		'backdrop_path' => $details['backdrop_path'],
+// 		'actors' => $actors,
+// 		'genres' => $genreNames,
+// 		'countries' => $countries,
+// 		'anime_categories'=> $anime_categories
+
+// 	];
+
+// 	echo json_encode($result);
+// }
 public function fetch_tmdb_series_data() {
-	$title = $this->input->post('title');
-	$apiKey = '550cd509e7933045659e6f893e844d64';
+    $title = $this->input->post('title');
+    $apiKey = '550cd509e7933045659e6f893e844d64';
 
-	if (empty($title)) {
-		echo json_encode(['error' => 'لم يتم إدخال عنوان المسلسل']);
-		return;
-	}
+    if (empty($title)) {
+        echo json_encode(['error' => 'لم يتم إدخال عنوان المسلسل'], JSON_UNESCAPED_UNICODE);
+        return;
+    }
 
-	function curl_get($url) {
-		$ch = curl_init();
-		curl_setopt_array($ch, [
-			CURLOPT_URL => $url,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_SSL_VERIFYPEER => false,
-			CURLOPT_SSL_VERIFYHOST => false,
-		]);
-		$response = curl_exec($ch);
-		curl_close($ch);
-		return $response;
-	}
+    function curl_get($url) {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+        ]);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        return $response;
+    }
 
-	function insert_if_not_exists($table, $name, $profile_image_url = null) {
-		$ci = &get_instance();
-		$ci->db->where('name', $name);
-		$query = $ci->db->get($table);
+    function insert_if_not_exists($table, $name, $profile_image_url = null) {
+        $ci = &get_instance();
+        $ci->db->where('name', $name);
+        $query = $ci->db->get($table);
 
-		if ($query->num_rows() == 0) {
-			$data = ['name' => $name];
-			$ci->db->insert($table, $data);
-			$insert_id = $ci->db->insert_id();
+        if ($query->num_rows() > 0) {
+            return ['id' => $query->row()->{$table . '_id'}, 'name' => $name];
+        }
 
-			if ($profile_image_url) {
-				$image_directory = 'assets/global/actor/';
-				if (!is_dir($image_directory)) {
-					mkdir($image_directory, 0777, true);
-				}
+        $data = ['name' => $name];
+        $ci->db->insert($table, $data);
+        $insert_id = $ci->db->insert_id();
 
-				$image_ext = pathinfo(parse_url($profile_image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
-				if (!$image_ext) $image_ext = 'jpg';
+        if ($profile_image_url) {
+            $image_directory = 'assets/global/actor/';
+            if (!is_dir($image_directory)) mkdir($image_directory, 0777, true);
 
-				$local_filename = $insert_id . '.' . strtolower($image_ext);
-				$local_path = $image_directory . $local_filename;
+            $image_ext = pathinfo(parse_url($profile_image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
+            if (!$image_ext) $image_ext = 'jpg';
 
-				$image_data = file_get_contents($profile_image_url);
-				if ($image_data !== false) {
-					file_put_contents($local_path, $image_data);
-				}
-			}
-		}
-	}
+            $local_filename = $insert_id . '.' . strtolower($image_ext);
+            $local_path = $image_directory . $local_filename;
 
-	// Step 1: البحث عن المسلسل
-	$searchUrl = "https://api.themoviedb.org/3/search/tv?api_key={$apiKey}&query=" . urlencode($title) . "&language=ar";
-	$searchResponse = curl_get($searchUrl);
-	$searchData = json_decode($searchResponse, true);
+            $image_data = @file_get_contents($profile_image_url);
+            if ($image_data !== false) file_put_contents($local_path, $image_data);
+        }
 
-	if (!isset($searchData['results'][0])) {
-		echo json_encode(['error' => '❌ لم يتم العثور على نتائج للمسلسل']);
-		return;
-	}
+        return ['id' => $insert_id, 'name' => $name];
+    }
 
-	$series = $searchData['results'][0];
-	$seriesId = $series['id'];
+    $searchUrl = "https://api.themoviedb.org/3/search/tv?api_key={$apiKey}&query=" . urlencode($title) . "&language=ar";
+    $searchResponse = curl_get($searchUrl);
+    $searchData = json_decode($searchResponse, true);
 
-	// Step 2: تفاصيل المسلسل
-	$detailsUrl = "https://api.themoviedb.org/3/tv/{$seriesId}?api_key={$apiKey}&language=ar";
-	$details = json_decode(curl_get($detailsUrl), true);
+    if (!isset($searchData['results'][0])) {
+        echo json_encode(['error' => '❌ لم يتم العثور على نتائج للمسلسل'], JSON_UNESCAPED_UNICODE);
+        return;
+    }
 
-	// Step 3: الممثلين
-	$creditsUrl = "https://api.themoviedb.org/3/tv/{$seriesId}/credits?api_key={$apiKey}&language=ar";
-	$credits = json_decode(curl_get($creditsUrl), true);
+    $series = $searchData['results'][0];
+    $seriesId = $series['id'];
 
+    $details = json_decode(curl_get("https://api.themoviedb.org/3/tv/{$seriesId}?api_key={$apiKey}&language=ar"), true);
+    $credits = json_decode(curl_get("https://api.themoviedb.org/3/tv/{$seriesId}/credits?api_key={$apiKey}&language=ar"), true);
+
+    // $actor_ids = [];
+    // $created_actors = [];
+    // if (isset($credits['cast'])) {
+    //     foreach (array_slice($credits['cast'], 0, 5) as $actor) {
+    //         $profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
+    //         $inserted = insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+    //         if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+    //             $actor_ids[] = (int)$inserted['id'];
+    //             $created_actors[] = $inserted['name'];
+    //         }
+    //     }
+    // }
 	$actors = [];
-	if (isset($credits['cast'])) {
-		foreach (array_slice($credits['cast'], 0, 5) as $actor) {
-			$actors[] = $actor['name'];
-			$profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
-			insert_if_not_exists('actor', $actor['name'], $profile_image_url);
-		}
+$actor_ids=[] ;
+$created_actors = [];
+if (isset($credits['cast'])) {
+	foreach (array_slice($credits['cast'], 0, 5) as $actor) {
+		$actors[] = $actor['name'];
+		
+		// جلب صورة الممثل (إذا كانت موجودة)
+		$profile_image_url = isset($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : null;
+		
+		// حفظ الممثل مع صورته على الخادم
+		 $inserted = insert_if_not_exists('actor', $actor['name'], $profile_image_url);
+            if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+                $actor_ids[] = (int)$inserted['id'];
+                $created_actors[] = $inserted['name'];
+            }
 	}
-
-	// Step 4: الأنواع
-	$genreNames = [];
-	if (isset($details['genres'])) {
-		foreach ($details['genres'] as $g) {
-			$genreNames[] = $g['name'];
-			insert_if_not_exists('genre', $g['name']);
-		}
-	}
-
-	// Step 5: الدول
-	$countries = [];
-
-	// جلب قائمة الدول من TMDB
-	$countryApiUrl = "https://api.themoviedb.org/3/configuration/countries?api_key={$apiKey}";
-	$countryList = json_decode(curl_get($countryApiUrl), true);
-
-	$countryMap = [];
-	if (is_array($countryList)) {
-		foreach ($countryList as $countryItem) {
-			$countryMap[$countryItem['iso_3166_1']] = $countryItem['english_name'];
-		}
-	}
-
-	if (isset($details['origin_country'])) {
-		foreach ($details['origin_country'] as $c_code) {
-			if (isset($countryMap[$c_code])) {
-				$country_name = $countryMap[$c_code];
-				$countries[] = $country_name;
-				insert_if_not_exists('country', $country_name);
-			} else {
-				$countries[] = $c_code; // fallback
-				insert_if_not_exists('country', $c_code);
-			}
-		}
-	}
-// Step 6: تصنيف أنمي واحد فقط
-$anime_categories = null;
-
-$is_anime = false;
-
-// التحقق من النوع Animation (genre id = 16)
-if (isset($details['genres']) && is_array($details['genres'])) {
-    foreach ($details['genres'] as $genre) {
-        if (isset($genre['id']) && $genre['id'] == 16) {
-            $is_anime = true;
-            break;
+}
+$genres = [];
+    $genre_ids = [];
+    $created_genres = [];
+    if (isset($details['genres'])) {
+        foreach ($details['genres'] as $g) {
+			$genres  []=$g['name'];
+            $inserted = insert_if_not_exists('genre', $g['name']);
+            if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+                $genre_ids[] = (int)$inserted['id'];
+                $created_genres[] = $inserted['name'];
+            }
         }
     }
-}
 
-// fallback: التحقق من بلد المنشأ
-if (!$is_anime && isset($details['origin_country']) && in_array('JP', $details['origin_country'])) {
-    $is_anime = true;
-}
+    $countries = [];
+    $country_ids = [];
+    $created_countries = [];
 
-if ($is_anime) {
-    $year = !empty($details['first_air_date']) ? (int)substr($details['first_air_date'], 0, 4) : null;
-    $current_year = (int)date('Y');
-
-    // ترتيب الأولويات:
-    // if (isset($details['type']) && strtolower($details['type']) === 'movie') {
-    //     $anime_categories = 'أفلام أنمي';
-	// 	insert_if_not_exists('category', $anime_categories);
-    // }  
-	 if ($year !== null && $year == $current_year) {
-        $anime_categories = 'أنمي جديد';
-		insert_if_not_exists('category', $anime_categories);
+    $countryMap = [];
+    $countryList = json_decode(curl_get("https://api.themoviedb.org/3/configuration/countries?api_key={$apiKey}"), true);
+    if (is_array($countryList)) {
+        foreach ($countryList as $c) {
+            $countryMap[$c['iso_3166_1']] = $c['english_name'];
+        }
     }
-	 elseif ($year !== null && $year < 2000) {
-        $anime_categories = 'أنمي قديم';
-		insert_if_not_exists('category', $anime_categories);
-    }elseif (
-        (!empty($details['status']) && $details['status'] === 'Returning Series') ||
-        (!empty($details['in_production']) && $details['in_production'])
-    ) {
-        $anime_categories = 'أنمي مستمر';
-		insert_if_not_exists('category', $anime_categories);
+
+    if (isset($details['origin_country'])) {
+        foreach ($details['origin_country'] as $c_code) {
+            $country_name = $countryMap[$c_code] ?? $c_code;
+            $inserted = insert_if_not_exists('country', $country_name);
+            if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+                $countries[] = $country_name;
+                $country_ids[] = (int)$inserted['id'];
+                $created_countries[] = $inserted['name'];
+            }
+        }
     }
-	elseif (!empty($details['status']) && $details['status'] === 'Ended') {
-        $anime_categories = 'أنمي مكتمل';
-		insert_if_not_exists('category', $anime_categories);
+
+    // anime category
+    $anime_categories = null;
+    $created_category = null;
+    $is_anime = false;
+
+    if (isset($details['genres']) && is_array($details['genres'])) {
+        foreach ($details['genres'] as $genre) {
+            if (isset($genre['id']) && $genre['id'] == 16) {
+                $is_anime = true;
+                break;
+            }
+        }
     }
-}
 
+    if (!$is_anime && isset($details['origin_country']) && in_array('JP', $details['origin_country'])) {
+        $is_anime = true;
+    }
 
+    if ($is_anime) {
+        $year = !empty($details['first_air_date']) ? (int)substr($details['first_air_date'], 0, 4) : null;
+        $current_year = (int)date('Y');
 
+        if ($year !== null && $year == $current_year) {
+            $anime_categories = 'أنمي جديد';
+        } elseif ($year !== null && $year < 2000) {
+            $anime_categories = 'أنمي قديم';
+        } elseif (
+            (!empty($details['status']) && $details['status'] === 'Returning Series') ||
+            (!empty($details['in_production']) && $details['in_production'])
+        ) {
+            $anime_categories = 'أنمي مستمر';
+        } elseif (!empty($details['status']) && $details['status'] === 'Ended') {
+            $anime_categories = 'أنمي مكتمل';
+        }
 
+        if ($anime_categories) {
+            $inserted = insert_if_not_exists('category', $anime_categories);
+            if (isset($inserted['id']) && is_numeric($inserted['id'])) {
+                $created_category = $inserted['name'];
+            }
+        }
+    }
 
+    // النتيجة النهائية
+    $result = [
+        'title' => $details['name'],
+        'overview' => $details['overview'],
+        'release_date' => $details['first_air_date'],
+        'vote_average' => $details['vote_average'],
+        'poster_path' => $details['poster_path'],
+        'backdrop_path' => $details['backdrop_path'],
+        'actors' => $actor_ids,
+        'genres' => $genre_ids,
+        'countries' => $country_ids,
+        'anime_categories' => $anime_categories,
+        'created' => [
+            'actors' => $created_actors,
+            'genres' => $created_genres,
+            'countries' => $created_countries,
+            'category' => $created_category,
+        ]
+    ];
 
-	// النتيجة النهائية
-	$result = [
-		'title' => $details['name'],
-		'overview' => $details['overview'],
-		'release_date' => $details['first_air_date'],
-		'vote_average' => $details['vote_average'],
-		'poster_path' => $details['poster_path'],
-		'backdrop_path' => $details['backdrop_path'],
-		'actors' => $actors,
-		'genres' => $genreNames,
-		'countries' => $countries,
-		'anime_categories'=> $anime_categories
-
-	];
-
-	echo json_encode($result);
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
 }
 
 
